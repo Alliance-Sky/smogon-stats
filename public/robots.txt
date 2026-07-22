@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://smogonstats.eu.cc/sitemap.xml

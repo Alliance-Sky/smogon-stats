@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokemon Showdown Usage Stats</title>
+    <meta name="description" content="View historical Pokemon Showdown usage statistics from 2014 to present." />
+    <meta name="keywords" content="Pokemon, Pokemon Showdown, Smogon, Usage Stats, Competitive Pokemon, VGC, OU, UU, RU, NU, PU" />
+    <meta name="author" content="Musaddik Temkar" />
+    <meta property="og:title" content="Pokemon Showdown Usage Stats" />
+    <meta property="og:description" content="View historical Pokemon Showdown usage statistics from 2014 to present." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Pokemon Showdown Usage Stats" />
+    <meta name="twitter:description" content="View historical Pokemon Showdown usage statistics from 2014 to present." />
+    <link rel="icon" type="image/svg+xml" href="/favicon-scarlet.svg" id="favicon" />
+    <script>
+      (function() {
+        try {
+          var match = document.cookie.match(/(^| )theme=([^;]+)/);
+          var theme = match ? match[2] : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'violet' : 'scarlet');
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.style.backgroundColor = theme === 'violet' ? '#09090b' : '#fdfaf6';
+          document.documentElement.style.color = theme === 'violet' ? '#f4f4f5' : '#2d3748';
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

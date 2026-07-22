@@ -289,18 +289,12 @@ select:focus {
 
 
 .tile-details {
-  padding: 0.75rem;
+  padding: 0.5rem;
   background: var(--details-bg);
-  height: 447px;
+  height: 400px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(128, 128, 128, 0.4) transparent;
-}
-
-@media (min-width: 768px) {
-  .tile-details {
-    height: 525px;
-  }
 }
 
 .tile-details::-webkit-scrollbar {
@@ -329,9 +323,9 @@ select:focus {
 
 .detail-section {
   background: var(--panel-bg);
-  border: 2px solid var(--panel-border);
-  border-radius: 12px;
-  padding: 0.5rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 0.25rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -344,11 +338,11 @@ select:focus {
 .detail-section h4 {
   color: var(--primary);
   margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  border-bottom: 2px solid var(--panel-border);
-  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 0.15rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   display: flex;
@@ -369,15 +363,15 @@ select:focus {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.15rem;
 }
 
 .detail-section li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.25rem 0;
-  font-size: 0.85rem;
+  padding: 0.15rem 0;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-color);
 }
@@ -393,9 +387,9 @@ select:focus {
   color: var(--badge-text);
   font-weight: 800;
   background: var(--badge-bg);
-  padding: 0.2rem 0.6rem;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
 }
 
 

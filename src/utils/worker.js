@@ -54,7 +54,7 @@ function parseMoveset(text) {
          
          const nameLine = lines[i+1].trim();
          currentPokemon = nameLine.substring(1, nameLine.indexOf('|', 1)).trim();
-         pokemonData = { Abilities: [], Items: [], Spreads: [], Moves: [] };
+         pokemonData = { Abilities: [], Items: [], Spreads: [], Moves: [], Counters: [] };
          data[currentPokemon] = pokemonData;
          currentSection = null;
          i += 3; 
@@ -74,17 +74,29 @@ function parseMoveset(text) {
     if (trimmedLine.startsWith('| Spreads')) { currentSection = 'Spreads'; continue; }
     if (trimmedLine.startsWith('| Moves')) { currentSection = 'Moves'; continue; }
     if (trimmedLine.startsWith('| Teammates')) { currentSection = 'Teammates'; continue; }
-    if (trimmedLine.startsWith('| Checks and Counters')) { currentSection = 'Checks and Counters'; continue; }
+    if (trimmedLine.startsWith('| Checks and Counters')) { currentSection = 'Counters'; continue; }
     
     if (currentSection && pokemonData[currentSection]) {
       if (trimmedLine.startsWith('| ')) {
         const content = trimmedLine.substring(1).replace(/\|\s*$/, '').trim();
-        const lastSpace = content.lastIndexOf(' ');
-        if (lastSpace !== -1) {
-          const name = content.substring(0, lastSpace).trim();
-          const percent = content.substring(lastSpace + 1).trim();
-          if (name !== 'Other' && name !== 'Empty' && parseFloat(percent) > 0) {
-            pokemonData[currentSection].push({ name, percent });
+        if (currentSection === 'Counters') {
+          if (content.startsWith('(')) continue;
+          const match = content.match(/^(.+?)\s+([0-9.]+)\s*\(/);
+          if (match) {
+            const name = match[1].trim();
+            const percent = match[2].trim();
+            if (name !== 'Other' && name !== 'Empty' && parseFloat(percent) > 0) {
+              pokemonData[currentSection].push({ name, percent });
+            }
+          }
+        } else {
+          const lastSpace = content.lastIndexOf(' ');
+          if (lastSpace !== -1) {
+            const name = content.substring(0, lastSpace).trim();
+            const percent = content.substring(lastSpace + 1).trim();
+            if (name !== 'Other' && name !== 'Empty' && parseFloat(percent) > 0) {
+              pokemonData[currentSection].push({ name, percent });
+            }
           }
         }
       }

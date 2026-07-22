@@ -289,7 +289,7 @@ select:focus {
 
 
 .tile-details {
-  padding: 0.5rem;
+  padding: 0.25rem;
   background: var(--details-bg);
   height: 400px;
   overflow-y: auto;
@@ -318,14 +318,14 @@ select:focus {
 .pokemon-details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .detail-section {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  padding: 0.25rem;
+  border-radius: 6px;
+  padding: 0.2rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -338,8 +338,8 @@ select:focus {
 .detail-section h4 {
   color: var(--primary);
   margin-top: 0;
-  margin-bottom: 0.25rem;
-  font-size: 0.85rem;
+  margin-bottom: 0.15rem;
+  font-size: 0.75rem;
   font-weight: 700;
   border-bottom: 1px solid var(--panel-border);
   padding-bottom: 0.15rem;
@@ -363,15 +363,15 @@ select:focus {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.1rem;
 }
 
 .detail-section li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.15rem 0;
-  font-size: 0.8rem;
+  padding: 0.1rem 0;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--text-color);
 }
@@ -380,16 +380,16 @@ select:focus {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-right: 0.5rem;
+  margin-right: 0.25rem;
 }
 
 .detail-section li strong {
   color: var(--badge-text);
   font-weight: 800;
   background: var(--badge-bg);
-  padding: 0.1rem 0.4rem;
+  padding: 0.1rem 0.3rem;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 0.65rem;
 }
 
 

@@ -26,10 +26,7 @@ function execWorker(type, payload) {
 }
 
 const PUBLIC_PROXIES = [
-  'https://api.codetabs.com/v1/proxy?quest=',
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?',
-  'https://thingproxy.freeboard.io/fetch/'
+  'https://api.smogonstats.eu.cc/?url='
 ];
 
 

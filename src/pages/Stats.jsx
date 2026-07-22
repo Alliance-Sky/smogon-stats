@@ -42,10 +42,13 @@ function getSprite(name) {
   return lowerName.replace(/[^a-z0-9]/g, '');
 }
 
-const formatPercent = (percentStr) => {
+const formatPercent = (percentStr, showDecimals = false) => {
   if (!percentStr) return '';
   const num = parseFloat(percentStr);
   if (isNaN(num)) return percentStr;
+  if (showDecimals) {
+    return `${parseFloat(percentStr)}%`;
+  }
   return `${Math.round(num)}%`;
 };
 
@@ -219,7 +222,7 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
         />
         <div className="tile-info">
           <div className="tile-name">{row.pokemon}</div>
-          <div className="tile-usage">{formatPercent(row.usagePercent)}</div>
+          <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
         </div>
         <div className="expand-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

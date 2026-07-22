@@ -14,7 +14,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
   
 
   const [details, setDetails] = useState(null);
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpanded] = useState(new Set());
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [detailsError, setDetailsError] = useState(false);
 
@@ -55,7 +55,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
 
 
     setDetails(null);
-    setExpanded(null);
+    setExpanded(new Set());
     setDetailsError(false);
     
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
@@ -97,13 +97,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
     };
   }, [period, format, rating, formats, setRating]);
 
-  const toggleDetails = (pokemon) => {
-    if (expanded === pokemon) {
-      setExpanded(null);
-      return;
-    }
-    
-    setExpanded(pokemon);
+  const fetchDetailsIfNeeded = () => {
     if (!details && !loadingDetails) {
       setLoadingDetails(true);
       setDetailsError(false);
@@ -120,6 +114,28 @@ export function useStats(period, format, rating, setFormat, setRating) {
     }
   };
 
+  const toggleDetails = (pokemon) => {
+    setExpanded(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(pokemon)) {
+        newExpanded.delete(pokemon);
+      } else {
+        newExpanded.add(pokemon);
+      }
+      return newExpanded;
+    });
+    fetchDetailsIfNeeded();
+  };
+
+  const expandAll = () => {
+    setExpanded(new Set(stats.map(s => s.pokemon)));
+    fetchDetailsIfNeeded();
+  };
+
+  const collapseAll = () => {
+    setExpanded(new Set());
+  };
+
   return {
     months,
     formats,
@@ -131,6 +147,8 @@ export function useStats(period, format, rating, setFormat, setRating) {
     setExpanded,
     loadingDetails,
     detailsError,
-    toggleDetails
+    toggleDetails,
+    expandAll,
+    collapseAll
   };
 }

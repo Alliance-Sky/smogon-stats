@@ -65,7 +65,9 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     setExpanded,
     loadingDetails,
     detailsError,
-    toggleDetails
+    toggleDetails,
+    expandAll,
+    collapseAll
   } = useStats(period, format, rating, setFormat, setRating);
 
 
@@ -174,20 +176,26 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
             <p>No data found for this selection.</p>
           </div>
         ) : (
-          <div className="pokedex-list">
-            {stats.map(row => (
-              <PokemonRow 
-                key={row.rank}
-                row={row}
-                isExpanded={expanded === row.pokemon}
-                loadingDetails={loadingDetails}
-                detailsError={detailsError}
-                detailsData={details && details[row.pokemon]}
-                onRowClick={onRowClick}
-                setExpanded={setExpanded}
-              />
-            ))}
-          </div>
+          <>
+            <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
+              <button className="control-btn" onClick={expandAll}>Expand All</button>
+              <button className="control-btn" onClick={collapseAll}>Collapse All</button>
+            </div>
+            <div className="pokedex-list">
+              {stats.map(row => (
+                <PokemonRow 
+                  key={row.rank}
+                  row={row}
+                  isExpanded={expanded.has(row.pokemon)}
+                  loadingDetails={loadingDetails}
+                  detailsError={detailsError}
+                  detailsData={details && details[row.pokemon]}
+                  onRowClick={onRowClick}
+                  setExpanded={setExpanded}
+                />
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

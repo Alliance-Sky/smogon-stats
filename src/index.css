@@ -503,3 +503,23 @@ select:focus {
   50% { width: 70%; }
   100% { width: 95%; }
 }
+
+.control-btn {
+  background: var(--bg-color);
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  font-weight: 700;
+  padding: 0.4rem 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+

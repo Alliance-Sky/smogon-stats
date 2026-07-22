@@ -92,6 +92,26 @@ body {
   letter-spacing: -0.02em;
 }
 
+.header-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.header-desc a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 800;
+  transition: color 0.2s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.header-desc a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 .subtitle {
   font-size: 0.8rem;
   color: var(--text-muted);

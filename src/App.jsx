@@ -65,6 +65,9 @@ function App() {
           <a href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             <h1>Smogon Stats</h1>
           </a>
+          <p className="header-desc">
+            Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
+          </p>
         </div>
         <button 
           className="theme-toggle" 
@@ -90,7 +93,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>Data provided by <a href="https://www.smogon.com/stats/" target="_blank" rel="noreferrer">Smogon</a>.</p>
+        <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
         <p>Not affiliated with Smogon or Pokemon Showdown.</p>
         <p>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
       </footer>

@@ -297,10 +297,16 @@ select:focus {
 .tile-details {
   padding: 0.75rem;
   background: var(--details-bg);
-  height: 408px;
+  height: 447px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(128, 128, 128, 0.4) transparent;
+}
+
+@media (min-width: 768px) {
+  .tile-details {
+    height: 525px;
+  }
 }
 
 .tile-details::-webkit-scrollbar {

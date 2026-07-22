@@ -54,7 +54,7 @@ function parseMoveset(text) {
          
          const nameLine = lines[i+1].trim();
          currentPokemon = nameLine.substring(1, nameLine.indexOf('|', 1)).trim();
-         pokemonData = { Abilities: [], Items: [], Spreads: [], Moves: [], Counters: [] };
+         pokemonData = { Abilities: [], Items: [], Spreads: [], Moves: [], Counters: [], Teammates: [] };
          data[currentPokemon] = pokemonData;
          currentSection = null;
          i += 3; 

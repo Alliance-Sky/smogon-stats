@@ -318,7 +318,7 @@ select:focus {
 .tile-details {
   padding: 0.25rem;
   background: var(--details-bg);
-  height: 310px;
+  height: 465px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(128, 128, 128, 0.4) transparent;

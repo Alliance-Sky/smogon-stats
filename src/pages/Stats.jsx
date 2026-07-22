@@ -221,14 +221,7 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
           onError={(e) => e.target.style.display='none'} 
         />
         <div className="tile-info">
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className="tile-name">{row.pokemon}</div>
-            {detailsData && detailsData.Abilities && detailsData.Abilities.length > 0 && (
-              <div className="tile-abilities" style={{ fontSize: '0.85em', opacity: 0.8, marginTop: '2px' }}>
-                {detailsData.Abilities.slice(0, 2).map(a => `${a.name} ${formatPercent(a.percent)}`).join(' | ')}
-              </div>
-            )}
-          </div>
+          <div className="tile-name">{row.pokemon}</div>
           <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
         </div>
         <div className="expand-icon">
@@ -277,9 +270,11 @@ function DetailsView({ data }) {
   };
 
   const moves = getTop(data.Moves, 6);
-  const items = getTop(data.Items, 4);
+  const items = getTop(data.Items, 6);
+  const abilities = getTop(data.Abilities, 4);
   const counters = getTop(data.Counters, 4);
-  const spreads = getTop(data.Spreads, 6).map(s => ({
+  const teammates = getTop(data.Teammates, 4);
+  const spreads = getTop(data.Spreads, 4).map(s => ({
     ...s,
     name: s.name.replace(':', ': ')
   }));
@@ -293,21 +288,33 @@ function DetailsView({ data }) {
         </ul>
       </div>
       <div className="detail-section">
-        <h4>Top Spreads</h4>
-        <ul>
-          {spreads.map(s => <li key={s.name}><span>{s.name}</span> <strong>{formatPercent(s.percent)}</strong></li>)}
-        </ul>
-      </div>
-      <div className="detail-section">
         <h4>Top Items</h4>
         <ul>
           {items.map(i => <li key={i.name}><span>{i.name}</span> <strong>{formatPercent(i.percent)}</strong></li>)}
         </ul>
       </div>
       <div className="detail-section">
+        <h4>Top Spreads</h4>
+        <ul>
+          {spreads.map(s => <li key={s.name}><span>{s.name}</span> <strong>{formatPercent(s.percent)}</strong></li>)}
+        </ul>
+      </div>
+      <div className="detail-section">
+        <h4>Top Abilities</h4>
+        <ul>
+          {abilities.map(a => <li key={a.name}><span>{a.name}</span> <strong>{formatPercent(a.percent)}</strong></li>)}
+        </ul>
+      </div>
+      <div className="detail-section">
         <h4>Common Counters</h4>
         <ul>
           {counters.map(c => <li key={c.name}><span>{c.name}</span> <strong>{formatPercent(c.percent)}</strong></li>)}
+        </ul>
+      </div>
+      <div className="detail-section">
+        <h4>Common Teammates</h4>
+        <ul>
+          {teammates.map(t => <li key={t.name}><span>{t.name}</span> <strong>{formatPercent(t.percent)}</strong></li>)}
         </ul>
       </div>
     </div>

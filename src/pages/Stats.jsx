@@ -221,12 +221,14 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
           onError={(e) => e.target.style.display='none'} 
         />
         <div className="tile-info">
-          <div className="tile-name">{row.pokemon}</div>
-          {detailsData && detailsData.Abilities && detailsData.Abilities.length > 0 && (
-            <div className="tile-abilities" style={{ fontSize: '0.85em', opacity: 0.8, marginTop: '2px' }}>
-              {detailsData.Abilities.slice(0, 2).map(a => `${a.name} ${formatPercent(a.percent)}`).join(' | ')}
-            </div>
-          )}
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="tile-name">{row.pokemon}</div>
+            {detailsData && detailsData.Abilities && detailsData.Abilities.length > 0 && (
+              <div className="tile-abilities" style={{ fontSize: '0.85em', opacity: 0.8, marginTop: '2px' }}>
+                {detailsData.Abilities.slice(0, 2).map(a => `${a.name} ${formatPercent(a.percent)}`).join(' | ')}
+              </div>
+            )}
+          </div>
           <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
         </div>
         <div className="expand-icon">

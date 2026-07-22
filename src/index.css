@@ -184,9 +184,16 @@ select:focus {
 
 
 .pokedex-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.5rem;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .pokedex-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .pokedex-tile {
@@ -291,7 +298,7 @@ select:focus {
 .tile-details {
   padding: 0.25rem;
   background: var(--details-bg);
-  height: 400px;
+  height: 310px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(128, 128, 128, 0.4) transparent;

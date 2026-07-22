@@ -272,8 +272,8 @@ function DetailsView({ data }) {
   const moves = getTop(data.Moves, 6);
   const items = getTop(data.Items, 6);
   const abilities = getTop(data.Abilities, 4);
-  const counters = getTop(data.Counters, 4);
-  const teammates = getTop(data.Teammates, 4);
+  const counters = getTop(data.Counters, 5);
+  const teammates = getTop(data.Teammates, 5);
   const spreads = getTop(data.Spreads, 4).map(s => ({
     ...s,
     name: s.name.replace(':', ': ')

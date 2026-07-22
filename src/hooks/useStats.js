@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { getMonths, getFormats, getStats, getDetails } from '../utils/api';
 
-export function useStats(period, format, rating) {
-  const navigate = useNavigate();
-
+export function useStats(period, format, rating, setFormat, setRating) {
 
   const [months, setMonths] = useState([]);
   const [formats, setFormats] = useState({});
@@ -43,12 +41,13 @@ export function useStats(period, format, rating) {
         if (availableFormats.length > 0 && !data[format]) {
           const firstFormat = availableFormats[0];
           const firstRating = data[firstFormat][0];
-          navigate(`/stats/${period}/${firstFormat}/${firstRating}`, { replace: true });
+          setFormat(firstFormat);
+          setRating(firstRating);
         }
       });
     }
     return () => { isCancelled = true; };
-  }, [period, navigate, format]);
+  }, [period, format, setFormat, setRating]);
 
 
   useEffect(() => {
@@ -90,13 +89,13 @@ export function useStats(period, format, rating) {
         });
     } else if (formats[format] && !formats[format].includes(rating)) {
 
-      navigate(`/stats/${period}/${format}/${formats[format][0]}`, { replace: true });
+      setRating(formats[format][0]);
     }
 
     return () => {
       isCancelled = true;
     };
-  }, [period, format, rating, formats, navigate]);
+  }, [period, format, rating, formats, setRating]);
 
   const toggleDetails = (pokemon) => {
     if (expanded === pokemon) {

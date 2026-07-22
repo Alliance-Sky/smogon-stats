@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import Stats from './pages/Stats';
 import PokeballIcon from './components/PokeballIcon';
-import DefaultRedirect from './components/DefaultRedirect';
 
 const getInitialTheme = () => {
   const match = document.cookie.match(/(^| )theme=([^;]+)/);
@@ -15,6 +13,9 @@ const getInitialTheme = () => {
 
 function App() {
   const [theme, setTheme] = useState(getInitialTheme);
+  const [period, setPeriod] = useState('2026-06');
+  const [format, setFormat] = useState('gen9ou');
+  const [rating, setRating] = useState('1760');
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -61,9 +62,9 @@ function App() {
     <div className="app-container">
       <header className="app-header">
         <div className="header-title-container">
-          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <a href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
             <h1>Smogon Stats</h1>
-          </Link>
+          </a>
         </div>
         <button 
           className="theme-toggle" 
@@ -77,10 +78,15 @@ function App() {
       </header>
     
       <main className="app-main">
-        <Routes>
-          <Route path="/" element={<DefaultRedirect />} />
-          <Route path="/stats/:period/:format/:rating" element={<Stats theme={theme} />} />
-        </Routes>
+        <Stats 
+          theme={theme}
+          period={period}
+          setPeriod={setPeriod}
+          format={format}
+          setFormat={setFormat}
+          rating={rating}
+          setRating={setRating}
+        />
       </main>
 
       <footer className="app-footer">

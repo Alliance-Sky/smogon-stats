@@ -1,5 +1,4 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { useStats } from '../hooks/useStats';
 import PokeballIcon from '../components/PokeballIcon';
 import '../index.css';
@@ -50,9 +49,7 @@ const formatPercent = (percentStr) => {
   return `${Math.round(num)}%`;
 };
 
-export default function Stats({ theme }) {
-  const { period, format, rating } = useParams();
-  const navigate = useNavigate();
+export default function Stats({ theme, period, format, rating, setPeriod, setFormat, setRating }) {
   
   const [showSplash, setShowSplash] = React.useState(() => !sessionStorage.getItem('hasVisited'));
   const [isFadingOut, setIsFadingOut] = React.useState(false);
@@ -69,17 +66,18 @@ export default function Stats({ theme }) {
     loadingDetails,
     detailsError,
     toggleDetails
-  } = useStats(period, format, rating);
+  } = useStats(period, format, rating, setFormat, setRating);
 
 
-  const onPeriodChange = (e) => navigate(`/stats/${e.target.value}/${format}/${rating}`);
+  const onPeriodChange = (e) => setPeriod(e.target.value);
   const onFormatChange = (e) => {
     const newFormat = e.target.value;
     const ratings = formats[newFormat] || [];
     const newRating = ratings.includes(rating) ? rating : (ratings[0] || '0');
-    navigate(`/stats/${period}/${newFormat}/${newRating}`);
+    setFormat(newFormat);
+    setRating(newRating);
   };
-  const onRatingChange = (e) => navigate(`/stats/${period}/${format}/${e.target.value}`);
+  const onRatingChange = (e) => setRating(e.target.value);
 
   const availableFormats = Object.keys(formats);
   const availableRatings = formats[format] || [];

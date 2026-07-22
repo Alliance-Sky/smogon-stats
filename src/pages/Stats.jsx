@@ -222,6 +222,11 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
         />
         <div className="tile-info">
           <div className="tile-name">{row.pokemon}</div>
+          {detailsData && detailsData.Abilities && detailsData.Abilities.length > 0 && (
+            <div className="tile-abilities" style={{ fontSize: '0.85em', opacity: 0.8, marginTop: '2px' }}>
+              {detailsData.Abilities.slice(0, 2).map(a => `${a.name} ${formatPercent(a.percent)}`).join(' | ')}
+            </div>
+          )}
           <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
         </div>
         <div className="expand-icon">
@@ -271,7 +276,7 @@ function DetailsView({ data }) {
 
   const moves = getTop(data.Moves, 6);
   const items = getTop(data.Items, 4);
-  const abilities = getTop(data.Abilities, 4);
+  const counters = getTop(data.Counters, 4);
   const spreads = getTop(data.Spreads, 6).map(s => ({
     ...s,
     name: s.name.replace(':', ': ')
@@ -298,9 +303,9 @@ function DetailsView({ data }) {
         </ul>
       </div>
       <div className="detail-section">
-        <h4>Top Abilities</h4>
+        <h4>Common Counters</h4>
         <ul>
-          {abilities.map(a => <li key={a.name}><span>{a.name}</span> <strong>{formatPercent(a.percent)}</strong></li>)}
+          {counters.map(c => <li key={c.name}><span>{c.name}</span> <strong>{formatPercent(c.percent)}</strong></li>)}
         </ul>
       </div>
     </div>

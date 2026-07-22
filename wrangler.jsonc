@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "smogonstats",
+  "compatibility_date": "2024-07-22",
+  "assets": {
+    "directory": "dist"
+  },
+  "routes": [
+    {
+      "pattern": "smogonstats.eu.cc",
+      "custom_domain": true
+    }
+  ]
+}

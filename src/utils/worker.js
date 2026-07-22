@@ -18,11 +18,14 @@ function parseStats(text) {
     
     const parts = line.split('|').map(p => p.trim());
     if (parts.length >= 5) {
-      data.push({
-        rank: parseInt(parts[1], 10),
-        pokemon: parts[2],
-        usagePercent: parts[3]
-      });
+      const usagePercent = parts[3];
+      if (parseFloat(usagePercent) > 0) {
+        data.push({
+          rank: parseInt(parts[1], 10),
+          pokemon: parts[2],
+          usagePercent
+        });
+      }
     }
   }
   
@@ -80,7 +83,7 @@ function parseMoveset(text) {
         if (lastSpace !== -1) {
           const name = content.substring(0, lastSpace).trim();
           const percent = content.substring(lastSpace + 1).trim();
-          if (name !== 'Other' && name !== 'Empty') {
+          if (name !== 'Other' && name !== 'Empty' && parseFloat(percent) > 0) {
             pokemonData[currentSection].push({ name, percent });
           }
         }

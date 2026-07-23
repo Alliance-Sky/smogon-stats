@@ -201,9 +201,10 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
 
       <div className="glass-panel">
         {loading || !stats ? (
-          <div className="loader-container">
-            <div className="spinner"></div>
-            <div className="loading-text">Parsing data from Smogon...</div>
+          <div className="pokedex-list fade-in-data">
+            {Array.from({ length: 20 }).map((_, i) => (
+              <SkeletonRow key={i} />
+            ))}
           </div>
         ) : error ? (
           <div className="error-message">
@@ -391,3 +392,16 @@ function DetailsView({ data, onPokemonClick }) {
     </div>
   );
 }
+
+const SkeletonRow = () => (
+  <div className="pokedex-tile skeleton-tile">
+    <div className="tile-header">
+      <div className="tile-rank skeleton-block" style={{ width: '30px' }}></div>
+      <div className="tile-sprite skeleton-block circle" style={{ width: '32px', height: '32px' }}></div>
+      <div className="tile-info">
+        <div className="tile-name skeleton-block" style={{ width: '120px' }}></div>
+        <div className="tile-usage skeleton-block" style={{ width: '60px' }}></div>
+      </div>
+    </div>
+  </div>
+);

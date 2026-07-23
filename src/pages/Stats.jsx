@@ -201,11 +201,17 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
 
       <div className="glass-panel">
         {loading || !stats ? (
-          <div className="pokedex-list fade-in-data">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <SkeletonRow key={i} />
-            ))}
-          </div>
+          <>
+            <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
+              <div className="skeleton-block" style={{ width: '100px', height: '34px', borderRadius: '12px' }}></div>
+              <div className="skeleton-block" style={{ width: '110px', height: '34px', borderRadius: '12px' }}></div>
+            </div>
+            <div className="pokedex-list fade-in-data">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <SkeletonRow key={i} />
+              ))}
+            </div>
+          </>
         ) : error ? (
           <div className="error-message">
             <h3>Error Loading Data</h3>

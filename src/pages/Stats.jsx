@@ -56,6 +56,17 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
   
   const [showSplash, setShowSplash] = React.useState(() => !sessionStorage.getItem('hasVisited'));
   const [isFadingOut, setIsFadingOut] = React.useState(false);
+  const [sortBy, setSortBy] = React.useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('sortBy') || 'usage';
+  });
+
+  React.useEffect(() => {
+    const url = new URL(window.location);
+    url.searchParams.set('sortBy', sortBy);
+    window.history.replaceState(null, '', url);
+  }, [sortBy]);
+  const [toast, setToast] = React.useState(null);
 
   const {
     months,
@@ -105,24 +116,41 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     toggleDetails(pokemon);
   };
 
-  const isStillInitializing = loading || months.length === 0 || availableFormats.length === 0 || stats.length === 0;
-
   React.useEffect(() => {
-    if (showSplash && !isStillInitializing && !error) {
+    if (showSplash) {
       const startFade = setTimeout(() => {
         setIsFadingOut(true);
-      }, 500);
+      }, 1000);
       const removeSplash = setTimeout(() => {
         setShowSplash(false);
         sessionStorage.setItem('hasVisited', 'true');
-      }, 1300);
+      }, 1500);
       
       return () => {
         clearTimeout(startFade);
         clearTimeout(removeSplash);
       };
     }
-  }, [isStillInitializing, error, showSplash]);
+  }, [showSplash]);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const scrollToPokemon = React.useCallback((pokemonName) => {
+    const el = document.getElementById(`pokemon-row-${pokemonName}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setExpanded(prev => {
+        const next = new Set(prev);
+        next.add(pokemonName);
+        return next;
+      });
+    } else {
+      showToast(`${pokemonName} is not in the current list.`);
+    }
+  }, [setExpanded]);
 
   return (
     <>
@@ -161,14 +189,29 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
             {availableRatings.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
+
+        <div className="control-group">
+          <label>Sort By</label>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="usage">Usage</option>
+            <option value="viability">Viability Ceiling</option>
+          </select>
+        </div>
       </div>
 
       <div className="glass-panel">
-        {loading ? (
-          <div className="loader-container">
-            <div className="spinner"></div>
-            <div className="loading-text">Parsing data from Smogon...</div>
-          </div>
+        {loading || !stats ? (
+          <>
+            <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
+              <div className="skeleton-block" style={{ width: '100px', height: '34px', borderRadius: '12px' }}></div>
+              <div className="skeleton-block" style={{ width: '110px', height: '34px', borderRadius: '12px' }}></div>
+            </div>
+            <div className="pokedex-list fade-in-data">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <SkeletonRow key={i} />
+              ))}
+            </div>
+          </>
         ) : error ? (
           <div className="error-message">
             <h3>Error Loading Data</h3>
@@ -184,34 +227,56 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
               <button className="control-btn" onClick={expandAll}>Expand All</button>
               <button className="control-btn" onClick={collapseAll}>Collapse All</button>
             </div>
-            <div className="pokedex-list">
-              {stats.map(row => (
-                <PokemonRow 
-                  key={row.rank}
-                  row={row}
+            <div className="pokedex-list fade-in-data">
+              {(() => {
+                const sortedStats = sortBy === 'usage' ? stats : [...stats].sort((a, b) => {
+                  const getV = (item, idx) => item.viability && item.viability.length > idx ? item.viability[idx] : -1;
+                  
+                  const diff1 = getV(b, 1) - getV(a, 1);
+                  if (diff1 !== 0) return diff1;
+                  
+                  const diff2 = getV(b, 2) - getV(a, 2);
+                  if (diff2 !== 0) return diff2;
+                  
+                  const diff3 = getV(b, 3) - getV(a, 3);
+                  if (diff3 !== 0) return diff3;
+                  
+                  return getV(b, 0) - getV(a, 0);
+                });
+                return sortedStats.map(row => (
+                  <PokemonRow 
+                    key={row.rank}
+                    row={row}
+                    sortBy={sortBy}
                   isExpanded={expanded.has(row.pokemon)}
                   loadingDetails={loadingDetails}
                   detailsError={detailsError}
                   detailsData={details && details[row.pokemon]}
                   onRowClick={onRowClick}
                   setExpanded={setExpanded}
+                  onPokemonClick={scrollToPokemon}
                 />
-              ))}
+              ))})()}
             </div>
           </>
         )}
       </div>
     </div>
+      {toast && (
+        <div className="toast-notification">
+          {toast}
+        </div>
+      )}
     </>
   );
 }
 
-const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded }) => {
+const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded, onPokemonClick }) => {
   const spriteSlug = getSprite(row.pokemon);
   const spriteUrl = `https://play.pokemonshowdown.com/sprites/home-centered/${spriteSlug}.png`;
   
   return (
-    <div className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
+    <div id={`pokemon-row-${row.pokemon}`} className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
       <div className="tile-header" onClick={() => onRowClick(row.pokemon)}>
         <div className="tile-rank">#{row.rank}</div>
         <img 
@@ -222,7 +287,11 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
         />
         <div className="tile-info">
           <div className="tile-name">{row.pokemon}</div>
-          <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
+          {sortBy === 'viability' && row.viability ? (
+            <div className="tile-usage viability-mode">Viability: [{row.viability.join(', ')}]</div>
+          ) : (
+            <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
+          )}
         </div>
         <div className="expand-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -238,7 +307,7 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
           ) : detailsError ? (
             <div className="details-error">Stats data not available</div>
           ) : detailsData ? (
-            <DetailsView data={detailsData} />
+            <DetailsView data={detailsData} onPokemonClick={onPokemonClick} />
           ) : (
             <div className="details-error">Stats data not available</div>
           )}
@@ -249,7 +318,7 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
 }, (prevProps, nextProps) => {
 
   if (!prevProps.isExpanded && !nextProps.isExpanded) {
-    return prevProps.row === nextProps.row;
+    return prevProps.row === nextProps.row && prevProps.sortBy === nextProps.sortBy;
   }
 
 
@@ -257,10 +326,11 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
          prevProps.loadingDetails === nextProps.loadingDetails &&
          prevProps.detailsError === nextProps.detailsError &&
          prevProps.detailsData === nextProps.detailsData &&
-         prevProps.row === nextProps.row;
+         prevProps.row === nextProps.row &&
+         prevProps.sortBy === nextProps.sortBy;
 });
 
-function DetailsView({ data }) {
+function DetailsView({ data, onPokemonClick }) {
   if (!data) return null;
 
 
@@ -308,15 +378,36 @@ function DetailsView({ data }) {
       <div className="detail-section">
         <h4>Common Counters</h4>
         <ul>
-          {counters.map(c => <li key={c.name}><span>{c.name}</span> <strong>{formatPercent(c.percent)}</strong></li>)}
+          {counters.map(c => (
+            <li key={c.name} className="clickable-pokemon" onClick={() => onPokemonClick(c.name)}>
+              <span>{c.name}</span> <strong>{formatPercent(c.percent)}</strong>
+            </li>
+          ))}
         </ul>
       </div>
       <div className="detail-section">
         <h4>Common Teammates</h4>
         <ul>
-          {teammates.map(t => <li key={t.name}><span>{t.name}</span> <strong>{formatPercent(t.percent)}</strong></li>)}
+          {teammates.map(t => (
+            <li key={t.name} className="clickable-pokemon" onClick={() => onPokemonClick(t.name)}>
+              <span>{t.name}</span> <strong>{formatPercent(t.percent)}</strong>
+            </li>
+          ))}
         </ul>
       </div>
     </div>
   );
 }
+
+const SkeletonRow = () => (
+  <div className="pokedex-tile skeleton-tile">
+    <div className="tile-header">
+      <div className="tile-rank skeleton-block" style={{ width: '30px' }}></div>
+      <div className="tile-sprite skeleton-block circle" style={{ width: '32px', height: '32px' }}></div>
+      <div className="tile-info">
+        <div className="tile-name skeleton-block" style={{ width: '120px' }}></div>
+        <div className="tile-usage skeleton-block" style={{ width: '60px' }}></div>
+      </div>
+    </div>
+  </div>
+);

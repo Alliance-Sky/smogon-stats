@@ -179,70 +179,140 @@ export async function getDir(path = '', isImmutable = false) {
 }
 
 export async function getMonths() {
-
-  const folders = await getDir('', false);
-  return folders.filter(f => /^\d{4}-\d{2}$/.test(f)).sort((a, b) => b.localeCompare(a));
+  const url = 'https://api.smogonstats.eu.cc/api/months';
+  if (memoryCache.has(url)) return memoryCache.get(url);
+  if (inflightRequests.has(url)) return inflightRequests.get(url);
+  
+  const fetchPromise = (async () => {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        memoryCache.set(url, json);
+        return json;
+      }
+    } catch (e) {
+      console.error('Error fetching months:', e);
+    }
+    return [];
+  })();
+  
+  inflightRequests.set(url, fetchPromise);
+  try {
+    const result = await fetchPromise;
+    return result;
+  } finally {
+    inflightRequests.delete(url);
+  }
 }
 
 export async function getFormats(month) {
-
-
-  const files = await getDir(`${month}/moveset/`, true);
-  const formatsMap = new Map();
+  const url = `https://api.smogonstats.eu.cc/api/formats?month=${month}`;
+  if (memoryCache.has(url)) return memoryCache.get(url);
+  if (inflightRequests.has(url)) return inflightRequests.get(url);
   
-  files.forEach(file => {
-    if (!file.endsWith('.txt')) return;
-    const nameWithoutExt = file.replace('.txt', '');
-    const lastDash = nameWithoutExt.lastIndexOf('-');
-    if (lastDash === -1) return;
-    
-    const format = nameWithoutExt.substring(0, lastDash);
-    const rating = nameWithoutExt.substring(lastDash + 1);
-    
-    if (!formatsMap.has(format)) {
-      formatsMap.set(format, []);
+  const fetchPromise = (async () => {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        memoryCache.set(url, json);
+        return json;
+      }
+    } catch (e) {
+      console.error('Error fetching formats:', e);
     }
-    formatsMap.get(format).push(rating);
-  });
-  
-  const result = {};
-  Array.from(formatsMap.keys()).sort().forEach(format => {
+    return {};
+  })();
 
-
-    result[format] = formatsMap.get(format)
-      .sort((a, b) => Number(a) - Number(b))
-      .slice(-2);
-  });
-  
-  return result;
+  inflightRequests.set(url, fetchPromise);
+  try {
+    const result = await fetchPromise;
+    return result;
+  } finally {
+    inflightRequests.delete(url);
+  }
 }
 
 
 const parsedStatsCache = new Map();
 
-export function getStats(month, format, rating) {
-  const cacheKey = `${month}/${format}-${rating}`;
-  if (parsedStatsCache.has(cacheKey)) {
-    return parsedStatsCache.get(cacheKey);
+export async function getStats(month, format, rating) {
+  const url = `https://api.smogonstats.eu.cc/api/usage?month=${month}&format=${format}&rating=${rating}`;
+  
+  if (memoryCache.has(url)) {
+    return memoryCache.get(url);
   }
 
-  const promise = (async () => {
-    try {
-      const fileName = `${format}-${rating}.txt`;
-      const targetUrl = `${BASE_URL}${month}/${fileName}`;
-      
+  if (inflightRequests.has(url)) {
+    return inflightRequests.get(url);
+  }
 
-      const text = await getText(targetUrl, true);
-      return await execWorker('parseStats', text);
-    } catch (error) {
-      parsedStatsCache.delete(cacheKey);
-      console.error('Error fetching stats:', error);
-      throw error;
+  const fetchPromise = (async () => {
+    if ('caches' in window) {
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        const cachedResponse = await cache.match(url);
+        if (cachedResponse) {
+          let jsonText;
+          if (cachedResponse.headers.get('Content-Type') === 'application/gzip') {
+            const decompressedStream = cachedResponse.body.pipeThrough(new DecompressionStream('gzip'));
+            jsonText = await new Response(decompressedStream).text();
+          } else {
+            jsonText = await cachedResponse.text();
+          }
+          const json = JSON.parse(jsonText);
+          memoryCache.set(url, json);
+          return json;
+        }
+      } catch (e) {
+        console.warn('Cache API error:', e);
+      }
     }
+    
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        
+        if ('caches' in window) {
+          try {
+            const cache = await caches.open(CACHE_NAME);
+            const jsonString = JSON.stringify(json);
+            let cacheResponse;
+            
+            if ('CompressionStream' in window) {
+              const compressedStream = new Blob([jsonString]).stream().pipeThrough(new CompressionStream('gzip'));
+              cacheResponse = new Response(compressedStream, {
+                headers: { 'Content-Type': 'application/gzip' }
+              });
+            } else {
+              cacheResponse = new Response(jsonString, {
+                headers: { 'Content-Type': 'application/json' }
+              });
+            }
+            await cache.put(url, cacheResponse);
+          } catch (e) {
+            console.warn('Cache API put error:', e);
+          }
+        }
+        
+        memoryCache.set(url, json);
+        return json;
+      }
+    } catch (e) {
+      console.error('Error fetching stats:', e);
+    }
+    return [];
   })();
-  
-  parsedStatsCache.set(cacheKey, promise);
-  return promise;
+
+  inflightRequests.set(url, fetchPromise);
+  try {
+    const result = await fetchPromise;
+    return result;
+  } finally {
+    inflightRequests.delete(url);
+  }
 }
 
 export function getDetails(month, format, rating) {
@@ -268,3 +338,82 @@ export function getDetails(month, format, rating) {
   parsedStatsCache.set(cacheKey, promise);
   return promise;
 }
+
+export async function getViability(month, format, rating) {
+  const url = `https://api.smogonstats.eu.cc/api/viability?month=${month}&format=${format}&rating=${rating}`;
+  
+  if (memoryCache.has(url)) {
+    return memoryCache.get(url);
+  }
+
+  if (inflightRequests.has(url)) {
+    return inflightRequests.get(url);
+  }
+
+  const fetchPromise = (async () => {
+    if ('caches' in window) {
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        const cachedResponse = await cache.match(url);
+        if (cachedResponse) {
+          let jsonText;
+          if (cachedResponse.headers.get('Content-Type') === 'application/gzip') {
+            const decompressedStream = cachedResponse.body.pipeThrough(new DecompressionStream('gzip'));
+            jsonText = await new Response(decompressedStream).text();
+          } else {
+            jsonText = await cachedResponse.text();
+          }
+          const json = JSON.parse(jsonText);
+          memoryCache.set(url, json);
+          return json;
+        }
+      } catch (e) {
+        console.warn('Cache API error:', e);
+      }
+    }
+    
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        
+        if ('caches' in window) {
+          try {
+            const cache = await caches.open(CACHE_NAME);
+            const jsonString = JSON.stringify(json);
+            let cacheResponse;
+            
+            if ('CompressionStream' in window) {
+              const compressedStream = new Blob([jsonString]).stream().pipeThrough(new CompressionStream('gzip'));
+              cacheResponse = new Response(compressedStream, {
+                headers: { 'Content-Type': 'application/gzip' }
+              });
+            } else {
+              cacheResponse = new Response(jsonString, {
+                headers: { 'Content-Type': 'application/json' }
+              });
+            }
+            await cache.put(url, cacheResponse);
+          } catch (e) {
+            console.warn('Cache API put error:', e);
+          }
+        }
+        
+        memoryCache.set(url, json);
+        return json;
+      }
+    } catch (e) {
+      console.error('Error fetching viability:', e);
+    }
+    return {};
+  })();
+
+  inflightRequests.set(url, fetchPromise);
+  try {
+    const result = await fetchPromise;
+    return result;
+  } finally {
+    inflightRequests.delete(url);
+  }
+}
+

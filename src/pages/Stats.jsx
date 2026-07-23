@@ -283,7 +283,7 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
 }, (prevProps, nextProps) => {
 
   if (!prevProps.isExpanded && !nextProps.isExpanded) {
-    return prevProps.row === nextProps.row;
+    return prevProps.row === nextProps.row && prevProps.sortBy === nextProps.sortBy;
   }
 
 
@@ -291,7 +291,8 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
          prevProps.loadingDetails === nextProps.loadingDetails &&
          prevProps.detailsError === nextProps.detailsError &&
          prevProps.detailsData === nextProps.detailsData &&
-         prevProps.row === nextProps.row;
+         prevProps.row === nextProps.row &&
+         prevProps.sortBy === nextProps.sortBy;
 });
 
 function DetailsView({ data }) {

@@ -57,6 +57,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
   const [showSplash, setShowSplash] = React.useState(() => !sessionStorage.getItem('hasVisited'));
   const [isFadingOut, setIsFadingOut] = React.useState(false);
   const [sortBy, setSortBy] = React.useState('usage');
+  const [toast, setToast] = React.useState(null);
 
   const {
     months,
@@ -124,6 +125,25 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
       };
     }
   }, [isStillInitializing, error, showSplash]);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const scrollToPokemon = React.useCallback((pokemonName) => {
+    const el = document.getElementById(`pokemon-row-${pokemonName}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setExpanded(prev => {
+        const next = new Set(prev);
+        next.add(pokemonName);
+        return next;
+      });
+    } else {
+      showToast(`${pokemonName} is not in the current list.`);
+    }
+  }, [setExpanded]);
 
   return (
     <>
@@ -220,6 +240,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                   detailsData={details && details[row.pokemon]}
                   onRowClick={onRowClick}
                   setExpanded={setExpanded}
+                  onPokemonClick={scrollToPokemon}
                 />
               ))})()}
             </div>
@@ -227,16 +248,21 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
         )}
       </div>
     </div>
+      {toast && (
+        <div className="toast-notification">
+          {toast}
+        </div>
+      )}
     </>
   );
 }
 
-const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded }) => {
+const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded, onPokemonClick }) => {
   const spriteSlug = getSprite(row.pokemon);
   const spriteUrl = `https://play.pokemonshowdown.com/sprites/home-centered/${spriteSlug}.png`;
   
   return (
-    <div className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
+    <div id={`pokemon-row-${row.pokemon}`} className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
       <div className="tile-header" onClick={() => onRowClick(row.pokemon)}>
         <div className="tile-rank">#{row.rank}</div>
         <img 
@@ -267,7 +293,7 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
           ) : detailsError ? (
             <div className="details-error">Stats data not available</div>
           ) : detailsData ? (
-            <DetailsView data={detailsData} />
+            <DetailsView data={detailsData} onPokemonClick={onPokemonClick} />
           ) : (
             <div className="details-error">Stats data not available</div>
           )}
@@ -290,7 +316,7 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
          prevProps.sortBy === nextProps.sortBy;
 });
 
-function DetailsView({ data }) {
+function DetailsView({ data, onPokemonClick }) {
   if (!data) return null;
 
 
@@ -338,13 +364,21 @@ function DetailsView({ data }) {
       <div className="detail-section">
         <h4>Common Counters</h4>
         <ul>
-          {counters.map(c => <li key={c.name}><span>{c.name}</span> <strong>{formatPercent(c.percent)}</strong></li>)}
+          {counters.map(c => (
+            <li key={c.name} className="clickable-pokemon" onClick={() => onPokemonClick(c.name)}>
+              <span>{c.name}</span> <strong>{formatPercent(c.percent)}</strong>
+            </li>
+          ))}
         </ul>
       </div>
       <div className="detail-section">
         <h4>Common Teammates</h4>
         <ul>
-          {teammates.map(t => <li key={t.name}><span>{t.name}</span> <strong>{formatPercent(t.percent)}</strong></li>)}
+          {teammates.map(t => (
+            <li key={t.name} className="clickable-pokemon" onClick={() => onPokemonClick(t.name)}>
+              <span>{t.name}</span> <strong>{formatPercent(t.percent)}</strong>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

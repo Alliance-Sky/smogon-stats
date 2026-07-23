@@ -564,3 +564,43 @@ select:focus {
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
+.clickable-pokemon {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0.1rem 0.25rem !important;
+  margin: 0 -0.25rem;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.clickable-pokemon:hover {
+  background-color: var(--row-hover);
+  transform: translateX(2px);
+}
+
+.toast-notification {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel-bg);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  box-shadow: var(--shadow);
+  font-weight: 700;
+  z-index: 1000;
+  animation: slide-up 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+

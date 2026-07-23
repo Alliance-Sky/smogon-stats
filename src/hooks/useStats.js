@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { getMonths, getFormats, getStats, getDetails } from '../utils/api';
+import { getMonths, getFormats, getStats, getDetails, getViability } from '../utils/api';
 
 export function useStats(period, format, rating, setFormat, setRating) {
 
@@ -61,10 +61,16 @@ export function useStats(period, format, rating, setFormat, setRating) {
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
       setLoading(true);
       setError(null);
-      getStats(period, format, rating)
-        .then(data => {
+      Promise.all([getStats(period, format, rating), getViability(period, format, rating)])
+        .then(([statsData, viabilityData]) => {
           if (isCancelled) return;
-          setStats(data);
+          
+          const mergedStats = statsData.map(stat => ({
+            ...stat,
+            viability: viabilityData[stat.pokemon] || null
+          }));
+          
+          setStats(mergedStats);
           setLoading(false);
           
 

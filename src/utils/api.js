@@ -268,3 +268,17 @@ export function getDetails(month, format, rating) {
   parsedStatsCache.set(cacheKey, promise);
   return promise;
 }
+
+export async function getViability(month, format, rating) {
+  const url = `https://api.smogonstats.eu.cc/api/viability?month=${month}&format=${format}&rating=${rating}`;
+  try {
+    const res = await fetch(url);
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.error('Error fetching viability:', e);
+  }
+  return {};
+}
+

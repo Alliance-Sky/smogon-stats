@@ -56,6 +56,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
   
   const [showSplash, setShowSplash] = React.useState(() => !sessionStorage.getItem('hasVisited'));
   const [isFadingOut, setIsFadingOut] = React.useState(false);
+  const [sortBy, setSortBy] = React.useState('usage');
 
   const {
     months,
@@ -161,6 +162,14 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
             {availableRatings.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
+
+        <div className="control-group">
+          <label>Sort By</label>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="usage">Usage</option>
+            <option value="viability">Viability Ceiling</option>
+          </select>
+        </div>
       </div>
 
       <div className="glass-panel">
@@ -185,10 +194,16 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
               <button className="control-btn" onClick={collapseAll}>Collapse All</button>
             </div>
             <div className="pokedex-list">
-              {stats.map(row => (
-                <PokemonRow 
-                  key={row.rank}
-                  row={row}
+              {(() => {
+                const sortedStats = sortBy === 'usage' ? stats : [...stats].sort((a, b) => {
+                  const vA = a.viability && a.viability.length > 0 ? a.viability[0] : -1;
+                  const vB = b.viability && b.viability.length > 0 ? b.viability[0] : -1;
+                  return vB - vA;
+                });
+                return sortedStats.map(row => (
+                  <PokemonRow 
+                    key={row.rank}
+                    row={row}
                   isExpanded={expanded.has(row.pokemon)}
                   loadingDetails={loadingDetails}
                   detailsError={detailsError}
@@ -196,7 +211,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                   onRowClick={onRowClick}
                   setExpanded={setExpanded}
                 />
-              ))}
+              ))})()}
             </div>
           </>
         )}
@@ -223,6 +238,11 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
         <div className="tile-info">
           <div className="tile-name">{row.pokemon}</div>
           <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
+          {row.viability && (
+            <div className="tile-viability" style={{ fontSize: '0.8em', opacity: 0.8, marginTop: '2px' }}>
+              Viability Ceiling: [{row.viability.join(', ')}]
+            </div>
+          )}
         </div>
         <div className="expand-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

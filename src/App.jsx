@@ -79,9 +79,7 @@ function App() {
     <div className="app-container">
       <header className="app-header">
         <div className="header-title-container">
-          <a href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <h1>Smogon Stats</h1>
-          </a>
+          <h1>Smogon Stats</h1>
           <p className="header-desc">
             Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
           </p>

@@ -300,6 +300,10 @@ select:focus {
   border-radius: 8px;
 }
 
+.tile-usage.viability-mode::before {
+  content: none;
+}
+
 .expand-icon {
   font-size: 1.2rem;
   color: var(--text-muted);

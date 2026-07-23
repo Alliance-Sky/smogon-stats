@@ -248,14 +248,9 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
         <div className="tile-info">
           <div className="tile-name">{row.pokemon}</div>
           {sortBy === 'viability' && row.viability ? (
-            <div className="tile-usage">Viability: [{row.viability.join(', ')}]</div>
+            <div className="tile-usage viability-mode">Viability: [{row.viability.join(', ')}]</div>
           ) : (
             <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
-          )}
-          {row.viability && sortBy !== 'viability' && (
-            <div className="tile-viability" style={{ fontSize: '0.8em', opacity: 0.8, marginTop: '2px' }}>
-              Viability Ceiling: [{row.viability.join(', ')}]
-            </div>
           )}
         </div>
         <div className="expand-icon">

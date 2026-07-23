@@ -213,6 +213,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                   <PokemonRow 
                     key={row.rank}
                     row={row}
+                    sortBy={sortBy}
                   isExpanded={expanded.has(row.pokemon)}
                   loadingDetails={loadingDetails}
                   detailsError={detailsError}
@@ -230,7 +231,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
   );
 }
 
-const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded }) => {
+const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded }) => {
   const spriteSlug = getSprite(row.pokemon);
   const spriteUrl = `https://play.pokemonshowdown.com/sprites/home-centered/${spriteSlug}.png`;
   
@@ -246,8 +247,12 @@ const PokemonRow = React.memo(({ row, isExpanded, loadingDetails, detailsError, 
         />
         <div className="tile-info">
           <div className="tile-name">{row.pokemon}</div>
-          <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
-          {row.viability && (
+          {sortBy === 'viability' && row.viability ? (
+            <div className="tile-usage">Viability: [{row.viability.join(', ')}]</div>
+          ) : (
+            <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
+          )}
+          {row.viability && sortBy !== 'viability' && (
             <div className="tile-viability" style={{ fontSize: '0.8em', opacity: 0.8, marginTop: '2px' }}>
               Viability Ceiling: [{row.viability.join(', ')}]
             </div>

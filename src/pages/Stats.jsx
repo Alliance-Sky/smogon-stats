@@ -201,7 +201,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
             <h3>Error Loading Data</h3>
             <p>{error}</p>
           </div>
-        ) : stats.length === 0 ? (
+        ) : !stats ? null : stats.length === 0 ? (
           <div className="empty-state">
             <p>No data found for this selection.</p>
           </div>

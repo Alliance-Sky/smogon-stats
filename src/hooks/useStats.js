@@ -8,7 +8,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
   const [formats, setFormats] = useState({});
   
 
-  const [stats, setStats] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -59,11 +59,14 @@ export function useStats(period, format, rating, setFormat, setRating) {
     setDetailsError(false);
     
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
-      setLoading(true);
+      const loadingTimeout = setTimeout(() => {
+        if (!isCancelled) setLoading(true);
+      }, 200);
       setError(null);
       Promise.all([getStats(period, format, rating), getViability(period, format, rating)])
         .then(([statsData, viabilityData]) => {
           if (isCancelled) return;
+          clearTimeout(loadingTimeout);
           
           const mergedStats = statsData.map(stat => ({
             ...stat,
@@ -90,6 +93,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
         })
         .catch(err => {
           if (isCancelled) return;
+          clearTimeout(loadingTimeout);
           setError(err.message);
           setLoading(false);
         });
@@ -134,8 +138,10 @@ export function useStats(period, format, rating, setFormat, setRating) {
   };
 
   const expandAll = () => {
-    setExpanded(new Set(stats.map(s => s.pokemon)));
-    fetchDetailsIfNeeded();
+    if (stats) {
+      setExpanded(new Set(stats.map(s => s.pokemon)));
+      fetchDetailsIfNeeded();
+    }
   };
 
   const collapseAll = () => {

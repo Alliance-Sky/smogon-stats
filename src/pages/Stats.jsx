@@ -196,9 +196,18 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
             <div className="pokedex-list">
               {(() => {
                 const sortedStats = sortBy === 'usage' ? stats : [...stats].sort((a, b) => {
-                  const vA = a.viability && a.viability.length > 0 ? a.viability[0] : -1;
-                  const vB = b.viability && b.viability.length > 0 ? b.viability[0] : -1;
-                  return vB - vA;
+                  const getV = (item, idx) => item.viability && item.viability.length > idx ? item.viability[idx] : -1;
+                  
+                  const diff1 = getV(b, 1) - getV(a, 1);
+                  if (diff1 !== 0) return diff1;
+                  
+                  const diff2 = getV(b, 2) - getV(a, 2);
+                  if (diff2 !== 0) return diff2;
+                  
+                  const diff3 = getV(b, 3) - getV(a, 3);
+                  if (diff3 !== 0) return diff3;
+                  
+                  return getV(b, 0) - getV(a, 0);
                 });
                 return sortedStats.map(row => (
                   <PokemonRow 

@@ -191,8 +191,8 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
       </div>
 
       <div className="glass-panel">
-        {loading ? (
-          <div className="loader-container">
+        {loading || !stats ? (
+          <div className="loader-container fade-in-delayed">
             <div className="spinner"></div>
             <div className="loading-text">Parsing data from Smogon...</div>
           </div>
@@ -201,7 +201,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
             <h3>Error Loading Data</h3>
             <p>{error}</p>
           </div>
-        ) : !stats ? null : stats.length === 0 ? (
+        ) : stats.length === 0 ? (
           <div className="empty-state">
             <p>No data found for this selection.</p>
           </div>

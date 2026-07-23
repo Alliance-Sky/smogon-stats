@@ -59,14 +59,11 @@ export function useStats(period, format, rating, setFormat, setRating) {
     setDetailsError(false);
     
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
-      const loadingTimeout = setTimeout(() => {
-        if (!isCancelled) setLoading(true);
-      }, 200);
+      setLoading(true);
       setError(null);
       Promise.all([getStats(period, format, rating), getViability(period, format, rating)])
         .then(([statsData, viabilityData]) => {
           if (isCancelled) return;
-          clearTimeout(loadingTimeout);
           
           const mergedStats = statsData.map(stat => ({
             ...stat,
@@ -93,7 +90,6 @@ export function useStats(period, format, rating, setFormat, setRating) {
         })
         .catch(err => {
           if (isCancelled) return;
-          clearTimeout(loadingTimeout);
           setError(err.message);
           setLoading(false);
         });

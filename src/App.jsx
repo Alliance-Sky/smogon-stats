@@ -13,9 +13,26 @@ const getInitialTheme = () => {
 
 function App() {
   const [theme, setTheme] = useState(getInitialTheme);
-  const [period, setPeriod] = useState('2026-06');
-  const [format, setFormat] = useState('gen9ou');
-  const [rating, setRating] = useState('1760');
+  const [period, setPeriod] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('period') || '2026-06';
+  });
+  const [format, setFormat] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('format') || 'gen9ou';
+  });
+  const [rating, setRating] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('rating') || '1760';
+  });
+
+  useEffect(() => {
+    const url = new URL(window.location);
+    url.searchParams.set('period', period);
+    url.searchParams.set('format', format);
+    url.searchParams.set('rating', rating);
+    window.history.replaceState(null, '', url);
+  }, [period, format, rating]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

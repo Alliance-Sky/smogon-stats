@@ -56,7 +56,16 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
   
   const [showSplash, setShowSplash] = React.useState(() => !sessionStorage.getItem('hasVisited'));
   const [isFadingOut, setIsFadingOut] = React.useState(false);
-  const [sortBy, setSortBy] = React.useState('usage');
+  const [sortBy, setSortBy] = React.useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('sortBy') || 'usage';
+  });
+
+  React.useEffect(() => {
+    const url = new URL(window.location);
+    url.searchParams.set('sortBy', sortBy);
+    window.history.replaceState(null, '', url);
+  }, [sortBy]);
   const [toast, setToast] = React.useState(null);
 
   const {

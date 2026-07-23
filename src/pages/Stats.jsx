@@ -201,7 +201,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
 
       <div className="glass-panel">
         {loading || !stats ? (
-          <div className="loader-container fade-in-delayed">
+          <div className="loader-container">
             <div className="spinner"></div>
             <div className="loading-text">Parsing data from Smogon...</div>
           </div>
@@ -220,7 +220,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
               <button className="control-btn" onClick={expandAll}>Expand All</button>
               <button className="control-btn" onClick={collapseAll}>Collapse All</button>
             </div>
-            <div className="pokedex-list">
+            <div className="pokedex-list fade-in-data">
               {(() => {
                 const sortedStats = sortBy === 'usage' ? stats : [...stats].sort((a, b) => {
                   const getV = (item, idx) => item.viability && item.viability.length > idx ? item.viability[idx] : -1;

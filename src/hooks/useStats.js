@@ -61,7 +61,12 @@ export function useStats(period, format, rating, setFormat, setRating) {
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
       setLoading(true);
       setError(null);
-      Promise.all([getStats(period, format, rating), getViability(period, format, rating)])
+      const minDurationPromise = new Promise(resolve => setTimeout(resolve, 350));
+      Promise.all([
+        getStats(period, format, rating),
+        getViability(period, format, rating),
+        minDurationPromise
+      ])
         .then(([statsData, viabilityData]) => {
           if (isCancelled) return;
           

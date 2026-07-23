@@ -107,24 +107,22 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     toggleDetails(pokemon);
   };
 
-  const isStillInitializing = loading || months.length === 0 || availableFormats.length === 0 || stats.length === 0;
-
   React.useEffect(() => {
-    if (showSplash && !isStillInitializing && !error) {
+    if (showSplash) {
       const startFade = setTimeout(() => {
         setIsFadingOut(true);
-      }, 500);
+      }, 1000);
       const removeSplash = setTimeout(() => {
         setShowSplash(false);
         sessionStorage.setItem('hasVisited', 'true');
-      }, 1300);
+      }, 1500);
       
       return () => {
         clearTimeout(startFade);
         clearTimeout(removeSplash);
       };
     }
-  }, [isStillInitializing, error, showSplash]);
+  }, [showSplash]);
 
   const showToast = (msg) => {
     setToast(msg);

@@ -179,42 +179,59 @@ export async function getDir(path = '', isImmutable = false) {
 }
 
 export async function getMonths() {
-
-  const folders = await getDir('', false);
-  return folders.filter(f => /^\d{4}-\d{2}$/.test(f)).sort((a, b) => b.localeCompare(a));
+  const url = 'https://api.smogonstats.eu.cc/api/months';
+  if (memoryCache.has(url)) return memoryCache.get(url);
+  if (inflightRequests.has(url)) return inflightRequests.get(url);
+  
+  const fetchPromise = (async () => {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        memoryCache.set(url, json);
+        return json;
+      }
+    } catch (e) {
+      console.error('Error fetching months:', e);
+    }
+    return [];
+  })();
+  
+  inflightRequests.set(url, fetchPromise);
+  try {
+    const result = await fetchPromise;
+    return result;
+  } finally {
+    inflightRequests.delete(url);
+  }
 }
 
 export async function getFormats(month) {
-
-
-  const files = await getDir(`${month}/moveset/`, true);
-  const formatsMap = new Map();
+  const url = `https://api.smogonstats.eu.cc/api/formats?month=${month}`;
+  if (memoryCache.has(url)) return memoryCache.get(url);
+  if (inflightRequests.has(url)) return inflightRequests.get(url);
   
-  files.forEach(file => {
-    if (!file.endsWith('.txt')) return;
-    const nameWithoutExt = file.replace('.txt', '');
-    const lastDash = nameWithoutExt.lastIndexOf('-');
-    if (lastDash === -1) return;
-    
-    const format = nameWithoutExt.substring(0, lastDash);
-    const rating = nameWithoutExt.substring(lastDash + 1);
-    
-    if (!formatsMap.has(format)) {
-      formatsMap.set(format, []);
+  const fetchPromise = (async () => {
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        memoryCache.set(url, json);
+        return json;
+      }
+    } catch (e) {
+      console.error('Error fetching formats:', e);
     }
-    formatsMap.get(format).push(rating);
-  });
-  
-  const result = {};
-  Array.from(formatsMap.keys()).sort().forEach(format => {
+    return {};
+  })();
 
-
-    result[format] = formatsMap.get(format)
-      .sort((a, b) => Number(a) - Number(b))
-      .slice(-2);
-  });
-  
-  return result;
+  inflightRequests.set(url, fetchPromise);
+  try {
+    const result = await fetchPromise;
+    return result;
+  } finally {
+    inflightRequests.delete(url);
+  }
 }
 
 

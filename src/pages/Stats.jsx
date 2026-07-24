@@ -320,17 +320,17 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                               <h5 className="meta-overview-title">Metagame Overview</h5>
                               
                               <div className="stalliness-bar-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                                <span style={{ fontSize: '0.8rem', color: '#f43f5e', fontWeight: 'bold' }}>OFFENSE</span>
-                                <div style={{ flex: 1, height: '8px', background: 'linear-gradient(90deg, #f43f5e 0%, #a855f7 50%, #3b82f6 100%)', borderRadius: '4px', position: 'relative' }}>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>OFFENSE</span>
+                                <div style={{ flex: 1, height: '8px', background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent) 50%, var(--text-muted) 100%)', borderRadius: '4px', position: 'relative' }}>
                                   <div style={{
                                     position: 'absolute',
                                     top: '-4px',
                                     left: `${Math.max(0, Math.min(100, ((metagame.stalliness + 1) / 2) * 100))}%`,
-                                    width: '16px', height: '16px', backgroundColor: '#fff', borderRadius: '50%', boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+                                    width: '16px', height: '16px', backgroundColor: 'var(--panel-bg)', border: '2px solid var(--primary)', borderRadius: '50%',
                                     transform: 'translateX(-50%)'
                                   }}></div>
                                 </div>
-                                <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 'bold' }}>STALL</span>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>STALL</span>
                               </div>
 
                               <div className="playstyles-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>

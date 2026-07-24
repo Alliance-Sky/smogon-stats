@@ -74,7 +74,10 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     return params.get('tools') === 'true';
   });
   
-  const [showMeta, setShowMeta] = React.useState(false);
+  const [showMeta, setShowMeta] = React.useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('expand') === 'all';
+  });
 
   React.useEffect(() => {
     const url = new URL(window.location);
@@ -87,7 +90,10 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
   }, [showTools]);
   
   React.useEffect(() => {
-    setShowMeta(false);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('expand') !== 'all') {
+      setShowMeta(false);
+    }
   }, [period, format, rating]);
   
   const {
@@ -269,8 +275,20 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
               </div>
               {!showTools && (
                 <>
-                  <button className="control-btn" onClick={() => { setShowMeta(true); expandAll(); }}>Expand All</button>
-                  <button className="control-btn" onClick={() => { setShowMeta(false); collapseAll(); }}>Collapse All</button>
+                  <button className="control-btn" onClick={() => { 
+                    setShowMeta(true); 
+                    expandAll(); 
+                    const url = new URL(window.location);
+                    url.searchParams.set('expand', 'all');
+                    window.history.replaceState(null, '', url);
+                  }}>Expand All</button>
+                  <button className="control-btn" onClick={() => { 
+                    setShowMeta(false); 
+                    collapseAll(); 
+                    const url = new URL(window.location);
+                    url.searchParams.delete('expand');
+                    window.history.replaceState(null, '', url);
+                  }}>Collapse All</button>
                 </>
               )}
             </div>

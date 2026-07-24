@@ -81,6 +81,12 @@ export function useStats(period, format, rating, setFormat, setRating) {
           }));
           
           setStats(mergedStats);
+          
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('expand') === 'all') {
+            setExpanded(new Set(mergedStats.map(s => s.pokemon)));
+          }
+          
           setLoading(false);
           
 

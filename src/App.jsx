@@ -82,18 +82,25 @@ function App() {
       <header className="app-header">
         <div className="header-title-container">
           <h1>Smogon Stats</h1>
-          <p className="header-desc">
+          <p className="header-desc" style={{ marginBottom: '8px' }}>
             Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
           </p>
+          <nav style={{ display: 'flex', gap: '20px', marginTop: 'auto' }}>
+            <button 
+              onClick={() => setCurrentView('stats')} 
+              style={{ background: 'none', border: 'none', color: currentView === 'stats' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'stats' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 4px 0', transition: 'all 0.2s ease' }}
+            >
+              Stats
+            </button>
+            <button 
+              onClick={() => setCurrentView('guide')} 
+              style={{ background: 'none', border: 'none', color: currentView === 'guide' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'guide' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 4px 0', transition: 'all 0.2s ease' }}
+            >
+              Guide
+            </button>
+          </nav>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button 
-            className="theme-toggle" 
-            onClick={() => setCurrentView(currentView === 'stats' ? 'guide' : 'stats')} 
-            style={{ padding: '8px 16px', borderRadius: '8px', background: 'var(--panel-bg-glass)', color: 'var(--text-main)', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            {currentView === 'stats' ? 'Guide' : 'Back to Stats'}
-          </button>
           <button 
             className="theme-toggle" 
             onClick={toggleTheme} 

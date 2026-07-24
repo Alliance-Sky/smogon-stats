@@ -1,7 +1,7 @@
 :root {
   --zoom-desktop: 90%;
   --zoom-mobile: 80%;
-  --header-h: 90px;
+  --header-h: 120px;
 }
 
 :root, [data-theme="scarlet"] {

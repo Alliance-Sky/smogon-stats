@@ -66,6 +66,8 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     window.history.replaceState(null, '', url);
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
+  const [visibleCount, setVisibleCount] = React.useState(100);
+  const observerTarget = React.useRef(null);
   
   const [showMeta, setShowMeta] = React.useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -178,6 +180,27 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     });
   }, [stats, sortBy]);
 
+  React.useEffect(() => {
+    setVisibleCount(100);
+  }, [sortedStats]);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 100);
+        }
+      },
+      { rootMargin: '400px' }
+    );
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+    return () => {
+      if (observerTarget.current) observer.unobserve(observerTarget.current);
+    };
+  }, [observerTarget]);
+
   const scrollToPokemon = React.useCallback((pokemonName) => {
     React.startTransition(() => {
       setExpanded(prev => {
@@ -185,6 +208,10 @@ export default function Stats({ currentView, theme, period, format, rating, setP
         next.add(pokemonName);
         return next;
       });
+      const targetIndex = sortedStats.findIndex(r => r.pokemon === pokemonName);
+      if (targetIndex !== -1) {
+        setVisibleCount(prev => Math.max(prev, targetIndex + 20));
+      }
     });
     setTimeout(() => {
       const el = document.getElementById(`pokemon-row-${pokemonName}`);
@@ -194,7 +221,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
         showToast(`${pokemonName} is not in the current list.`);
       }
     }, 50);
-  }, [setExpanded]);
+  }, [setExpanded, sortedStats]);
 
   return (
     <>
@@ -348,7 +375,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
             </div>
             <div style={{ display: currentView !== 'chart' ? 'block' : 'none', width: '100%' }}>
               <div className="pokedex-list fade-in-data">
-                {sortedStats.map(row => (
+                {sortedStats.slice(0, visibleCount).map(row => (
                   <PokemonRow 
                     key={row.pokemon}
                     row={row}
@@ -363,6 +390,9 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                   />
                 ))}
               </div>
+              {visibleCount < sortedStats.length && (
+                <div ref={observerTarget} style={{ height: '20px', width: '100%' }}></div>
+              )}
             </div>
           </>
         )}

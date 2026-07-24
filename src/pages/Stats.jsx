@@ -67,7 +67,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
   const [visibleCount, setVisibleCount] = React.useState(100);
-  const observerTarget = React.useRef(null);
+  const [observerTarget, setObserverTarget] = React.useState(null);
   
   const [showMeta, setShowMeta] = React.useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -185,6 +185,8 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   }, [sortedStats]);
 
   React.useEffect(() => {
+    if (!observerTarget) return;
+
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
@@ -193,11 +195,11 @@ export default function Stats({ currentView, theme, period, format, rating, setP
       },
       { rootMargin: '400px' }
     );
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
-    }
+    
+    observer.observe(observerTarget);
+    
     return () => {
-      if (observerTarget.current) observer.unobserve(observerTarget.current);
+      observer.unobserve(observerTarget);
     };
   }, [observerTarget]);
 
@@ -391,7 +393,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                 ))}
               </div>
               {visibleCount < sortedStats.length && (
-                <div ref={observerTarget} style={{ height: '20px', width: '100%' }}></div>
+                <div ref={setObserverTarget} style={{ height: '20px', width: '100%' }}></div>
               )}
             </div>
           </>

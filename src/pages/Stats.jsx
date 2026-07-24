@@ -258,12 +258,14 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                 >
                   {showTools ? 'Back to Stats' : 'Format Comparison'}
                 </button>
-                <button 
-                  className="control-btn" 
-                  onClick={() => setShowMeta(!showMeta)} 
-                >
-                  Meta
-                </button>
+                {!showTools && (
+                  <button 
+                    className="control-btn" 
+                    onClick={() => setShowMeta(!showMeta)} 
+                  >
+                    Meta
+                  </button>
+                )}
               </div>
               {!showTools && (
                 <>
@@ -273,7 +275,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
               )}
             </div>
 
-            {showMeta && (
+            {!showTools && showMeta && (
               <div className="pokedex-tile tool-tile fade-in-data" style={{ marginBottom: '1rem', width: '100%' }}>
                 <div className="tool-tile-content" style={{ width: '100%' }}>
                   <div className="tool-tile-info" style={{ width: '100%' }}>

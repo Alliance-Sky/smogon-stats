@@ -236,8 +236,6 @@ select:focus {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  content-visibility: auto;
-  contain-intrinsic-size: 64px;
 }
 
 .tile-header {
@@ -331,10 +329,7 @@ select:focus {
   color: var(--primary);
 }
 
-.tool-tile {
-  content-visibility: visible !important;
-  contain: none !important;
-}
+
 
 
 .tile-details {

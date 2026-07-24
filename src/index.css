@@ -85,11 +85,6 @@ body {
   background: var(--panel-bg);
   border-bottom: 2px solid var(--primary);
   box-shadow: var(--shadow);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  transform: translateZ(0);
-  will-change: transform;
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 

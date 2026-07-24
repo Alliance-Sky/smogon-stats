@@ -95,30 +95,6 @@ function App() {
             >
               Guide
             </button>
-            <select 
-              value={theme}
-              onChange={(e) => {
-                const newTheme = e.target.value;
-                setTheme(newTheme);
-                document.cookie = `theme=${newTheme};path=/;max-age=31536000`;
-              }}
-              style={{ 
-                background: 'none', 
-                border: 'none', 
-                color: 'var(--text-muted)', 
-                cursor: 'pointer', 
-                fontWeight: 'bold', 
-                fontSize: '0.95rem', 
-                padding: '0 16px 4px 0', 
-                margin: 0,
-                outline: 'none',
-                boxShadow: 'none',
-                backgroundPosition: 'right 0px center'
-              }}
-            >
-              <option value="scarlet">Light Theme</option>
-              <option value="violet">Dark Theme</option>
-            </select>
           </nav>
         </div>
       </header>
@@ -141,9 +117,38 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
-        <p>Not affiliated with Smogon or Pokemon Showdown.</p>
-        <p>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+          <div>
+            <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
+            <p>Not affiliated with Smogon or Pokemon Showdown.</p>
+            <p>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Theme:</span>
+            <select 
+              value={theme}
+              onChange={(e) => {
+                const newTheme = e.target.value;
+                setTheme(newTheme);
+                document.cookie = `theme=${newTheme};path=/;max-age=31536000`;
+              }}
+              style={{
+                background: 'var(--panel-bg)',
+                border: '1px solid var(--panel-border)',
+                color: 'var(--text-color)',
+                borderRadius: '8px',
+                padding: '6px 30px 6px 12px',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                outline: 'none',
+                fontWeight: 'bold'
+              }}
+            >
+              <option value="scarlet">Light</option>
+              <option value="violet">Dark</option>
+            </select>
+          </div>
+        </div>
       </footer>
     </div>
   );

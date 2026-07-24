@@ -1,9 +1,9 @@
 import React from 'react';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useStats } from '../hooks/useStats';
 import PokeballIcon from '../components/PokeballIcon';
 import FormatTools from '../components/FormatTools';
 import '../index.css';
-
 
 function getSprite(name) {
   const hyphenatedBases = [
@@ -54,7 +54,6 @@ const formatPercent = (percentStr, showDecimals = false) => {
 };
 
 export default function Stats({ currentView, theme, period, format, rating, setPeriod, setFormat, setRating }) {
-  
   const [showSplash, setShowSplash] = React.useState(() => !sessionStorage.getItem('hasVisited'));
   const [isFadingOut, setIsFadingOut] = React.useState(false);
   const [sortBy, setSortBy] = React.useState(() => {
@@ -98,7 +97,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     collapseAll
   } = useStats(period, format, rating, setFormat, setRating);
 
-
   const onPeriodChange = (e) => setPeriod(e.target.value);
   const onFormatChange = (e) => {
     const newFormat = e.target.value;
@@ -113,7 +111,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   const availableRatings = formats[format] || [];
 
   const formatName = (formatStr) => {
-
     const match = formatStr.match(/^gen(10|[1-9])(.*)$/);
     if (match) {
       let name = match[2].toUpperCase();
@@ -152,19 +149,72 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     setTimeout(() => setToast(null), 3000);
   };
 
+  const sortedStats = React.useMemo(() => {
+    if (!stats) return [];
+    if (sortBy === 'usage') return stats;
+    if (sortBy === 'leads') {
+      return [...stats].sort((a, b) => parseFloat(b.leadPercent) - parseFloat(a.leadPercent));
+    }
+    return [...stats].sort((a, b) => {
+      const getV = (item, idx) => (item.viability && item.viability.length > idx ? item.viability[idx] : -1);
+      const diff1 = getV(b, 1) - getV(a, 1);
+      if (diff1 !== 0) return diff1;
+      const diff2 = getV(b, 2) - getV(a, 2);
+      if (diff2 !== 0) return diff2;
+      const diff3 = getV(b, 3) - getV(a, 3);
+      if (diff3 !== 0) return diff3;
+      return getV(b, 0) - getV(a, 0);
+    });
+  }, [stats, sortBy]);
+
+  const [columns, setColumns] = React.useState(() => (typeof window !== 'undefined' && window.innerWidth >= 768 ? 2 : 1));
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setColumns(window.innerWidth >= 768 ? 2 : 1);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const listRef = React.useRef(null);
+  const [scrollMargin, setScrollMargin] = React.useState(0);
+
+  React.useLayoutEffect(() => {
+    if (listRef.current) {
+      setScrollMargin(listRef.current.offsetTop);
+    }
+  }, [showMeta, stats, currentView]);
+
+  const rowCount = Math.ceil(sortedStats.length / columns);
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: rowCount,
+    estimateSize: React.useCallback((rowIndex) => {
+      const item1 = sortedStats[rowIndex * columns];
+      const item2 = sortedStats[rowIndex * columns + 1];
+      const exp1 = item1 && expanded.has(item1.pokemon);
+      const exp2 = item2 && expanded.has(item2.pokemon);
+      return (exp1 || exp2) ? 450 : 64;
+    }, [sortedStats, columns, expanded]),
+    overscan: 5,
+    scrollMargin,
+  });
+
   const scrollToPokemon = React.useCallback((pokemonName) => {
-    const el = document.getElementById(`pokemon-row-${pokemonName}`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const index = sortedStats.findIndex(s => s.pokemon === pokemonName);
+    if (index !== -1) {
+      const rowIndex = Math.floor(index / columns);
       setExpanded(prev => {
         const next = new Set(prev);
         next.add(pokemonName);
         return next;
       });
+      rowVirtualizer.scrollToIndex(rowIndex, { align: 'center', behavior: 'smooth' });
     } else {
       showToast(`${pokemonName} is not in the current list.`);
     }
-  }, [setExpanded]);
+  }, [sortedStats, columns, setExpanded, rowVirtualizer]);
 
   return (
     <>
@@ -266,8 +316,10 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                     window.history.replaceState(null, '', url);
                   }}>Expand All</button>
                   <button className="control-btn" onClick={() => { 
-                    setShowMeta(false); 
-                    collapseAll(); 
+                    React.startTransition(() => {
+                      setShowMeta(false); 
+                      collapseAll(); 
+                    });
                     const url = new URL(window.location);
                     url.searchParams.delete('expand');
                     window.history.replaceState(null, '', url);
@@ -332,38 +384,56 @@ export default function Stats({ currentView, theme, period, format, rating, setP
               <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
             </div>
             <div style={{ display: currentView !== 'chart' ? 'block' : 'none', width: '100%' }}>
-              <div className="pokedex-list fade-in-data">
-                {(() => {
-                  const sortedStats = sortBy === 'usage' ? stats : 
-                                      sortBy === 'leads' ? [...stats].sort((a, b) => parseFloat(b.leadPercent) - parseFloat(a.leadPercent)) : 
-                                      [...stats].sort((a, b) => {
-                    const getV = (item, idx) => item.viability && item.viability.length > idx ? item.viability[idx] : -1;
-                    
-                    const diff1 = getV(b, 1) - getV(a, 1);
-                    if (diff1 !== 0) return diff1;
-                    
-                    const diff2 = getV(b, 2) - getV(a, 2);
-                    if (diff2 !== 0) return diff2;
-                    
-                    const diff3 = getV(b, 3) - getV(a, 3);
-                    if (diff3 !== 0) return diff3;
-                    
-                    return getV(b, 0) - getV(a, 0);
-                  });
-                  return sortedStats.map(row => (
-                    <PokemonRow 
-                      key={row.rank}
-                      row={row}
-                      sortBy={sortBy}
-                    isExpanded={expanded.has(row.pokemon)}
-                    loadingDetails={loadingDetails}
-                    detailsError={detailsError}
-                    detailsData={details && details[row.pokemon]}
-                    onRowClick={onRowClick}
-                    setExpanded={setExpanded}
-                    onPokemonClick={scrollToPokemon}
-                  />
-                ))})()}
+              <div
+                ref={listRef}
+                className="pokedex-list fade-in-data"
+                style={{
+                  height: `${rowVirtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative',
+                  display: 'block',
+                }}
+              >
+                {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+                  const rowIndex = virtualItem.index;
+                  return (
+                    <div
+                      key={virtualItem.key || rowIndex}
+                      ref={rowVirtualizer.measureElement}
+                      data-index={rowIndex}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        display: 'grid',
+                        gridTemplateColumns: columns === 2 ? 'repeat(2, 1fr)' : '1fr',
+                        gap: '0.5rem',
+                        transform: `translateY(${virtualItem.start - rowVirtualizer.options.scrollMargin}px)`,
+                      }}
+                    >
+                      {Array.from({ length: columns }).map((_, colIdx) => {
+                        const itemIdx = rowIndex * columns + colIdx;
+                        const row = sortedStats[itemIdx];
+                        if (!row) return <div key={`empty-${colIdx}`} />;
+                        return (
+                          <PokemonRow 
+                            key={row.pokemon}
+                            row={row}
+                            sortBy={sortBy}
+                            isExpanded={expanded.has(row.pokemon)}
+                            loadingDetails={loadingDetails}
+                            detailsError={detailsError}
+                            detailsData={details && details[row.pokemon]}
+                            onRowClick={onRowClick}
+                            setExpanded={setExpanded}
+                            onPokemonClick={scrollToPokemon}
+                          />
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </>
@@ -439,11 +509,9 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
     </div>
   );
 }, (prevProps, nextProps) => {
-
   if (!prevProps.isExpanded && !nextProps.isExpanded) {
     return prevProps.row === nextProps.row && prevProps.sortBy === nextProps.sortBy;
   }
-
 
   return prevProps.isExpanded === nextProps.isExpanded &&
          prevProps.loadingDetails === nextProps.loadingDetails &&
@@ -455,7 +523,6 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
 
 function DetailsView({ data, onPokemonClick }) {
   if (!data) return null;
-
 
   const getTop = (arr, n = 5) => {
     if (!arr) return [];

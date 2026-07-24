@@ -150,14 +150,46 @@ export function useStats(period, format, rating, setFormat, setRating) {
   };
 
   const expandAll = () => {
-    if (stats) {
-      setExpanded(new Set(stats.map(s => s.pokemon)));
-      fetchDetailsIfNeeded();
-    }
+    if (!stats) return;
+    const allPokemon = stats.map(s => s.pokemon);
+    let index = 0;
+    const batchSize = 50;
+
+    const step = () => {
+      index += batchSize;
+      if (index >= allPokemon.length) {
+        setExpanded(new Set(allPokemon));
+        fetchDetailsIfNeeded();
+      } else {
+        setExpanded(new Set(allPokemon.slice(0, index)));
+        setTimeout(step, 10);
+      }
+    };
+
+    setTimeout(step, 10);
   };
 
   const collapseAll = () => {
-    setExpanded(new Set());
+    setExpanded(prev => {
+      const currentExpanded = Array.from(prev);
+      if (currentExpanded.length === 0) return prev;
+      
+      let index = currentExpanded.length;
+      const batchSize = 50;
+
+      const step = () => {
+        index -= batchSize;
+        if (index <= 0) {
+          setExpanded(new Set());
+        } else {
+          setExpanded(new Set(currentExpanded.slice(0, index)));
+          setTimeout(step, 10);
+        }
+      };
+
+      setTimeout(step, 10);
+      return prev;
+    });
   };
 
   return {

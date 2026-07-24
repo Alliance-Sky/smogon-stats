@@ -300,7 +300,8 @@ select:focus {
   border-radius: 8px;
 }
 
-.tile-usage.viability-mode::before {
+.tile-usage.viability-mode::before,
+.tile-usage.lead-mode::before {
   content: none;
 }
 

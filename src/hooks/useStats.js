@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { getMonths, getFormats, getStats, getDetails, getViability } from '../utils/api';
+import { getMonths, getFormats, getStats, getDetails, getViability, getLeads } from '../utils/api';
 
 export function useStats(period, format, rating, setFormat, setRating) {
 
@@ -61,13 +61,19 @@ export function useStats(period, format, rating, setFormat, setRating) {
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
       setLoading(true);
       setError(null);
-      Promise.all([getStats(period, format, rating), getViability(period, format, rating)])
-        .then(([statsData, viabilityData]) => {
+      Promise.all([getStats(period, format, rating), getViability(period, format, rating), getLeads(period, format, rating)])
+        .then(([statsData, viabilityData, leadsData]) => {
           if (isCancelled) return;
           
+          const leadsMap = {};
+          leadsData.forEach(lead => {
+            leadsMap[lead.pokemon] = lead.leadPercent;
+          });
+
           const mergedStats = statsData.map(stat => ({
             ...stat,
-            viability: viabilityData[stat.pokemon] || null
+            viability: viabilityData[stat.pokemon] || null,
+            leadPercent: leadsMap[stat.pokemon] || '0.000%'
           }));
           
           setStats(mergedStats);

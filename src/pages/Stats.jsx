@@ -211,6 +211,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
             <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option value="usage">Usage</option>
               <option value="viability">Viability Ceiling</option>
+              <option value="leads">Lead %</option>
             </select>
           </div>
         </div>
@@ -262,7 +263,9 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
             ) : (
               <div className="pokedex-list fade-in-data">
                 {(() => {
-                  const sortedStats = sortBy === 'usage' ? stats : [...stats].sort((a, b) => {
+                  const sortedStats = sortBy === 'usage' ? stats : 
+                                      sortBy === 'leads' ? [...stats].sort((a, b) => parseFloat(b.leadPercent) - parseFloat(a.leadPercent)) : 
+                                      [...stats].sort((a, b) => {
                     const getV = (item, idx) => item.viability && item.viability.length > idx ? item.viability[idx] : -1;
                     
                     const diff1 = getV(b, 1) - getV(a, 1);
@@ -323,6 +326,8 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
           <div className="tile-name">{row.pokemon}</div>
           {sortBy === 'viability' && row.viability ? (
             <div className="tile-usage viability-mode">Viability: [{row.viability.join(', ')}]</div>
+          ) : sortBy === 'leads' ? (
+            <div className="tile-usage lead-mode">Lead: {formatPercent(row.leadPercent, true)}</div>
           ) : (
             <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
           )}

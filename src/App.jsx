@@ -84,22 +84,22 @@ function App() {
           <p className="header-desc" style={{ marginBottom: '8px' }}>
             Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
           </p>
-          <nav style={{ display: 'flex', gap: '20px', marginTop: 'auto' }}>
+          <nav style={{ display: 'flex', gap: '20px', marginTop: 'auto', marginBottom: '-2px' }}>
             <button 
               onClick={() => setCurrentView('stats')} 
-              style={{ background: 'none', border: 'none', color: currentView === 'stats' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'stats' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 4px 0', transition: 'all 0.2s ease' }}
+              style={{ background: 'none', border: 'none', color: currentView === 'stats' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'stats' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 12px 0', transition: 'all 0.2s ease' }}
             >
               Stats
             </button>
             <button 
               onClick={() => setCurrentView('chart')} 
-              style={{ background: 'none', border: 'none', color: currentView === 'chart' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'chart' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 4px 0', transition: 'all 0.2s ease' }}
+              style={{ background: 'none', border: 'none', color: currentView === 'chart' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'chart' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 12px 0', transition: 'all 0.2s ease' }}
             >
               Format Chart
             </button>
             <button 
               onClick={() => setCurrentView('guide')} 
-              style={{ background: 'none', border: 'none', color: currentView === 'guide' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'guide' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 4px 0', transition: 'all 0.2s ease' }}
+              style={{ background: 'none', border: 'none', color: currentView === 'guide' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'guide' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 12px 0', transition: 'all 0.2s ease' }}
             >
               Guide
             </button>

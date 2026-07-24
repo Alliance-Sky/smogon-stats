@@ -97,7 +97,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   } = useStats(period, format, rating, setFormat, setRating);
 
   const handleCollapseAll = React.useCallback(() => {
-    setShowMeta(false);
     const url = new URL(window.location);
     url.searchParams.delete('expand');
     window.history.replaceState(null, '', url);

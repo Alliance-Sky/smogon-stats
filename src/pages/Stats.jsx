@@ -86,6 +86,10 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     window.history.replaceState(null, '', url);
   }, [showTools]);
   
+  React.useEffect(() => {
+    setShowMeta(false);
+  }, [period, format, rating]);
+  
   const {
     months,
     formats,

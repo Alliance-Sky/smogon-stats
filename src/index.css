@@ -835,3 +835,22 @@ select:focus {
   50% { opacity: 0.8; }
 }
 
+.virtual-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+  padding-right: 2px;
+}
+
+.virtual-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.virtual-scroll-container::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 4px;
+}
+

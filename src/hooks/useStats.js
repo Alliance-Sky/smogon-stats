@@ -65,6 +65,8 @@ export function useStats(period, format, rating, setFormat, setRating) {
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
       setLoading(true);
       setError(null);
+      const fetchStartTime = Date.now();
+
       Promise.all([getStats(period, format, rating), getViability(period, format, rating), getLeads(period, format, rating), getMetagame(period, format, rating)])
         .then(([statsData, viabilityData, leadsData, metagameData]) => {
           if (isCancelled) return;
@@ -89,7 +91,13 @@ export function useStats(period, format, rating, setFormat, setRating) {
             setExpanded(new Set(mergedStats.map(s => s.pokemon)));
           }
           
-          setLoading(false);
+          const elapsed = Date.now() - fetchStartTime;
+          const minSkeletonTime = 200; // Prevent skeleton flickering on instant cache hits
+          const delay = Math.max(0, minSkeletonTime - elapsed);
+
+          setTimeout(() => {
+            if (!isCancelled) setLoading(false);
+          }, delay);
           
 
           setLoadingDetails(true);

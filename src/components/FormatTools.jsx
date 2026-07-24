@@ -90,6 +90,7 @@ export default function FormatTools({ theme, period, months, formats, formatName
   };
   
   const chartOptions = {
+    indexAxis: 'y',
     maintainAspectRatio: false,
     color: textColor,
     plugins: {
@@ -113,12 +114,12 @@ export default function FormatTools({ theme, period, months, formats, formatName
     scales: {
       x: {
         ticks: { color: textColor, font: { family: 'Outfit' } },
-        grid: { display: false }
+        grid: { color: panelBorder },
+        beginAtZero: true
       },
       y: {
         ticks: { color: textColor, font: { family: 'Outfit' } },
-        grid: { color: panelBorder },
-        beginAtZero: true
+        grid: { display: false }
       }
     }
   };

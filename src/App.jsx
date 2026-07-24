@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Stats from './pages/Stats';
+import Guide from './pages/Guide';
 import PokeballIcon from './components/PokeballIcon';
 
 const getInitialTheme = () => {
@@ -13,6 +14,7 @@ const getInitialTheme = () => {
 
 function App() {
   const [theme, setTheme] = useState(getInitialTheme);
+  const [currentView, setCurrentView] = useState('stats');
   const [period, setPeriod] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('period') || '2026-06';
@@ -84,27 +86,40 @@ function App() {
             Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
           </p>
         </div>
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme} 
-          title={`Switch to Pokémon ${nextTheme.charAt(0).toUpperCase() + nextTheme.slice(1)} theme`}
-          aria-label="Toggle theme"
-          style={{ padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <PokeballIcon variant={nextTheme} size={32} />
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button 
+            className="theme-toggle" 
+            onClick={() => setCurrentView(currentView === 'stats' ? 'guide' : 'stats')} 
+            style={{ padding: '8px 16px', borderRadius: '8px', background: 'var(--panel-bg-glass)', color: 'var(--text-main)', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            {currentView === 'stats' ? 'Guide' : 'Back to Stats'}
+          </button>
+          <button 
+            className="theme-toggle" 
+            onClick={toggleTheme} 
+            title={`Switch to Pokémon ${nextTheme.charAt(0).toUpperCase() + nextTheme.slice(1)} theme`}
+            aria-label="Toggle theme"
+            style={{ padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <PokeballIcon variant={nextTheme} size={32} />
+          </button>
+        </div>
       </header>
     
       <main className="app-main">
-        <Stats 
-          theme={theme}
-          period={period}
-          setPeriod={setPeriod}
-          format={format}
-          setFormat={setFormat}
-          rating={rating}
-          setRating={setRating}
-        />
+        {currentView === 'stats' ? (
+          <Stats 
+            theme={theme}
+            period={period}
+            setPeriod={setPeriod}
+            format={format}
+            setFormat={setFormat}
+            rating={rating}
+            setRating={setRating}
+          />
+        ) : (
+          <Guide />
+        )}
       </main>
 
       <footer className="app-footer">

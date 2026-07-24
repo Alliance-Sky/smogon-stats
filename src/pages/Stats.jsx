@@ -257,15 +257,19 @@ export default function Stats({ currentView, theme, period, format, rating, setP
               {currentView !== 'chart' && (
                 <>
                   <button className="control-btn" onClick={() => { 
-                    setShowMeta(true); 
-                    expandAll(); 
+                    React.startTransition(() => {
+                      setShowMeta(true); 
+                      expandAll(); 
+                    });
                     const url = new URL(window.location);
                     url.searchParams.set('expand', 'all');
                     window.history.replaceState(null, '', url);
                   }}>Expand All</button>
                   <button className="control-btn" onClick={() => { 
-                    setShowMeta(false); 
-                    collapseAll(); 
+                    React.startTransition(() => {
+                      setShowMeta(false); 
+                      collapseAll(); 
+                    });
                     const url = new URL(window.location);
                     url.searchParams.delete('expand');
                     window.history.replaceState(null, '', url);

@@ -235,8 +235,6 @@ select:focus {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  content-visibility: auto;
-  contain-intrinsic-size: 50px;
 }
 
 .tile-header {

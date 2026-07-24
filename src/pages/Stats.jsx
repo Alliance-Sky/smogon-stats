@@ -409,7 +409,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                         display: 'grid',
                         gridTemplateColumns: columns === 2 ? 'repeat(2, 1fr)' : '1fr',
                         gap: '0.5rem',
-                        transform: `translateY(${virtualItem.start - rowVirtualizer.options.scrollMargin}px)`,
+                        transform: `translateY(${virtualItem.start}px)`,
                       }}
                     >
                       {Array.from({ length: columns }).map((_, colIdx) => {

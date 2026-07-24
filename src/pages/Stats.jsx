@@ -180,11 +180,28 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   const listRef = React.useRef(null);
   const [scrollMargin, setScrollMargin] = React.useState(0);
 
-  React.useLayoutEffect(() => {
+  const updateScrollMargin = React.useCallback(() => {
     if (listRef.current) {
-      setScrollMargin(listRef.current.offsetTop);
+      const rect = listRef.current.getBoundingClientRect();
+      const top = rect.top + window.scrollY;
+      setScrollMargin(top);
     }
-  }, [showMeta, stats, currentView]);
+  }, []);
+
+  React.useLayoutEffect(() => {
+    updateScrollMargin();
+    const raf = requestAnimationFrame(updateScrollMargin);
+    const timer = setTimeout(updateScrollMargin, 300);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    };
+  }, [showMeta, stats, currentView, showSplash, updateScrollMargin]);
+
+  React.useEffect(() => {
+    window.addEventListener('resize', updateScrollMargin);
+    return () => window.removeEventListener('resize', updateScrollMargin);
+  }, [updateScrollMargin]);
 
   const rowCount = Math.ceil(sortedStats.length / columns);
 
@@ -409,7 +426,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                         display: 'grid',
                         gridTemplateColumns: columns === 2 ? 'repeat(2, 1fr)' : '1fr',
                         gap: '0.5rem',
-                        transform: `translateY(${virtualItem.start}px)`,
+                        transform: `translateY(${virtualItem.start - rowVirtualizer.options.scrollMargin}px)`,
                       }}
                     >
                       {Array.from({ length: columns }).map((_, colIdx) => {

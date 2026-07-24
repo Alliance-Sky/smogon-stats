@@ -67,7 +67,21 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   const [toast, setToast] = React.useState(null);
   const [visibleCount, setVisibleCount] = React.useState(200);
   
-  const [showMeta, setShowMeta] = React.useState(false);
+  const [showMeta, setShowMeta] = React.useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('meta') === 'true';
+  });
+
+  React.useEffect(() => {
+    const url = new URL(window.location);
+    if (showMeta) {
+      url.searchParams.set('meta', 'true');
+    } else {
+      url.searchParams.delete('meta');
+    }
+    window.history.replaceState(null, '', url);
+  }, [showMeta]);
+
   const [showBackToTop, setShowBackToTop] = React.useState(false);
 
   React.useEffect(() => {
@@ -109,7 +123,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     const url = new URL(window.location);
     url.searchParams.delete('expand');
     window.history.replaceState(null, '', url);
-    setShowMeta(false);
     React.startTransition(() => {
       setExpanded(new Set());
     });

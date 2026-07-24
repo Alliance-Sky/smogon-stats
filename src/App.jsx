@@ -125,11 +125,11 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
           <div>
             <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
             <p>Not affiliated with Smogon or Pokemon Showdown.</p>
-            <p>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
+            <p style={{ marginBottom: 0 }}>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Theme:</span>

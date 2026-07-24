@@ -73,6 +73,8 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     const params = new URLSearchParams(window.location.search);
     return params.get('tools') === 'true';
   });
+  
+  const [showMeta, setShowMeta] = React.useState(false);
 
   React.useEffect(() => {
     const url = new URL(window.location);
@@ -83,10 +85,12 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     }
     window.history.replaceState(null, '', url);
   }, [showTools]);
+  
   const {
     months,
     formats,
     stats,
+    metagame,
     loading,
     error,
     details,
@@ -243,13 +247,22 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
         ) : (
           <>
             <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
-              <button 
-                className="control-btn" 
-                onClick={() => setShowTools(!showTools)} 
-                style={{ marginRight: 'auto', backgroundColor: showTools ? 'transparent' : 'var(--primary)', color: showTools ? 'var(--primary)' : 'white' }}
-              >
-                {showTools ? 'Back to Stats' : 'Format Comparison'}
-              </button>
+              <div style={{ display: 'flex', gap: '10px', marginRight: 'auto' }}>
+                <button 
+                  className="control-btn" 
+                  onClick={() => setShowTools(!showTools)} 
+                  style={{ backgroundColor: showTools ? 'transparent' : 'var(--primary)', color: showTools ? 'var(--primary)' : 'white' }}
+                >
+                  {showTools ? 'Back to Stats' : 'Format Comparison'}
+                </button>
+                <button 
+                  className="control-btn" 
+                  onClick={() => setShowMeta(!showMeta)} 
+                  style={{ backgroundColor: showMeta ? 'transparent' : 'var(--primary)', color: showMeta ? 'var(--primary)' : 'white' }}
+                >
+                  Meta
+                </button>
+              </div>
               {!showTools && (
                 <>
                   <button className="control-btn" onClick={expandAll}>Expand All</button>
@@ -257,6 +270,58 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                 </>
               )}
             </div>
+
+            {showMeta && (
+              <div className="pokedex-tile tool-tile fade-in-data" style={{ marginBottom: '1rem', width: '100%' }}>
+                <div className="tool-tile-content" style={{ width: '100%' }}>
+                  <div className="tool-tile-info" style={{ width: '100%' }}>
+                    {!metagame ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '4px' }} className="pulse-opacity">
+                        <div className="skeleton-block" style={{ width: '40%', height: '18px', borderRadius: '4px', marginBottom: '8px' }}></div>
+                        <div className="skeleton-block" style={{ width: '100%', height: '8px', borderRadius: '4px', marginBottom: '12px' }}></div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <div className="skeleton-block" style={{ width: '90px', height: '26px', borderRadius: '6px' }}></div>
+                          <div className="skeleton-block" style={{ width: '110px', height: '26px', borderRadius: '6px' }}></div>
+                          <div className="skeleton-block" style={{ width: '80px', height: '26px', borderRadius: '6px' }}></div>
+                        </div>
+                      </div>
+                    ) : Object.keys(metagame.playstyles).length === 0 ? (
+                      <div className="empty-state" style={{ padding: '1rem' }}>No metagame data available for this format.</div>
+                    ) : (
+                      <div className="metagame-analysis">
+                        <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Metagame Overview</h5>
+                        
+                        <div className="stalliness-bar-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                          <span style={{ fontSize: '0.8rem', color: '#f43f5e', fontWeight: 'bold' }}>OFFENSE</span>
+                          <div style={{ flex: 1, height: '8px', background: 'linear-gradient(90deg, #f43f5e 0%, #a855f7 50%, #3b82f6 100%)', borderRadius: '4px', position: 'relative' }}>
+                            <div style={{
+                              position: 'absolute',
+                              top: '-4px',
+                              left: `${Math.max(0, Math.min(100, ((metagame.stalliness + 1) / 3) * 100))}%`,
+                              width: '16px', height: '16px', backgroundColor: '#fff', borderRadius: '50%', boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+                              transform: 'translateX(-50%)'
+                            }}></div>
+                          </div>
+                          <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 'bold' }}>STALL</span>
+                        </div>
+
+                        <div className="playstyles-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {Object.entries(metagame.playstyles)
+                            .sort(([,a], [,b]) => b - a)
+                            .slice(0, 8)
+                            .map(([style, pct]) => (
+                              <span key={style} style={{ fontSize: '0.85rem', background: 'var(--badge-bg)', padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                                {style.charAt(0).toUpperCase() + style.slice(1)}: <strong>{pct.toFixed(1)}%</strong>
+                              </span>
+                            ))
+                          }
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
             
             {showTools ? (
               <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />

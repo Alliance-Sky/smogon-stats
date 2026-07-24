@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { getMonths, getFormats, getStats, getDetails, getViability, getLeads } from '../utils/api';
+import { getMonths, getFormats, getStats, getDetails, getViability, getLeads, getMetagame } from '../utils/api';
 
 export function useStats(period, format, rating, setFormat, setRating) {
 
@@ -9,6 +9,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
   
 
   const [stats, setStats] = useState(null);
+  const [metagame, setMetagame] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -57,13 +58,16 @@ export function useStats(period, format, rating, setFormat, setRating) {
     setDetails(null);
     setExpanded(new Set());
     setDetailsError(false);
+    setMetagame(null);
     
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
       setLoading(true);
       setError(null);
-      Promise.all([getStats(period, format, rating), getViability(period, format, rating), getLeads(period, format, rating)])
-        .then(([statsData, viabilityData, leadsData]) => {
+      Promise.all([getStats(period, format, rating), getViability(period, format, rating), getLeads(period, format, rating), getMetagame(period, format, rating)])
+        .then(([statsData, viabilityData, leadsData, metagameData]) => {
           if (isCancelled) return;
+          
+          setMetagame(metagameData);
           
           const leadsMap = {};
           leadsData.forEach(lead => {

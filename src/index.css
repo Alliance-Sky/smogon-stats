@@ -864,3 +864,28 @@ select:focus {
   transform: translateY(-5px);
   background: var(--accent);
 }
+
+.load-more-btn {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  padding: 0.8rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.load-more-btn:hover {
+  background: var(--primary);
+  color: var(--bg-color);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.load-more-btn:active {
+  transform: translateY(0);
+}

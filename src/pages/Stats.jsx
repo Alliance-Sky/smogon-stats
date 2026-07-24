@@ -410,7 +410,12 @@ export default function Stats({ currentView, theme, period, format, rating, setP
       {showBackToTop && (
         <button 
           className="back-to-top fade-in-data"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={() => {
+            window.scrollTo({ 
+              top: 0, 
+              behavior: window.scrollY > 5000 ? 'auto' : 'smooth' 
+            });
+          }}
           title="Back to top"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

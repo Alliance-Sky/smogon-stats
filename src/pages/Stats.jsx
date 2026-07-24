@@ -67,6 +67,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
   const [visibleCount, setVisibleCount] = React.useState(120);
+  const [observerTarget, setObserverTarget] = React.useState(null);
   
   const [showMeta, setShowMeta] = React.useState(false);
   const [showBackToTop, setShowBackToTop] = React.useState(false);
@@ -198,6 +199,25 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   React.useEffect(() => {
     setVisibleCount(120);
   }, [sortedStats]);
+
+  React.useEffect(() => {
+    if (!observerTarget) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 120);
+        }
+      },
+      { rootMargin: '400px' }
+    );
+    
+    observer.observe(observerTarget);
+    
+    return () => {
+      observer.unobserve(observerTarget);
+    };
+  }, [observerTarget]);
 
   const scrollToPokemon = React.useCallback((pokemonName) => {
     React.startTransition(() => {
@@ -389,14 +409,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                 ))}
               </div>
               {visibleCount < sortedStats.length && (
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', paddingBottom: '2rem' }}>
-                  <button 
-                    className="load-more-btn"
-                    onClick={() => setVisibleCount(prev => prev + 120)}
-                  >
-                    Load More Pokémon
-                  </button>
-                </div>
+                <div ref={setObserverTarget} style={{ height: '20px', width: '100%' }}></div>
               )}
             </div>
           </>

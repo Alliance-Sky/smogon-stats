@@ -73,8 +73,10 @@ export default function FormatTools({ theme, period, months, formats, formatName
   const panelBg = theme === 'violet' ? '#18181b' : '#ffffff';
   const panelBorder = theme === 'violet' ? '#27272a' : '#f1f5f9';
 
+  const truncate = (str, n) => (str.length > n) ? str.slice(0, n - 1) + '…' : str;
+
   const chartData = {
-    labels: comparedItems.map(item => `[${item.month}] ${formatName(item.format)} (${item.rating})`),
+    labels: comparedItems.map(item => `[${item.month}] ${truncate(formatName(item.format), 16)} (${item.rating})`),
     datasets: [
       {
         label: 'Total Battles',

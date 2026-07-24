@@ -330,9 +330,10 @@ export default function Stats({ currentView, theme, period, format, rating, setP
               </div>
             )}
             
-            {currentView === 'chart' ? (
+            <div style={{ display: currentView === 'chart' ? 'block' : 'none', width: '100%' }}>
               <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
-            ) : (
+            </div>
+            <div style={{ display: currentView !== 'chart' ? 'block' : 'none', width: '100%' }}>
               <div className="pokedex-list fade-in-data">
                 {(() => {
                   const sortedStats = sortBy === 'usage' ? stats : 
@@ -366,7 +367,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                   />
                 ))})()}
               </div>
-            )}
+            </div>
           </>
         )}
       </div>

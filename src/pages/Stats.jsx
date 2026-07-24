@@ -108,15 +108,32 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     });
   }, [collapseAll]);
 
-  const onPeriodChange = (e) => setPeriod(e.target.value);
+  const resetExpansion = () => {
+    const url = new URL(window.location);
+    url.searchParams.delete('expand');
+    window.history.replaceState(null, '', url);
+    setShowMeta(false);
+    React.startTransition(() => {
+      setExpanded(new Set());
+    });
+  };
+
+  const onPeriodChange = (e) => {
+    setPeriod(e.target.value);
+    resetExpansion();
+  };
   const onFormatChange = (e) => {
     const newFormat = e.target.value;
     const ratings = formats[newFormat] || [];
     const newRating = ratings.includes(rating) ? rating : (ratings[0] || '0');
     setFormat(newFormat);
     setRating(newRating);
+    resetExpansion();
   };
-  const onRatingChange = (e) => setRating(e.target.value);
+  const onRatingChange = (e) => {
+    setRating(e.target.value);
+    resetExpansion();
+  };
 
   const availableFormats = Object.keys(formats);
   const availableRatings = formats[format] || [];
@@ -266,7 +283,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
 
           <div className="control-group">
             <label>Sort By</label>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); resetExpansion(); }}>
               <option value="usage">Usage</option>
               <option value="viability">Viability Ceiling</option>
               <option value="leads">Lead %</option>

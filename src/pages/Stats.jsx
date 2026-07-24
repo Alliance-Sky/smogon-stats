@@ -72,8 +72,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     return params.get('expand') === 'all';
   });
   
-  const [isCollapsing, setIsCollapsing] = React.useState(false);
-
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('expand') !== 'all') {
@@ -99,17 +97,13 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   } = useStats(period, format, rating, setFormat, setRating);
 
   const handleCollapseAll = React.useCallback(() => {
-    setIsCollapsing(true);
     setShowMeta(false);
     const url = new URL(window.location);
     url.searchParams.delete('expand');
     window.history.replaceState(null, '', url);
 
-    requestAnimationFrame(() => {
-      React.startTransition(() => {
-        collapseAll();
-        setIsCollapsing(false);
-      });
+    React.startTransition(() => {
+      collapseAll();
     });
   }, [collapseAll]);
 
@@ -363,7 +357,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
               <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
             </div>
             <div style={{ display: currentView !== 'chart' ? 'block' : 'none', width: '100%' }}>
-              <div className={`pokedex-list fade-in-data ${isCollapsing ? 'is-collapsing' : ''}`}>
+              <div className="pokedex-list fade-in-data">
                 {sortedStats.map(row => (
                   <PokemonRow 
                     key={row.pokemon}

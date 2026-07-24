@@ -151,7 +151,27 @@ export function useStats(period, format, rating, setFormat, setRating) {
 
   const expandAll = () => {
     if (stats) {
-      setExpanded(new Set(stats.map(s => s.pokemon)));
+      const allPokemons = stats.map(s => s.pokemon);
+      let currentIndex = 0;
+      const chunkSize = 30;
+      
+      const processChunk = () => {
+        const chunk = allPokemons.slice(currentIndex, currentIndex + chunkSize);
+        if (chunk.length === 0) return;
+        
+        setExpanded(prev => {
+          const next = new Set(prev);
+          chunk.forEach(p => next.add(p));
+          return next;
+        });
+        
+        currentIndex += chunkSize;
+        if (currentIndex < allPokemons.length) {
+          setTimeout(processChunk, 16);
+        }
+      };
+      
+      processChunk();
       fetchDetailsIfNeeded();
     }
   };

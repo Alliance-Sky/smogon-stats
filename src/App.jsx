@@ -14,7 +14,10 @@ const getInitialTheme = () => {
 
 function App() {
   const [theme, setTheme] = useState(getInitialTheme);
-  const [currentView, setCurrentView] = useState('stats');
+  const [currentView, setCurrentView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') || 'stats';
+  });
   const [period, setPeriod] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('period') || '2026-06';
@@ -30,11 +33,16 @@ function App() {
 
   useEffect(() => {
     const url = new URL(window.location);
+    if (currentView === 'stats') {
+      url.searchParams.delete('view');
+    } else {
+      url.searchParams.set('view', currentView);
+    }
     url.searchParams.set('period', period);
     url.searchParams.set('format', format);
     url.searchParams.set('rating', rating);
     window.history.replaceState(null, '', url);
-  }, [period, format, rating]);
+  }, [currentView, period, format, rating]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');

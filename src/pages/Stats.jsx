@@ -74,7 +74,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
 
   React.useEffect(() => {
     const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 400);
+      setShowBackToTop(window.scrollY > window.innerHeight * 1.5);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);

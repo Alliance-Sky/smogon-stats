@@ -92,7 +92,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
           }
           
           const elapsed = Date.now() - fetchStartTime;
-          const minSkeletonTime = 200; // Prevent skeleton flickering on instant cache hits
+          const minSkeletonTime = 300; // 300ms sweet spot to ensure silky smooth transitions on cache hits
           const delay = Math.max(0, minSkeletonTime - elapsed);
 
           setTimeout(() => {

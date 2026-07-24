@@ -93,6 +93,12 @@ function App() {
               Stats
             </button>
             <button 
+              onClick={() => setCurrentView('chart')} 
+              style={{ background: 'none', border: 'none', color: currentView === 'chart' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'chart' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 4px 0', transition: 'all 0.2s ease' }}
+            >
+              Format Chart
+            </button>
+            <button 
               onClick={() => setCurrentView('guide')} 
               style={{ background: 'none', border: 'none', color: currentView === 'guide' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem', borderBottom: currentView === 'guide' ? '2px solid var(--primary)' : '2px solid transparent', padding: '0 0 4px 0', transition: 'all 0.2s ease' }}
             >
@@ -114,8 +120,11 @@ function App() {
       </header>
     
       <main className="app-main">
-        {currentView === 'stats' ? (
+        {currentView === 'guide' ? (
+          <Guide />
+        ) : (
           <Stats 
+            currentView={currentView}
             theme={theme}
             period={period}
             setPeriod={setPeriod}
@@ -124,8 +133,6 @@ function App() {
             rating={rating}
             setRating={setRating}
           />
-        ) : (
-          <Guide />
         )}
       </main>
 

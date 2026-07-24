@@ -53,7 +53,7 @@ const formatPercent = (percentStr, showDecimals = false) => {
   return `${Math.round(num)}%`;
 };
 
-export default function Stats({ theme, period, format, rating, setPeriod, setFormat, setRating }) {
+export default function Stats({ currentView, theme, period, format, rating, setPeriod, setFormat, setRating }) {
   
   const [showSplash, setShowSplash] = React.useState(() => !sessionStorage.getItem('hasVisited'));
   const [isFadingOut, setIsFadingOut] = React.useState(false);
@@ -69,25 +69,10 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
   
-  const [showTools, setShowTools] = React.useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('tools') === 'true';
-  });
-  
   const [showMeta, setShowMeta] = React.useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('expand') === 'all';
   });
-
-  React.useEffect(() => {
-    const url = new URL(window.location);
-    if (showTools) {
-      url.searchParams.set('tools', 'true');
-    } else {
-      url.searchParams.delete('tools');
-    }
-    window.history.replaceState(null, '', url);
-  }, [showTools]);
   
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -194,7 +179,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
         </div>
       )}
       <div className="stats-page">
-      {!showTools && (
+      {currentView !== 'chart' && (
         <div className="glass-panel controls-container">
           <div className="control-group">
             <label>Stats Period</label>
@@ -258,13 +243,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
           <>
             <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
               <div style={{ display: 'flex', gap: '10px', marginRight: 'auto' }}>
-                <button 
-                  className="control-btn" 
-                  onClick={() => setShowTools(!showTools)} 
-                >
-                  {showTools ? 'Back to Stats' : 'Format Comparison'}
-                </button>
-                {!showTools && (
+                {currentView !== 'chart' && (
                   <button 
                     className="control-btn" 
                     onClick={() => setShowMeta(!showMeta)} 
@@ -273,7 +252,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                   </button>
                 )}
               </div>
-              {!showTools && (
+              {currentView !== 'chart' && (
                 <>
                   <button className="control-btn" onClick={() => { 
                     setShowMeta(true); 
@@ -293,7 +272,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
               )}
             </div>
 
-            {!showTools && showMeta && (
+            {currentView !== 'chart' && showMeta && (
               <div className="pokedex-tile tool-tile fade-in-data" style={{ marginBottom: '1rem', width: '100%' }}>
                 <div className="tool-tile-content" style={{ width: '100%' }}>
                   <div className="tool-tile-info" style={{ width: '100%' }}>
@@ -345,7 +324,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
               </div>
             )}
             
-            {showTools ? (
+            {currentView === 'chart' ? (
               <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
             ) : (
               <div className="pokedex-list fade-in-data">

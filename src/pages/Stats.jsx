@@ -288,7 +288,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                 <>
                   <button className="control-btn" onClick={() => { 
                     React.startTransition(() => {
-                      setShowMeta(true); 
                       expandAll(); 
                     });
                     const url = new URL(window.location);

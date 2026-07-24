@@ -118,8 +118,8 @@ export default function FormatTools({ theme, period, months, formats, formatName
         borderWidth: 1,
         callbacks: {
           label: (context) => {
-            const val = context.parsed.y;
-            return ` Battles: ${val.toLocaleString()}`;
+            const val = context.parsed.x;
+            return ` Total Battles: ${val.toLocaleString()}`;
           }
         }
       }

@@ -54,8 +54,6 @@ const formatPercent = (percentStr, showDecimals = false) => {
 };
 
 export default function Stats({ currentView, theme, period, format, rating, setPeriod, setFormat, setRating }) {
-  const [showSplash, setShowSplash] = React.useState(() => !sessionStorage.getItem('hasVisited'));
-  const [isFadingOut, setIsFadingOut] = React.useState(false);
   const [sortBy, setSortBy] = React.useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('sortBy') || 'usage';
@@ -155,23 +153,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     });
   };
 
-  React.useEffect(() => {
-    if (showSplash) {
-      const startFade = setTimeout(() => {
-        setIsFadingOut(true);
-      }, 1000);
-      const removeSplash = setTimeout(() => {
-        setShowSplash(false);
-        sessionStorage.setItem('hasVisited', 'true');
-      }, 1500);
-      
-      return () => {
-        clearTimeout(startFade);
-        clearTimeout(removeSplash);
-      };
-    }
-  }, [showSplash]);
-
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
@@ -223,16 +204,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
 
   return (
     <>
-      {showSplash && (
-        <div className={`splash-screen ${isFadingOut ? 'fade-out' : ''}`}>
-          <div className="splash-content">
-            <PokeballIcon variant={theme || 'scarlet'} size={80} className="splash-logo" />
-            <div className="progress-bar-container splash-progress">
-              <div className="progress-bar-fill"></div>
-            </div>
-          </div>
-        </div>
-      )}
       <div className="stats-page">
       {currentView !== 'chart' && (
         <div className="glass-panel controls-container">

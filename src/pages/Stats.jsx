@@ -97,6 +97,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     formats,
     stats,
     metagame,
+    totalBattles,
     loading,
     error,
     details,
@@ -218,181 +219,175 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   return (
     <>
       <div className="stats-page">
-      {currentView !== 'chart' && (
-        <div className="glass-panel controls-container">
-          <div className="control-group">
-            <label>Stats Period</label>
-            <select value={period || ''} onChange={onPeriodChange} disabled={months.length === 0}>
-              {months.length === 0 && <option>Loading...</option>}
-              {months.map(m => <option key={m} value={m}>{m}</option>)}
-            </select>
-          </div>
-
-          <div className="control-group">
-            <label>Format</label>
-            <select value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>
-              {availableFormats.length === 0 && <option>Loading...</option>}
-              {availableFormats.map(f => <option key={f} value={f}>{formatName(f)}</option>)}
-            </select>
-          </div>
-
-          <div className="control-group">
-            <label>Rating Baseline</label>
-            <select value={rating || ''} onChange={onRatingChange} disabled={availableRatings.length === 0}>
-              {availableRatings.length === 0 && <option>Loading...</option>}
-              {availableRatings.map(r => <option key={r} value={r}>{r}</option>)}
-            </select>
-          </div>
-
-          <div className="control-group">
-            <label>Sort By</label>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="usage">Usage</option>
-              <option value="viability">Viability Ceiling</option>
-              <option value="leads">Lead %</option>
-            </select>
-          </div>
-        </div>
-      )}
-
-      <div className="glass-panel">
-        {loading || !stats ? (
-          <>
-            <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
-              <div style={{ marginRight: 'auto' }}>
-                <div className="skeleton-block" style={{ width: '80px', height: '34px', borderRadius: '12px' }}></div>
-              </div>
-              <div className="skeleton-block" style={{ width: '100px', height: '34px', borderRadius: '12px' }}></div>
-              <div className="skeleton-block" style={{ width: '110px', height: '34px', borderRadius: '12px' }}></div>
-            </div>
-            <div className="pokedex-list fade-in-data">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <SkeletonRow key={i} />
-              ))}
-            </div>
-          </>
-        ) : error ? (
-          <div className="error-message">
-            <h3>Error Loading Data</h3>
-            <p>{error}</p>
-          </div>
-        ) : stats.length === 0 ? (
-          <div className="empty-state">
-            <p>No data found for this selection.</p>
-          </div>
+        {currentView === 'chart' ? (
+          <React.Suspense fallback={<div className="empty-state" style={{ padding: '2rem' }}>Loading Chart...</div>}>
+            <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
+          </React.Suspense>
         ) : (
           <>
-            <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
-              <div style={{ display: 'flex', gap: '10px', marginRight: 'auto' }}>
-                {currentView !== 'chart' && (
-                  <button 
-                    className="control-btn" 
-                    onClick={() => setShowMeta(!showMeta)} 
-                  >
-                    Meta
-                  </button>
-                )}
+            <div className="glass-panel controls-container">
+              <div className="control-group">
+                <label>Stats Period</label>
+                <select value={period || ''} onChange={onPeriodChange} disabled={months.length === 0}>
+                  {months.length === 0 && <option>Loading...</option>}
+                  {months.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
               </div>
-              {currentView !== 'chart' && (
-                <>
-                  <button className="control-btn" onClick={() => { 
-                    React.startTransition(() => {
-                      expandAll(); 
-                    });
-                    const url = new URL(window.location);
-                    url.searchParams.set('expand', 'all');
-                    window.history.replaceState(null, '', url);
-                  }}>Expand All</button>
-                  <button className="control-btn" onClick={handleCollapseAll}>Collapse All</button>
-                </>
-              )}
+
+              <div className="control-group">
+                <label>Format</label>
+                <select value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>
+                  {availableFormats.length === 0 && <option>Loading...</option>}
+                  {availableFormats.map(f => <option key={f} value={f}>{formatName(f)}</option>)}
+                </select>
+              </div>
+
+              <div className="control-group">
+                <label>Rating Baseline</label>
+                <select value={rating || ''} onChange={onRatingChange} disabled={availableRatings.length === 0}>
+                  {availableRatings.length === 0 && <option>Loading...</option>}
+                  {availableRatings.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+
+              <div className="control-group">
+                <label>Sort By</label>
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                  <option value="usage">Usage</option>
+                  <option value="viability">Viability Ceiling</option>
+                  <option value="leads">Lead %</option>
+                </select>
+              </div>
             </div>
 
-            {currentView !== 'chart' && showMeta && (
-              <div className="pokedex-tile tool-tile fade-in-data" style={{ marginBottom: '1rem', width: '100%' }}>
-                <div className="tool-tile-content" style={{ width: '100%' }}>
-                  <div className="tool-tile-info" style={{ width: '100%' }}>
-                    {!metagame ? (
-                      <MetagameSkeleton />
-                    ) : Object.keys(metagame.playstyles).length === 0 ? (
-                      <div className="empty-state" style={{ padding: '1rem' }}>No metagame data available for this format.</div>
-                    ) : (
-                      <div className="metagame-analysis">
-                        <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Metagame Overview</h5>
-                        
-                        <div className="stalliness-bar-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                          <span style={{ fontSize: '0.8rem', color: '#f43f5e', fontWeight: 'bold' }}>OFFENSE</span>
-                          <div style={{ flex: 1, height: '8px', background: 'linear-gradient(90deg, #f43f5e 0%, #a855f7 50%, #3b82f6 100%)', borderRadius: '4px', position: 'relative' }}>
-                            <div style={{
-                              position: 'absolute',
-                              top: '-4px',
-                              left: `${Math.max(0, Math.min(100, ((metagame.stalliness + 1) / 2) * 100))}%`,
-                              width: '16px', height: '16px', backgroundColor: '#fff', borderRadius: '50%', boxShadow: '0 0 4px rgba(0,0,0,0.5)',
-                              transform: 'translateX(-50%)'
-                            }}></div>
-                          </div>
-                          <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 'bold' }}>STALL</span>
-                        </div>
+            <div className="glass-panel">
+              {loading || !stats ? (
+                <>
+                  <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
+                    <div style={{ marginRight: 'auto' }}>
+                      <div className="skeleton-block" style={{ width: '80px', height: '34px', borderRadius: '12px' }}></div>
+                    </div>
+                    <div className="skeleton-block" style={{ width: '100px', height: '34px', borderRadius: '12px' }}></div>
+                    <div className="skeleton-block" style={{ width: '110px', height: '34px', borderRadius: '12px' }}></div>
+                  </div>
+                  <div className="pokedex-list fade-in-data">
+                    {Array.from({ length: 20 }).map((_, i) => (
+                      <SkeletonRow key={i} />
+                    ))}
+                  </div>
+                </>
+              ) : error ? (
+                <div className="error-message">
+                  <h3>Error Loading Data</h3>
+                  <p>{error}</p>
+                </div>
+              ) : stats.length === 0 ? (
+                <div className="empty-state">
+                  <p>No data found for this selection.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', gap: '10px', marginRight: 'auto' }}>
+                      <button 
+                        className="control-btn" 
+                        onClick={() => setShowMeta(!showMeta)} 
+                      >
+                        Meta
+                      </button>
+                    </div>
+                    <button className="control-btn" onClick={() => { 
+                      React.startTransition(() => {
+                        expandAll(); 
+                      });
+                      const url = new URL(window.location);
+                      url.searchParams.set('expand', 'all');
+                      window.history.replaceState(null, '', url);
+                    }}>Expand All</button>
+                    <button className="control-btn" onClick={handleCollapseAll}>Collapse All</button>
+                  </div>
 
-                        <div className="playstyles-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                          {Object.entries(metagame.playstyles)
-                            .sort(([,a], [,b]) => b - a)
-                            .slice(0, 8)
-                            .map(([style, pct]) => (
-                              <span key={style} style={{ fontSize: '0.85rem', background: 'var(--badge-bg)', padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
-                                {style.charAt(0).toUpperCase() + style.slice(1)}: <strong>{pct.toFixed(1)}%</strong>
-                              </span>
-                            ))
-                          }
+                  {showMeta && (
+                    <div className="pokedex-tile tool-tile fade-in-data" style={{ marginBottom: '1rem', width: '100%' }}>
+                      <div className="tool-tile-content" style={{ width: '100%' }}>
+                        <div className="tool-tile-info" style={{ width: '100%' }}>
+                          {!metagame ? (
+                            <MetagameSkeleton />
+                          ) : Object.keys(metagame.playstyles).length === 0 ? (
+                            <div className="empty-state" style={{ padding: '1rem' }}>No metagame data available for this format.</div>
+                          ) : (
+                            <div className="metagame-analysis">
+                              <h5 className="meta-overview-title">Metagame Overview</h5>
+                              
+                              <div className="stalliness-bar-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                                <span style={{ fontSize: '0.8rem', color: '#f43f5e', fontWeight: 'bold' }}>OFFENSE</span>
+                                <div style={{ flex: 1, height: '8px', background: 'linear-gradient(90deg, #f43f5e 0%, #a855f7 50%, #3b82f6 100%)', borderRadius: '4px', position: 'relative' }}>
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '-4px',
+                                    left: `${Math.max(0, Math.min(100, ((metagame.stalliness + 1) / 2) * 100))}%`,
+                                    width: '16px', height: '16px', backgroundColor: '#fff', borderRadius: '50%', boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+                                    transform: 'translateX(-50%)'
+                                  }}></div>
+                                </div>
+                                <span style={{ fontSize: '0.8rem', color: '#3b82f6', fontWeight: 'bold' }}>STALL</span>
+                              </div>
+
+                              <div className="playstyles-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                {Object.entries(metagame.playstyles)
+                                  .sort(([,a], [,b]) => b - a)
+                                  .slice(0, 8)
+                                  .map(([style, pct]) => (
+                                    <span key={style} style={{ fontSize: '0.85rem', background: 'var(--badge-bg)', padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                                      {style.charAt(0).toUpperCase() + style.slice(1)}: <strong>{pct.toFixed(1)}%</strong>
+                                    </span>
+                                  ))
+                                }
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
+                  
+                  <div className="pokedex-list fade-in-data">
+                    {sortedStats.slice(0, visibleCount).map((row, index) => (
+                      <PokemonRow 
+                        key={row.pokemon}
+                        row={row}
+                        index={index}
+                        sortBy={sortBy}
+                        isExpanded={expanded.has(row.pokemon)}
+                        loadingDetails={loadingDetails}
+                        detailsError={detailsError}
+                        detailsData={details && details[row.pokemon]}
+                        onRowClick={onRowClick}
+                        setExpanded={setExpanded}
+                        onPokemonClick={scrollToPokemon}
+                      />
+                    ))}
                   </div>
-                </div>
-              </div>
-            )}
-            
-            <div style={{ display: currentView === 'chart' ? 'block' : 'none', width: '100%' }}>
-              <React.Suspense fallback={<div className="empty-state" style={{ padding: '2rem' }}>Loading Chart...</div>}>
-                <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
-              </React.Suspense>
-            </div>
-            <div style={{ display: currentView !== 'chart' ? 'block' : 'none', width: '100%' }}>
-              <div className="pokedex-list fade-in-data">
-                {sortedStats.slice(0, visibleCount).map(row => (
-                  <PokemonRow 
-                    key={row.pokemon}
-                    row={row}
-                    sortBy={sortBy}
-                    isExpanded={expanded.has(row.pokemon)}
-                    loadingDetails={loadingDetails}
-                    detailsError={detailsError}
-                    detailsData={details && details[row.pokemon]}
-                    onRowClick={onRowClick}
-                    setExpanded={setExpanded}
-                    onPokemonClick={scrollToPokemon}
-                  />
-                ))}
-              </div>
-              {visibleCount < sortedStats.length && (
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', paddingBottom: '2rem' }}>
-                  <button 
-                    className="load-more-btn"
-                    onClick={() => {
-                      React.startTransition(() => {
-                        setVisibleCount(prev => prev + 200);
-                      });
-                    }}
-                  >
-                    Load More Pokémon
-                  </button>
-                </div>
+                  {visibleCount < sortedStats.length && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', paddingBottom: '2rem' }}>
+                      <button 
+                        className="load-more-btn"
+                        onClick={() => {
+                          React.startTransition(() => {
+                            setVisibleCount(prev => prev + 200);
+                          });
+                        }}
+                      >
+                        Load More Pokémon
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </>
         )}
       </div>
-    </div>
       {showBackToTop && (
         <button 
           className="back-to-top fade-in-data"
@@ -418,15 +413,19 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   );
 }
 
-const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded, onPokemonClick }) => {
+const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded, onPokemonClick }) => {
   const spriteSlug = getSprite(row.pokemon);
   const spriteUrl = `https://play.pokemonshowdown.com/sprites/home-centered/${spriteSlug}.png`;
   const deferredExpanded = React.useDeferredValue(isExpanded);
+  const displayRank = sortBy === 'usage' ? row.rank : (index + 1);
+  const isTopRank = displayRank <= 3;
+  const isLeadSort = sortBy === 'leads' || sortBy === 'lead';
+  const isViabilitySort = sortBy === 'viability';
   
   return (
     <div id={`pokemon-row-${row.pokemon}`} className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
       <div className="tile-header" onClick={() => onRowClick(row.pokemon)}>
-        <div className="tile-rank">#{row.rank}</div>
+        <div className={`tile-rank ${isTopRank ? 'top-rank-gold' : ''}`}>#{displayRank}</div>
         <img 
           src={spriteUrl} 
           alt={row.pokemon} 
@@ -435,12 +434,21 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
         />
         <div className="tile-info">
           <div className="tile-name">{row.pokemon}</div>
-          {sortBy === 'viability' && row.viability ? (
-            <div className="tile-usage viability-mode">Viability: [{row.viability.join(', ')}]</div>
-          ) : sortBy === 'leads' ? (
-            <div className="tile-usage lead-mode">Lead: {formatPercent(row.leadPercent, true)}</div>
+          {isViabilitySort && row.viability ? (
+            <div className="tile-usage badge-pill">
+              <span className="badge-type">Viability</span>
+              <span className="badge-value gold-value">[{row.viability.join(', ')}]</span>
+            </div>
+          ) : isLeadSort ? (
+            <div className="tile-usage badge-pill">
+              <span className="badge-type">Lead</span>
+              <span className="badge-value gold-value">{formatPercent(row.leadPercent, true)}</span>
+            </div>
           ) : (
-            <div className="tile-usage">{formatPercent(row.usagePercent, true)}</div>
+            <div className="tile-usage badge-pill">
+              <span className="badge-type">Usage</span>
+              <span className="badge-value gold-value">{formatPercent(row.usagePercent, true)}</span>
+            </div>
           )}
         </div>
         <div className="expand-icon">

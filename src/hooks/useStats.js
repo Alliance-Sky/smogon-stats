@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-import { getMonths, getFormats, getStats, getDetails, getViability, getLeads, getMetagame } from '../utils/api';
+import { getMonths, getFormats, getStats, getDetails, getViability, getLeads, getMetagame, getTotalBattles } from '../utils/api';
 
 export function useStats(period, format, rating, setFormat, setRating) {
 
@@ -10,6 +10,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
 
   const [stats, setStats] = useState(null);
   const [metagame, setMetagame] = useState(null);
+  const [totalBattles, setTotalBattles] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -67,11 +68,12 @@ export function useStats(period, format, rating, setFormat, setRating) {
       setError(null);
       const fetchStartTime = Date.now();
 
-      Promise.all([getStats(period, format, rating), getViability(period, format, rating), getLeads(period, format, rating), getMetagame(period, format, rating)])
-        .then(([statsData, viabilityData, leadsData, metagameData]) => {
+      Promise.all([getStats(period, format, rating), getViability(period, format, rating), getLeads(period, format, rating), getMetagame(period, format, rating), getTotalBattles(period, format, rating)])
+        .then(([statsData, viabilityData, leadsData, metagameData, battlesCount]) => {
           if (isCancelled) return;
           
           setMetagame(metagameData);
+          setTotalBattles(battlesCount || 0);
           
           const leadsMap = {};
           leadsData.forEach(lead => {
@@ -201,6 +203,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
     formats,
     stats,
     metagame,
+    totalBattles,
     loading,
     error,
     details,

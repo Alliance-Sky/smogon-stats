@@ -13,27 +13,29 @@
   --accent: #f59e0b;
   --panel-bg: #ffffff;
   --panel-border: #f1f5f9;
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  --shadow: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
   --badge-bg: #ffe4e6;
   --badge-text: #e11d48;
   --details-bg: #fafaf9;
   --row-hover: #fff1f2;
+  --highlight-color: var(--primary);
 }
 
 [data-theme="violet"] {
-  --bg-color: #09090b;
-  --text-color: #f4f4f5;
-  --text-muted: #a1a1aa;
-  --primary: #a855f7;
-  --primary-hover: #c084fc;
-  --accent: #2dd4bf;
-  --panel-bg: #18181b;
-  --panel-border: #27272a;
-  --shadow: 0 12px 40px rgba(168, 85, 247, 0.12);
-  --badge-bg: rgba(168, 85, 247, 0.15);
-  --badge-text: #d8b4fe;
-  --details-bg: #09090b;
-  --row-hover: rgba(168, 85, 247, 0.08);
+  --bg-color: #0d1117;
+  --text-color: #f0f6fc;
+  --text-muted: #8b949e;
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --accent: #14b8a6;
+  --panel-bg: #161b22;
+  --panel-border: #30363d;
+  --shadow: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
+  --badge-bg: #163134;
+  --badge-text: #2dd4bf;
+  --details-bg: #0d1117;
+  --row-hover: #16242a;
+  --highlight-color: #f59e0b;
 }
 
 * {
@@ -141,7 +143,6 @@ body {
 
 .theme-toggle:hover {
   border-color: var(--primary);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 .app-main {
@@ -195,7 +196,7 @@ select {
   font-weight: 600;
   outline: none;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
@@ -208,7 +209,6 @@ select:hover {
 
 select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
 }
 
 
@@ -229,7 +229,6 @@ select:focus {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -249,7 +248,6 @@ select:focus {
 
 .pokedex-tile.expanded {
   border-color: var(--primary);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
 .pokedex-tile.expanded .tile-header {
@@ -269,7 +267,6 @@ select:focus {
   height: 32px;
   object-fit: contain;
   margin-right: 0.75rem;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .tile-info {
@@ -297,22 +294,6 @@ select:focus {
   gap: 0.5rem;
 }
 
-.tile-usage::before {
-  content: 'Usage';
-  text-transform: uppercase;
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
-  color: var(--text-muted);
-  background: var(--badge-bg);
-  padding: 0.1rem 0.4rem;
-  border-radius: 8px;
-}
-
-.tile-usage.viability-mode::before,
-.tile-usage.lead-mode::before {
-  content: none;
-}
-
 .expand-icon {
   font-size: 1.2rem;
   color: var(--text-muted);
@@ -336,7 +317,7 @@ select:focus {
   height: 462px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(128, 128, 128, 0.4) transparent;
+  scrollbar-color: #9ca3af transparent;
 }
 
 .tile-details::-webkit-scrollbar {
@@ -348,12 +329,12 @@ select:focus {
 }
 
 .tile-details::-webkit-scrollbar-thumb {
-  background-color: rgba(128, 128, 128, 0.4);
+  background-color: #9ca3af;
   border-radius: 10px;
 }
 
 .tile-details::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(128, 128, 128, 0.7);
+  background-color: #6b7280;
 }
 
 
@@ -368,21 +349,20 @@ select:focus {
   border: 1px solid var(--panel-border);
   border-radius: 6px;
   padding: 0.2rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .detail-section:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow);
   border-color: var(--primary);
 }
 
 .detail-section h4 {
-  color: var(--primary);
+  color: var(--highlight-color);
   margin-top: 0;
   margin-bottom: 0.15rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
   border-bottom: 1px solid var(--panel-border);
   padding-bottom: 0.15rem;
   text-transform: uppercase;
@@ -396,7 +376,7 @@ select:focus {
   display: inline-block;
   width: 8px;
   height: 8px;
-  background: var(--accent);
+  background: var(--highlight-color);
   border-radius: 50%;
   margin-right: 8px;
 }
@@ -471,7 +451,6 @@ select:focus {
   text-align: center;
   background: var(--panel-bg);
   border-top: 2px dashed var(--panel-border);
-  box-shadow: 0 -10px 25px rgba(0,0,0,0.02);
   transition: background-color 0.4s ease;
 }
 
@@ -572,7 +551,22 @@ select:focus {
 .control-btn:hover {
   background: var(--primary);
   color: white;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.add-btn {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--primary) !important;
+  font-weight: 800;
+  padding: 0.4rem 1.2rem;
+  border-radius: 12px;
+  height: 38px;
+  white-space: nowrap;
+}
+
+.add-btn:hover {
+  background: var(--primary-hover) !important;
+  transform: translateY(-2px);
 }
 
 .clickable-pokemon {
@@ -704,12 +698,11 @@ select:focus {
 
 .tool-tile {
   margin-bottom: 0.75rem;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s;
 }
 
 .tool-tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .tool-tile-content {
@@ -782,7 +775,7 @@ select:focus {
 }
 
 [data-theme="violet"] .remove-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: #281d21;
 }
 
 
@@ -849,12 +842,9 @@ select:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   cursor: pointer;
   z-index: 1000;
-  opacity: 0.5;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  opacity: 1;
   transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.3s ease;
 }
 
@@ -875,17 +865,140 @@ select:focus {
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .load-more-btn:hover {
   background: var(--primary);
   color: var(--bg-color);
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
 .load-more-btn:active {
   transform: translateY(0);
+}
+
+/* Header Brand Text Logo Styles */
+.brand-logo-container {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+  padding: 4px 0 6px 0;
+}
+
+.brand-text-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 2.2rem;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.scarlet-theme .brand-main {
+  color: #1e293b;
+}
+
+.scarlet-theme .brand-sub {
+  color: #f43f5e;
+}
+
+.violet-theme .brand-main {
+  color: #f4f4f5;
+}
+
+.violet-theme .brand-sub {
+  color: #10b981;
+}
+
+.brand-mascot-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+/* Special Warm Gold Highlight Accent for Top 3 Ranks & Key Badges */
+.top-rank-gold {
+  color: var(--highlight-color) !important;
+  font-weight: 900 !important;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.nav-btn.active {
+  color: var(--primary) !important;
+}
+
+.nav-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  background: var(--highlight-color);
+  border-radius: 50%;
+}
+
+.meta-overview-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--highlight-color) !important;
+  font-weight: 800;
+}
+
+/* Embedded Metric Pill Badges */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--badge-bg);
+  border: 1px solid var(--panel-border);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.badge-type {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border-right: 1px solid var(--panel-border);
+  padding-right: 5px;
+}
+
+.badge-value {
+  color: var(--badge-text);
+  font-weight: 800;
+}
+
+.gold-value {
+  color: var(--highlight-color) !important;
+  font-weight: 800;
 }
 

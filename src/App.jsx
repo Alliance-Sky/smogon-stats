@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Stats from './pages/Stats';
 import Guide from './pages/Guide';
 import PokeballIcon from './components/PokeballIcon';
+import HeaderLogo from './components/HeaderLogo';
 
 const getInitialTheme = () => {
   const match = document.cookie.match(/(^| )theme=([^;]+)/);
@@ -80,28 +81,31 @@ function App() {
     <div className="app-container">
       <header className="app-header">
         <div className="header-title-container">
-          <h1>Smogon Stats</h1>
+          <HeaderLogo theme={theme} />
           <p className="header-desc" style={{ marginBottom: '8px' }}>
             Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
           </p>
           <nav style={{ display: 'flex', gap: '15px', marginTop: '15px', alignItems: 'center' }}>
             <button 
               onClick={() => setCurrentView('stats')} 
-              style={{ background: 'none', border: 'none', color: currentView === 'stats' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', padding: 0, transition: 'color 0.2s ease' }}
+              className={`nav-btn ${currentView === 'stats' ? 'active' : ''}`}
+              style={{ color: currentView === 'stats' ? 'var(--primary)' : 'var(--text-muted)' }}
             >
               Stats
             </button>
             <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
             <button 
               onClick={() => setCurrentView('chart')} 
-              style={{ background: 'none', border: 'none', color: currentView === 'chart' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', padding: 0, transition: 'color 0.2s ease' }}
+              className={`nav-btn ${currentView === 'chart' ? 'active' : ''}`}
+              style={{ color: currentView === 'chart' ? 'var(--primary)' : 'var(--text-muted)' }}
             >
               Format Chart
             </button>
             <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
             <button 
               onClick={() => setCurrentView('guide')} 
-              style={{ background: 'none', border: 'none', color: currentView === 'guide' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', padding: 0, transition: 'color 0.2s ease' }}
+              className={`nav-btn ${currentView === 'guide' ? 'active' : ''}`}
+              style={{ color: currentView === 'guide' ? 'var(--primary)' : 'var(--text-muted)' }}
             >
               Guide
             </button>

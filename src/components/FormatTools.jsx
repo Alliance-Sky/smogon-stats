@@ -159,25 +159,39 @@ export default function FormatTools({ theme, period, months, formats, formatName
 
   return (
     <div className="format-tools fade-in-data">
-      <div className="glass-panel controls-container" style={{ marginBottom: 0 }}>
+      <div className="glass-panel controls-container" style={{ marginTop: 0, borderTop: 'none', marginBottom: '1.25rem' }}>
         <div className="control-group">
-          <label>Add Format to Compare</label>
-          <div className="tools-inputs">
-            <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} style={{ flex: 1 }}>
-              {months.map(m => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-            <select value={selectedFormat} onChange={onFormatChange} style={{ flex: 2 }} disabled={fetchingFormats}>
-              {fetchingFormats ? <option>Loading...</option> : Object.keys(localFormats).map(f => (
-                <option key={f} value={f}>{formatName(f)}</option>
-              ))}
-            </select>
+          <label>Compare Period</label>
+          <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
+            {months.map(m => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        </div>
 
-            <button className="control-btn add-btn" onClick={handleAdd} disabled={loading || fetchingFormats}>
-              {loading ? 'Adding...' : 'Add'}
-            </button>
-          </div>
+        <div className="control-group">
+          <label>Compare Format</label>
+          <select value={selectedFormat} onChange={onFormatChange} disabled={fetchingFormats}>
+            {fetchingFormats ? <option>Loading...</option> : Object.keys(localFormats).map(f => (
+              <option key={f} value={f}>{formatName(f)}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="control-group">
+          <label>Rating Baseline</label>
+          <select value={selectedRating} onChange={e => setSelectedRating(e.target.value)} disabled={fetchingFormats || !selectedFormat}>
+            {fetchingFormats ? <option>Loading...</option> : (localFormats[selectedFormat] || []).map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="control-group">
+          <label style={{ visibility: 'hidden' }}>Action</label>
+          <button className="control-btn add-btn" onClick={handleAdd} disabled={loading || fetchingFormats}>
+            {loading ? 'Adding...' : '+ Add Format'}
+          </button>
         </div>
       </div>
 

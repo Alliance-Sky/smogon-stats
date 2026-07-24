@@ -857,11 +857,15 @@ select:focus {
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   cursor: pointer;
   z-index: 1000;
+  opacity: 0.5;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.3s ease;
 }
 
 .back-to-top:hover {
   transform: translateY(-5px);
   background: var(--accent);
+  opacity: 1;
 }
 

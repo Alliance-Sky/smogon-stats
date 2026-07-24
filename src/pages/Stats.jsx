@@ -319,7 +319,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                             <div style={{
                               position: 'absolute',
                               top: '-4px',
-                              left: `${Math.max(0, Math.min(100, ((metagame.stalliness + 1) / 3) * 100))}%`,
+                              left: `${Math.max(0, Math.min(100, ((metagame.stalliness + 1) / 2) * 100))}%`,
                               width: '16px', height: '16px', backgroundColor: '#fff', borderRadius: '50%', boxShadow: '0 0 4px rgba(0,0,0,0.5)',
                               transform: 'translateX(-50%)'
                             }}></div>

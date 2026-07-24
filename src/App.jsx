@@ -131,30 +131,45 @@ function App() {
             <p>Not affiliated with Smogon or Pokemon Showdown.</p>
             <p>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Theme:</span>
-            <select 
-              value={theme}
-              onChange={(e) => {
-                const newTheme = e.target.value;
-                setTheme(newTheme);
-                document.cookie = `theme=${newTheme};path=/;max-age=31536000`;
+            <button 
+              onClick={() => {
+                setTheme('scarlet');
+                document.cookie = `theme=scarlet;path=/;max-age=31536000`;
               }}
               style={{
-                background: 'var(--panel-bg)',
-                border: '1px solid var(--panel-border)',
-                color: 'var(--text-color)',
-                borderRadius: '8px',
-                padding: '6px 30px 6px 12px',
-                fontSize: '0.9rem',
+                background: 'none',
+                border: 'none',
+                color: theme === 'scarlet' ? 'var(--primary)' : 'var(--text-muted)',
                 cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+                padding: '0',
                 outline: 'none',
-                fontWeight: 'bold'
               }}
             >
-              <option value="scarlet">Light</option>
-              <option value="violet">Dark</option>
-            </select>
+              Light
+            </button>
+            <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
+            <button 
+              onClick={() => {
+                setTheme('violet');
+                document.cookie = `theme=violet;path=/;max-age=31536000`;
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: theme === 'violet' ? 'var(--primary)' : 'var(--text-muted)',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+                padding: '0',
+                outline: 'none',
+              }}
+            >
+              Dark
+            </button>
           </div>
         </div>
       </footer>

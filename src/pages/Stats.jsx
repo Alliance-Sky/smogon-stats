@@ -234,7 +234,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                 onClick={() => setShowTools(!showTools)} 
                 style={{ marginRight: 'auto', backgroundColor: showTools ? 'transparent' : 'var(--primary)', color: showTools ? 'var(--primary)' : 'white' }}
               >
-                {showTools ? 'Back to Stats' : 'Format Comparison Tools'}
+                {showTools ? 'Back to Stats' : 'Format Comparison'}
               </button>
               {!showTools && (
                 <>

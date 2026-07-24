@@ -251,14 +251,12 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
                 <button 
                   className="control-btn" 
                   onClick={() => setShowTools(!showTools)} 
-                  style={{ backgroundColor: showTools ? 'transparent' : 'var(--primary)', color: showTools ? 'var(--primary)' : 'white' }}
                 >
                   {showTools ? 'Back to Stats' : 'Format Comparison'}
                 </button>
                 <button 
                   className="control-btn" 
                   onClick={() => setShowMeta(!showMeta)} 
-                  style={{ backgroundColor: showMeta ? 'transparent' : 'var(--primary)', color: showMeta ? 'var(--primary)' : 'white' }}
                 >
                   Meta
                 </button>

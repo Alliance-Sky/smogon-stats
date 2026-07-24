@@ -72,6 +72,8 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     return params.get('expand') === 'all';
   });
   
+  const [isCollapsing, setIsCollapsing] = React.useState(false);
+
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('expand') !== 'all') {
@@ -95,6 +97,21 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     expandAll,
     collapseAll
   } = useStats(period, format, rating, setFormat, setRating);
+
+  const handleCollapseAll = React.useCallback(() => {
+    setIsCollapsing(true);
+    setShowMeta(false);
+    const url = new URL(window.location);
+    url.searchParams.delete('expand');
+    window.history.replaceState(null, '', url);
+
+    requestAnimationFrame(() => {
+      React.startTransition(() => {
+        collapseAll();
+        setIsCollapsing(false);
+      });
+    });
+  }, [collapseAll]);
 
   const onPeriodChange = (e) => setPeriod(e.target.value);
   const onFormatChange = (e) => {
@@ -285,15 +302,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                     url.searchParams.set('expand', 'all');
                     window.history.replaceState(null, '', url);
                   }}>Expand All</button>
-                  <button className="control-btn" onClick={() => { 
-                    React.startTransition(() => {
-                      setShowMeta(false); 
-                      collapseAll(); 
-                    });
-                    const url = new URL(window.location);
-                    url.searchParams.delete('expand');
-                    window.history.replaceState(null, '', url);
-                  }}>Collapse All</button>
+                  <button className="control-btn" onClick={handleCollapseAll}>Collapse All</button>
                 </>
               )}
             </div>
@@ -354,7 +363,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
               <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
             </div>
             <div style={{ display: currentView !== 'chart' ? 'block' : 'none', width: '100%' }}>
-              <div className="pokedex-list fade-in-data">
+              <div className={`pokedex-list fade-in-data ${isCollapsing ? 'is-collapsing' : ''}`}>
                 {sortedStats.map(row => (
                   <PokemonRow 
                     key={row.pokemon}

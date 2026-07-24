@@ -573,3 +573,81 @@ export async function getLeads(month, format, rating) {
     inflightRequests.delete(url);
   }
 }
+
+export async function getMetagame(month, format, rating) {
+  const url = `https://api.smogonstats.eu.cc/api/metagame?month=${month}&format=${format}&rating=${rating}`;
+  
+  if (memoryCache.has(url)) {
+    return memoryCache.get(url);
+  }
+
+  if (inflightRequests.has(url)) {
+    return inflightRequests.get(url);
+  }
+
+  const fetchPromise = (async () => {
+    if ('caches' in window) {
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        const cachedResponse = await cache.match(url);
+        if (cachedResponse) {
+          let jsonText;
+          if (cachedResponse.headers.get('Content-Type') === 'application/gzip') {
+            const decompressedStream = cachedResponse.body.pipeThrough(new DecompressionStream('gzip'));
+            jsonText = await new Response(decompressedStream).text();
+          } else {
+            jsonText = await cachedResponse.text();
+          }
+          const json = JSON.parse(jsonText);
+          memoryCache.set(url, json);
+          return json;
+        }
+      } catch (e) {
+        console.warn('Cache API error:', e);
+      }
+    }
+    
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        
+        if ('caches' in window) {
+          try {
+            const cache = await caches.open(CACHE_NAME);
+            const jsonString = JSON.stringify(json);
+            
+            try {
+              const compressedStream = new Blob([jsonString]).stream().pipeThrough(new CompressionStream('gzip'));
+              const cacheResponse = new Response(compressedStream, {
+                headers: { 'Content-Type': 'application/gzip' }
+              });
+              await cache.put(url, cacheResponse);
+            } catch (e) {
+              const uncompressedResponse = new Response(jsonString, {
+                headers: { 'Content-Type': 'application/json' }
+              });
+              await cache.put(url, uncompressedResponse);
+            }
+          } catch (e) {
+            console.warn('Cache API put error:', e);
+          }
+        }
+        
+        memoryCache.set(url, json);
+        return json;
+      }
+    } catch (e) {
+      console.error('Error fetching metagame:', e);
+    }
+    return { stalliness: 0, playstyles: {} };
+  })();
+
+  inflightRequests.set(url, fetchPromise);
+  try {
+    const result = await fetchPromise;
+    return result;
+  } finally {
+    inflightRequests.delete(url);
+  }
+}

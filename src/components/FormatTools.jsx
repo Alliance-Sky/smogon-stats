@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { getTotalBattles, getFormats } from '../utils/api';
+import { getTotalBattles, getFormats, getMetagame } from '../utils/api';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -65,13 +65,16 @@ export default function FormatTools({ theme, period, months, formats, formatName
     if (!selectedFormat || !selectedRating) return;
     
     setLoading(true);
-    const battles = await getTotalBattles(selectedMonth, selectedFormat, selectedRating);
+    const [battles, metagame] = await Promise.all([
+      getTotalBattles(selectedMonth, selectedFormat, selectedRating),
+      getMetagame(selectedMonth, selectedFormat, selectedRating)
+    ]);
     
     setComparedItems(prev => {
       if (prev.find(i => i.month === selectedMonth && i.format === selectedFormat && i.rating === selectedRating)) {
         return prev;
       }
-      return [...prev, { month: selectedMonth, format: selectedFormat, rating: selectedRating, battles }];
+      return [...prev, { month: selectedMonth, format: selectedFormat, rating: selectedRating, battles, metagame }];
     });
     setLoading(false);
   };
@@ -207,6 +210,37 @@ export default function FormatTools({ theme, period, months, formats, formatName
                   <div className="tool-wait-time">
                     Est. Wait Time: <strong>{formatWaitTime(item.battles)}</strong>
                   </div>
+                  {item.metagame && item.metagame.playstyles && Object.keys(item.metagame.playstyles).length > 0 && (
+                    <div className="metagame-analysis" style={{ marginTop: '1rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border)' }}>
+                      <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Metagame Overview</h5>
+                      
+                      <div className="stalliness-bar-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '0.7rem', color: '#f43f5e', fontWeight: 'bold' }}>OFFENSE</span>
+                        <div style={{ flex: 1, height: '6px', background: 'linear-gradient(90deg, #f43f5e 0%, #a855f7 50%, #3b82f6 100%)', borderRadius: '3px', position: 'relative' }}>
+                          <div style={{
+                            position: 'absolute',
+                            top: '-3px',
+                            left: `${Math.max(0, Math.min(100, ((item.metagame.stalliness + 1) / 3) * 100))}%`,
+                            width: '12px', height: '12px', backgroundColor: '#fff', borderRadius: '50%', boxShadow: '0 0 4px rgba(0,0,0,0.5)',
+                            transform: 'translateX(-50%)'
+                          }}></div>
+                        </div>
+                        <span style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 'bold' }}>STALL</span>
+                      </div>
+
+                      <div className="playstyles-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {Object.entries(item.metagame.playstyles)
+                          .sort(([,a], [,b]) => b - a)
+                          .slice(0, 5)
+                          .map(([style, pct]) => (
+                            <span key={style} style={{ fontSize: '0.7rem', background: 'var(--badge-bg)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)' }}>
+                              {style.charAt(0).toUpperCase() + style.slice(1)}: {pct.toFixed(1)}%
+                            </span>
+                          ))
+                        }
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <button className="remove-btn" onClick={() => handleRemove(idx)} aria-label="Remove">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

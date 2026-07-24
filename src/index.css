@@ -634,3 +634,142 @@ select:focus {
   pointer-events: none;
   opacity: 0.8;
 }
+
+/* Format Tools Styles */
+.format-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.tools-content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 850px) {
+  .tools-content-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.chart-container, .list-container {
+  background: var(--panel-bg);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--panel-border);
+}
+
+.tools-inputs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.add-btn {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.add-btn:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: white;
+}
+
+.tools-header {
+  font-size: 1.1rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--panel-border);
+  padding-bottom: 0.5rem;
+}
+
+.tool-tile {
+  margin-bottom: 0.75rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tool-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.tool-tile-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+}
+
+.tool-format-name {
+  color: var(--primary);
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tool-rating-badge {
+  font-size: 0.75rem;
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+.tool-stats {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.tool-stats strong {
+  color: var(--text-color);
+}
+
+.dot-sep {
+  color: var(--panel-border);
+}
+
+.tool-wait-time {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+.tool-wait-time strong {
+  color: var(--accent);
+}
+
+.remove-btn {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: #ef4444;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.remove-btn:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+  transform: scale(1.1);
+}
+
+[data-theme="violet"] .remove-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}

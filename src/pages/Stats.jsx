@@ -1,6 +1,7 @@
 import React from 'react';
 import { useStats } from '../hooks/useStats';
 import PokeballIcon from '../components/PokeballIcon';
+import FormatTools from '../components/FormatTools';
 import '../index.css';
 
 
@@ -67,6 +68,7 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     window.history.replaceState(null, '', url);
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
+  const [showTools, setShowTools] = React.useState(false);
 
   const {
     months,
@@ -165,44 +167,47 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
         </div>
       )}
       <div className="stats-page">
-      <div className="glass-panel controls-container">
-        <div className="control-group">
-          <label>Stats Period</label>
-          <select value={period || ''} onChange={onPeriodChange} disabled={months.length === 0}>
-            {months.length === 0 && <option>Loading...</option>}
-            {months.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </div>
+      {!showTools && (
+        <div className="glass-panel controls-container">
+          <div className="control-group">
+            <label>Stats Period</label>
+            <select value={period || ''} onChange={onPeriodChange} disabled={months.length === 0}>
+              {months.length === 0 && <option>Loading...</option>}
+              {months.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
 
-        <div className="control-group">
-          <label>Format</label>
-          <select value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>
-            {availableFormats.length === 0 && <option>Loading...</option>}
-            {availableFormats.map(f => <option key={f} value={f}>{formatName(f)}</option>)}
-          </select>
-        </div>
+          <div className="control-group">
+            <label>Format</label>
+            <select value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>
+              {availableFormats.length === 0 && <option>Loading...</option>}
+              {availableFormats.map(f => <option key={f} value={f}>{formatName(f)}</option>)}
+            </select>
+          </div>
 
-        <div className="control-group">
-          <label>Rating Baseline</label>
-          <select value={rating || ''} onChange={onRatingChange} disabled={availableRatings.length === 0}>
-            {availableRatings.length === 0 && <option>Loading...</option>}
-            {availableRatings.map(r => <option key={r} value={r}>{r}</option>)}
-          </select>
-        </div>
+          <div className="control-group">
+            <label>Rating Baseline</label>
+            <select value={rating || ''} onChange={onRatingChange} disabled={availableRatings.length === 0}>
+              {availableRatings.length === 0 && <option>Loading...</option>}
+              {availableRatings.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
 
-        <div className="control-group">
-          <label>Sort By</label>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            <option value="usage">Usage</option>
-            <option value="viability">Viability Ceiling</option>
-          </select>
+          <div className="control-group">
+            <label>Sort By</label>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="usage">Usage</option>
+              <option value="viability">Viability Ceiling</option>
+            </select>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="glass-panel">
         {loading || !stats ? (
           <>
             <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
+              <div className="skeleton-block" style={{ width: '210px', height: '34px', borderRadius: '12px', marginRight: 'auto' }}></div>
               <div className="skeleton-block" style={{ width: '100px', height: '34px', borderRadius: '12px' }}></div>
               <div className="skeleton-block" style={{ width: '110px', height: '34px', borderRadius: '12px' }}></div>
             </div>
@@ -224,40 +229,56 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
         ) : (
           <>
             <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
-              <button className="control-btn" onClick={expandAll}>Expand All</button>
-              <button className="control-btn" onClick={collapseAll}>Collapse All</button>
+              <button 
+                className="control-btn" 
+                onClick={() => setShowTools(!showTools)} 
+                style={{ marginRight: 'auto', backgroundColor: showTools ? 'transparent' : 'var(--primary)', color: showTools ? 'var(--primary)' : 'white' }}
+              >
+                {showTools ? 'Back to Stats' : 'Format Comparison Tools'}
+              </button>
+              {!showTools && (
+                <>
+                  <button className="control-btn" onClick={expandAll}>Expand All</button>
+                  <button className="control-btn" onClick={collapseAll}>Collapse All</button>
+                </>
+              )}
             </div>
-            <div className="pokedex-list fade-in-data">
-              {(() => {
-                const sortedStats = sortBy === 'usage' ? stats : [...stats].sort((a, b) => {
-                  const getV = (item, idx) => item.viability && item.viability.length > idx ? item.viability[idx] : -1;
-                  
-                  const diff1 = getV(b, 1) - getV(a, 1);
-                  if (diff1 !== 0) return diff1;
-                  
-                  const diff2 = getV(b, 2) - getV(a, 2);
-                  if (diff2 !== 0) return diff2;
-                  
-                  const diff3 = getV(b, 3) - getV(a, 3);
-                  if (diff3 !== 0) return diff3;
-                  
-                  return getV(b, 0) - getV(a, 0);
-                });
-                return sortedStats.map(row => (
-                  <PokemonRow 
-                    key={row.rank}
-                    row={row}
-                    sortBy={sortBy}
-                  isExpanded={expanded.has(row.pokemon)}
-                  loadingDetails={loadingDetails}
-                  detailsError={detailsError}
-                  detailsData={details && details[row.pokemon]}
-                  onRowClick={onRowClick}
-                  setExpanded={setExpanded}
-                  onPokemonClick={scrollToPokemon}
-                />
-              ))})()}
-            </div>
+            
+            {showTools ? (
+              <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
+            ) : (
+              <div className="pokedex-list fade-in-data">
+                {(() => {
+                  const sortedStats = sortBy === 'usage' ? stats : [...stats].sort((a, b) => {
+                    const getV = (item, idx) => item.viability && item.viability.length > idx ? item.viability[idx] : -1;
+                    
+                    const diff1 = getV(b, 1) - getV(a, 1);
+                    if (diff1 !== 0) return diff1;
+                    
+                    const diff2 = getV(b, 2) - getV(a, 2);
+                    if (diff2 !== 0) return diff2;
+                    
+                    const diff3 = getV(b, 3) - getV(a, 3);
+                    if (diff3 !== 0) return diff3;
+                    
+                    return getV(b, 0) - getV(a, 0);
+                  });
+                  return sortedStats.map(row => (
+                    <PokemonRow 
+                      key={row.rank}
+                      row={row}
+                      sortBy={sortBy}
+                    isExpanded={expanded.has(row.pokemon)}
+                    loadingDetails={loadingDetails}
+                    detailsError={detailsError}
+                    detailsData={details && details[row.pokemon]}
+                    onRowClick={onRowClick}
+                    setExpanded={setExpanded}
+                    onPokemonClick={scrollToPokemon}
+                  />
+                ))})()}
+              </div>
+            )}
           </>
         )}
       </div>

@@ -417,3 +417,82 @@ export async function getViability(month, format, rating) {
   }
 }
 
+export async function getTotalBattles(month, format, rating) {
+  const url = `https://api.smogonstats.eu.cc/api/format-stats?month=${month}&format=${format}&rating=${rating}`;
+  
+  if (memoryCache.has(url)) {
+    return memoryCache.get(url).totalBattles || 0;
+  }
+
+  if (inflightRequests.has(url)) {
+    const res = await inflightRequests.get(url);
+    return res.totalBattles || 0;
+  }
+
+  const fetchPromise = (async () => {
+    if ('caches' in window) {
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        const cachedResponse = await cache.match(url);
+        if (cachedResponse) {
+          let jsonText;
+          if (cachedResponse.headers.get('Content-Type') === 'application/gzip') {
+            const decompressedStream = cachedResponse.body.pipeThrough(new DecompressionStream('gzip'));
+            jsonText = await new Response(decompressedStream).text();
+          } else {
+            jsonText = await cachedResponse.text();
+          }
+          const json = JSON.parse(jsonText);
+          memoryCache.set(url, json);
+          return json;
+        }
+      } catch (e) {
+        console.warn('Cache API error:', e);
+      }
+    }
+    
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const json = await res.json();
+        
+        if ('caches' in window) {
+          try {
+            const cache = await caches.open(CACHE_NAME);
+            const jsonString = JSON.stringify(json);
+            let cacheResponse;
+            
+            if ('CompressionStream' in window) {
+              const compressedStream = new Blob([jsonString]).stream().pipeThrough(new CompressionStream('gzip'));
+              cacheResponse = new Response(compressedStream, {
+                headers: { 'Content-Type': 'application/gzip' }
+              });
+            } else {
+              cacheResponse = new Response(jsonString, {
+                headers: { 'Content-Type': 'application/json' }
+              });
+            }
+            await cache.put(url, cacheResponse);
+          } catch (e) {
+            console.warn('Cache API put error:', e);
+          }
+        }
+        
+        memoryCache.set(url, json);
+        return json;
+      }
+    } catch (e) {
+      console.error('Error fetching total battles:', e);
+    }
+    return { totalBattles: 0 };
+  })();
+
+  inflightRequests.set(url, fetchPromise);
+  try {
+    const result = await fetchPromise;
+    return result.totalBattles || 0;
+  } finally {
+    inflightRequests.delete(url);
+  }
+}
+

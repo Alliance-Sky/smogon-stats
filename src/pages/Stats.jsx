@@ -1,5 +1,4 @@
 import React from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
 import { useStats } from '../hooks/useStats';
 import PokeballIcon from '../components/PokeballIcon';
 import FormatTools from '../components/FormatTools';
@@ -124,7 +123,9 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   };
 
   const onRowClick = (pokemon) => {
-    toggleDetails(pokemon);
+    React.startTransition(() => {
+      toggleDetails(pokemon);
+    });
   };
 
   React.useEffect(() => {
@@ -167,47 +168,23 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     });
   }, [stats, sortBy]);
 
-  const [columns, setColumns] = React.useState(() => (typeof window !== 'undefined' && window.innerWidth >= 768 ? 2 : 1));
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setColumns(window.innerWidth >= 768 ? 2 : 1);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const parentRef = React.useRef(null);
-
-  const rowCount = Math.ceil(sortedStats.length / columns);
-
-  const rowVirtualizer = useVirtualizer({
-    count: rowCount,
-    getScrollElement: () => parentRef.current,
-    estimateSize: React.useCallback((rowIndex) => {
-      const item1 = sortedStats[rowIndex * columns];
-      const item2 = sortedStats[rowIndex * columns + 1];
-      const exp1 = item1 && expanded.has(item1.pokemon);
-      const exp2 = item2 && expanded.has(item2.pokemon);
-      return (exp1 || exp2) ? 450 : 64;
-    }, [sortedStats, columns, expanded]),
-    overscan: 5,
-  });
-
   const scrollToPokemon = React.useCallback((pokemonName) => {
-    const index = sortedStats.findIndex(s => s.pokemon === pokemonName);
-    if (index !== -1) {
-      const rowIndex = Math.floor(index / columns);
+    React.startTransition(() => {
       setExpanded(prev => {
         const next = new Set(prev);
         next.add(pokemonName);
         return next;
       });
-      rowVirtualizer.scrollToIndex(rowIndex, { align: 'center', behavior: 'smooth' });
-    } else {
-      showToast(`${pokemonName} is not in the current list.`);
-    }
-  }, [sortedStats, columns, setExpanded, rowVirtualizer]);
+    });
+    setTimeout(() => {
+      const el = document.getElementById(`pokemon-row-${pokemonName}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        showToast(`${pokemonName} is not in the current list.`);
+      }
+    }, 50);
+  }, [setExpanded]);
 
   return (
     <>
@@ -377,68 +354,21 @@ export default function Stats({ currentView, theme, period, format, rating, setP
               <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
             </div>
             <div style={{ display: currentView !== 'chart' ? 'block' : 'none', width: '100%' }}>
-              <div
-                ref={parentRef}
-                className="virtual-scroll-container"
-                style={{
-                  height: '100%',
-                  maxHeight: 'calc(100vh - 220px)',
-                  minHeight: '400px',
-                  overflowY: 'auto',
-                  width: '100%',
-                  position: 'relative',
-                }}
-              >
-                <div
-                  className="pokedex-list fade-in-data"
-                  style={{
-                    height: `${rowVirtualizer.getTotalSize()}px`,
-                    width: '100%',
-                    position: 'relative',
-                    display: 'block',
-                  }}
-                >
-                  {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-                    const rowIndex = virtualItem.index;
-                    return (
-                      <div
-                        key={virtualItem.key || rowIndex}
-                        ref={rowVirtualizer.measureElement}
-                        data-index={rowIndex}
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          display: 'grid',
-                          gridTemplateColumns: columns === 2 ? 'repeat(2, 1fr)' : '1fr',
-                          gap: '0.5rem',
-                          transform: `translateY(${virtualItem.start}px)`,
-                        }}
-                      >
-                        {Array.from({ length: columns }).map((_, colIdx) => {
-                          const itemIdx = rowIndex * columns + colIdx;
-                          const row = sortedStats[itemIdx];
-                          if (!row) return <div key={`empty-${colIdx}`} />;
-                          return (
-                            <PokemonRow 
-                              key={row.pokemon}
-                              row={row}
-                              sortBy={sortBy}
-                              isExpanded={expanded.has(row.pokemon)}
-                              loadingDetails={loadingDetails}
-                              detailsError={detailsError}
-                              detailsData={details && details[row.pokemon]}
-                              onRowClick={onRowClick}
-                              setExpanded={setExpanded}
-                              onPokemonClick={scrollToPokemon}
-                            />
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
+              <div className="pokedex-list fade-in-data">
+                {sortedStats.map(row => (
+                  <PokemonRow 
+                    key={row.pokemon}
+                    row={row}
+                    sortBy={sortBy}
+                    isExpanded={expanded.has(row.pokemon)}
+                    loadingDetails={loadingDetails}
+                    detailsError={detailsError}
+                    detailsData={details && details[row.pokemon]}
+                    onRowClick={onRowClick}
+                    setExpanded={setExpanded}
+                    onPokemonClick={scrollToPokemon}
+                  />
+                ))}
               </div>
             </div>
           </>

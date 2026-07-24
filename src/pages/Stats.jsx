@@ -69,17 +69,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   const [visibleCount, setVisibleCount] = React.useState(60);
   const [observerTarget, setObserverTarget] = React.useState(null);
   
-  const [showMeta, setShowMeta] = React.useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('expand') === 'all';
-  });
-  
-  React.useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('expand') !== 'all') {
-      setShowMeta(false);
-    }
-  }, [period, format, rating]);
+  const [showMeta, setShowMeta] = React.useState(false);
   
   const {
     months,

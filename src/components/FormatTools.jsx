@@ -250,7 +250,27 @@ export default function FormatTools({ theme, period, months, formats, formatName
                 </button>
               </div>
             </div>
-          )) : (
+          )) : null}
+          {loading && (
+            <div className="pokedex-tile tool-tile pulse-opacity">
+              <div className="tool-tile-content" style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '4px' }}>
+                <div className="skeleton-block" style={{ width: '60%', height: '24px', borderRadius: '4px', marginBottom: '4px' }}></div>
+                <div className="skeleton-block" style={{ width: '40%', height: '16px', borderRadius: '4px' }}></div>
+                <div className="skeleton-block" style={{ width: '50%', height: '16px', borderRadius: '4px', marginBottom: '12px' }}></div>
+                
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
+                  <div className="skeleton-block" style={{ width: '30%', height: '14px', borderRadius: '4px', marginBottom: '12px' }}></div>
+                  <div className="skeleton-block" style={{ width: '100%', height: '6px', borderRadius: '3px', marginBottom: '12px' }}></div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <div className="skeleton-block" style={{ width: '60px', height: '20px', borderRadius: '4px' }}></div>
+                    <div className="skeleton-block" style={{ width: '80px', height: '20px', borderRadius: '4px' }}></div>
+                    <div className="skeleton-block" style={{ width: '50px', height: '20px', borderRadius: '4px' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {!loading && comparedItems.length === 0 && (
             <div className="empty-state" style={{ padding: '2rem' }}>No formats added yet</div>
           )}
         </div>

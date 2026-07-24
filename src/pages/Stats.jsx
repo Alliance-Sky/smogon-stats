@@ -263,8 +263,8 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
               </div>
               {!showTools && (
                 <>
-                  <button className="control-btn" onClick={expandAll}>Expand All</button>
-                  <button className="control-btn" onClick={collapseAll}>Collapse All</button>
+                  <button className="control-btn" onClick={() => { setShowMeta(true); expandAll(); }}>Expand All</button>
+                  <button className="control-btn" onClick={() => { setShowMeta(false); collapseAll(); }}>Collapse All</button>
                 </>
               )}
             </div>

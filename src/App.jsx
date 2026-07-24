@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Stats from './pages/Stats';
+import Guide from './pages/Guide';
 import PokeballIcon from './components/PokeballIcon';
+import HeaderLogo from './components/HeaderLogo';
 
 const getInitialTheme = () => {
   const match = document.cookie.match(/(^| )theme=([^;]+)/);
@@ -13,6 +15,10 @@ const getInitialTheme = () => {
 
 function App() {
   const [theme, setTheme] = useState(getInitialTheme);
+  const [currentView, setCurrentView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') || 'stats';
+  });
   const [period, setPeriod] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('period') || '2026-06';
@@ -28,11 +34,16 @@ function App() {
 
   useEffect(() => {
     const url = new URL(window.location);
+    if (currentView === 'stats') {
+      url.searchParams.delete('view');
+    } else {
+      url.searchParams.set('view', currentView);
+    }
     url.searchParams.set('period', period);
     url.searchParams.set('format', format);
     url.searchParams.set('rating', rating);
     window.history.replaceState(null, '', url);
-  }, [period, format, rating]);
+  }, [currentView, period, format, rating]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -65,52 +76,109 @@ function App() {
     }
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prev => {
-      const newTheme = prev === 'scarlet' ? 'violet' : 'scarlet';
-      document.cookie = `theme=${newTheme};path=/;max-age=31536000`;
-      return newTheme;
-    });
-  };
-
-  const nextTheme = theme === 'scarlet' ? 'violet' : 'scarlet';
 
   return (
     <div className="app-container">
       <header className="app-header">
         <div className="header-title-container">
-          <h1>Smogon Stats</h1>
-          <p className="header-desc">
+          <HeaderLogo theme={theme} />
+          <p className="header-desc" style={{ marginBottom: '8px' }}>
             Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
           </p>
+          <nav style={{ display: 'flex', gap: '15px', marginTop: '15px', alignItems: 'center' }}>
+            <button 
+              onClick={() => setCurrentView('stats')} 
+              className={`nav-btn ${currentView === 'stats' ? 'active' : ''}`}
+              style={{ color: currentView === 'stats' ? 'var(--primary)' : 'var(--text-muted)' }}
+            >
+              Stats
+            </button>
+            <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
+            <button 
+              onClick={() => setCurrentView('chart')} 
+              className={`nav-btn ${currentView === 'chart' ? 'active' : ''}`}
+              style={{ color: currentView === 'chart' ? 'var(--primary)' : 'var(--text-muted)' }}
+            >
+              Format Chart
+            </button>
+            <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
+            <button 
+              onClick={() => setCurrentView('guide')} 
+              className={`nav-btn ${currentView === 'guide' ? 'active' : ''}`}
+              style={{ color: currentView === 'guide' ? 'var(--primary)' : 'var(--text-muted)' }}
+            >
+              Guide
+            </button>
+          </nav>
         </div>
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme} 
-          title={`Switch to Pokémon ${nextTheme.charAt(0).toUpperCase() + nextTheme.slice(1)} theme`}
-          aria-label="Toggle theme"
-          style={{ padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <PokeballIcon variant={nextTheme} size={32} />
-        </button>
       </header>
     
       <main className="app-main">
-        <Stats 
-          theme={theme}
-          period={period}
-          setPeriod={setPeriod}
-          format={format}
-          setFormat={setFormat}
-          rating={rating}
-          setRating={setRating}
-        />
+        <div style={{ display: currentView === 'guide' ? 'block' : 'none', width: '100%' }}>
+          <Guide />
+        </div>
+        <div style={{ display: currentView !== 'guide' ? 'block' : 'none', width: '100%' }}>
+          <Stats 
+            currentView={currentView}
+            theme={theme}
+            period={period}
+            setPeriod={setPeriod}
+            format={format}
+            setFormat={setFormat}
+            rating={rating}
+            setRating={setRating}
+          />
+        </div>
       </main>
 
       <footer className="app-footer">
-        <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
-        <p>Not affiliated with Smogon or Pokemon Showdown.</p>
-        <p>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+          <div>
+            <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
+            <p>Not affiliated with Smogon or Pokemon Showdown.</p>
+            <p style={{ marginBottom: 0 }}>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Theme:</span>
+            <button 
+              onClick={() => {
+                setTheme('scarlet');
+                document.cookie = `theme=scarlet;path=/;max-age=31536000`;
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: theme === 'scarlet' ? 'var(--primary)' : 'var(--text-muted)',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+                padding: '0',
+                outline: 'none',
+              }}
+            >
+              Light
+            </button>
+            <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
+            <button 
+              onClick={() => {
+                setTheme('violet');
+                document.cookie = `theme=violet;path=/;max-age=31536000`;
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: theme === 'violet' ? 'var(--primary)' : 'var(--text-muted)',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+                padding: '0',
+                outline: 'none',
+              }}
+            >
+              Dark
+            </button>
+          </div>
+        </div>
       </footer>
     </div>
   );

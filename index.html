@@ -14,6 +14,9 @@
     <meta name="twitter:title" content="Pokemon Showdown Usage Stats" />
     <meta name="twitter:description" content="View historical Pokemon Showdown usage statistics from 2014 to present." />
     <link rel="icon" type="image/svg+xml" href="/favicon-scarlet.svg" id="favicon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <script>
       (function() {
         try {
@@ -22,6 +25,8 @@
           document.documentElement.setAttribute('data-theme', theme);
           document.documentElement.style.backgroundColor = theme === 'violet' ? '#09090b' : '#fdfaf6';
           document.documentElement.style.color = theme === 'violet' ? '#f4f4f5' : '#2d3748';
+          var favicon = document.getElementById('favicon');
+          if (favicon) favicon.href = '/favicon-' + theme + '.svg';
         } catch (e) {}
       })();
     </script>

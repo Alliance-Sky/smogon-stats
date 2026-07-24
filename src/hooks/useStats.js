@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-import { getMonths, getFormats, getStats, getDetails, getViability } from '../utils/api';
+import { getMonths, getFormats, getStats, getDetails, getViability, getLeads, getMetagame, getTotalBattles } from '../utils/api';
 
 export function useStats(period, format, rating, setFormat, setRating) {
 
@@ -9,6 +9,8 @@ export function useStats(period, format, rating, setFormat, setRating) {
   
 
   const [stats, setStats] = useState(null);
+  const [metagame, setMetagame] = useState(null);
+  const [totalBattles, setTotalBattles] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -17,6 +19,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
   const [expanded, setExpanded] = useState(new Set());
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [detailsError, setDetailsError] = useState(false);
+  const chunkingRef = useRef(0);
 
 
   useEffect(() => {
@@ -56,22 +59,47 @@ export function useStats(period, format, rating, setFormat, setRating) {
 
     setDetails(null);
     setExpanded(new Set());
+    chunkingRef.current += 1;
     setDetailsError(false);
+    setMetagame(null);
     
     if (period && format && rating && formats[format] && formats[format].includes(rating)) {
       setLoading(true);
       setError(null);
-      Promise.all([getStats(period, format, rating), getViability(period, format, rating)])
-        .then(([statsData, viabilityData]) => {
+      const fetchStartTime = Date.now();
+
+      Promise.all([getStats(period, format, rating), getViability(period, format, rating), getLeads(period, format, rating), getMetagame(period, format, rating), getTotalBattles(period, format, rating)])
+        .then(([statsData, viabilityData, leadsData, metagameData, battlesCount]) => {
           if (isCancelled) return;
           
+          setMetagame(metagameData);
+          setTotalBattles(battlesCount || 0);
+          
+          const leadsMap = {};
+          leadsData.forEach(lead => {
+            leadsMap[lead.pokemon] = lead.leadPercent;
+          });
+
           const mergedStats = statsData.map(stat => ({
             ...stat,
-            viability: viabilityData[stat.pokemon] || null
+            viability: viabilityData[stat.pokemon] || null,
+            leadPercent: leadsMap[stat.pokemon] || '0.000%'
           }));
           
           setStats(mergedStats);
-          setLoading(false);
+          
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('expand') === 'all') {
+            setExpanded(new Set(mergedStats.map(s => s.pokemon)));
+          }
+          
+          const elapsed = Date.now() - fetchStartTime;
+          const minSkeletonTime = 300; // 300ms sweet spot to ensure silky smooth transitions on cache hits
+          const delay = Math.max(0, minSkeletonTime - elapsed);
+
+          setTimeout(() => {
+            if (!isCancelled) setLoading(false);
+          }, delay);
           
 
           setLoadingDetails(true);
@@ -135,12 +163,38 @@ export function useStats(period, format, rating, setFormat, setRating) {
 
   const expandAll = () => {
     if (stats) {
-      setExpanded(new Set(stats.map(s => s.pokemon)));
+      chunkingRef.current += 1;
+      const currentChunkId = chunkingRef.current;
+      
+      const allPokemons = stats.map(s => s.pokemon);
+      let currentIndex = 0;
+      const chunkSize = 30;
+      
+      const processChunk = () => {
+        if (chunkingRef.current !== currentChunkId) return;
+        
+        const chunk = allPokemons.slice(currentIndex, currentIndex + chunkSize);
+        if (chunk.length === 0) return;
+        
+        setExpanded(prev => {
+          const next = new Set(prev);
+          chunk.forEach(p => next.add(p));
+          return next;
+        });
+        
+        currentIndex += chunkSize;
+        if (currentIndex < allPokemons.length) {
+          setTimeout(processChunk, 16);
+        }
+      };
+      
+      processChunk();
       fetchDetailsIfNeeded();
     }
   };
 
   const collapseAll = () => {
+    chunkingRef.current += 1;
     setExpanded(new Set());
   };
 
@@ -148,6 +202,8 @@ export function useStats(period, format, rating, setFormat, setRating) {
     months,
     formats,
     stats,
+    metagame,
+    totalBattles,
     loading,
     error,
     details,

@@ -208,7 +208,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     setTimeout(() => {
       const el = document.getElementById(`pokemon-row-${pokemonName}`);
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.scrollIntoView({ behavior: 'auto', block: 'center' });
       } else {
         showToast(`${pokemonName} is not in the current list.`);
       }

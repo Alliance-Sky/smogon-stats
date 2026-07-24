@@ -381,6 +381,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                 ref={parentRef}
                 className="virtual-scroll-container"
                 style={{
+                  height: '100%',
                   maxHeight: 'calc(100vh - 220px)',
                   minHeight: '400px',
                   overflowY: 'auto',

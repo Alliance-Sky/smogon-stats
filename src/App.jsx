@@ -110,9 +110,10 @@ function App() {
       </header>
     
       <main className="app-main">
-        {currentView === 'guide' ? (
+        <div style={{ display: currentView === 'guide' ? 'block' : 'none', width: '100%' }}>
           <Guide />
-        ) : (
+        </div>
+        <div style={{ display: currentView !== 'guide' ? 'block' : 'none', width: '100%' }}>
           <Stats 
             currentView={currentView}
             theme={theme}
@@ -123,7 +124,7 @@ function App() {
             rating={rating}
             setRating={setRating}
           />
-        )}
+        </div>
       </main>
 
       <footer className="app-footer">

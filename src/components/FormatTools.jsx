@@ -87,7 +87,7 @@ export default function FormatTools({ theme, period, months, formats, formatName
   const truncate = (str, n) => (str.length > n) ? str.slice(0, n - 1) + '…' : str;
 
   const chartData = {
-    labels: comparedItems.map(item => `[${item.month}] ${truncate(formatName(item.format), 16)} (${item.rating})`),
+    labels: comparedItems.map(item => `[${item.month}] ${truncate(formatName(item.format), 16)}`),
     datasets: [
       {
         label: 'Total Battles',
@@ -170,11 +170,7 @@ export default function FormatTools({ theme, period, months, formats, formatName
                 <option key={f} value={f}>{formatName(f)}</option>
               ))}
             </select>
-            <select value={selectedRating} onChange={e => setSelectedRating(e.target.value)} style={{ flex: 1 }} disabled={fetchingFormats}>
-              {fetchingFormats ? <option>...</option> : (localFormats[selectedFormat] || []).map(r => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
+
             <button className="control-btn add-btn" onClick={handleAdd} disabled={loading || fetchingFormats}>
               {loading ? 'Adding...' : 'Add'}
             </button>
@@ -201,7 +197,7 @@ export default function FormatTools({ theme, period, months, formats, formatName
               <div className="tool-tile-content">
                 <div className="tool-tile-info">
                   <h4 className="tool-format-name">
-                    <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>[{item.month}]</span> {formatName(item.format)} <span className="tool-rating-badge">{item.rating}</span>
+                    <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>[{item.month}]</span> {formatName(item.format)}
                   </h4>
                   <div className="tool-stats">
                     <span><strong>{item.battles.toLocaleString()}</strong> Total Battles</span>

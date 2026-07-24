@@ -306,15 +306,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                 <div className="tool-tile-content" style={{ width: '100%' }}>
                   <div className="tool-tile-info" style={{ width: '100%' }}>
                     {!metagame ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '4px' }} className="pulse-opacity">
-                        <div className="skeleton-block" style={{ width: '40%', height: '18px', borderRadius: '4px', marginBottom: '8px' }}></div>
-                        <div className="skeleton-block" style={{ width: '100%', height: '8px', borderRadius: '4px', marginBottom: '12px' }}></div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <div className="skeleton-block" style={{ width: '90px', height: '26px', borderRadius: '6px' }}></div>
-                          <div className="skeleton-block" style={{ width: '110px', height: '26px', borderRadius: '6px' }}></div>
-                          <div className="skeleton-block" style={{ width: '80px', height: '26px', borderRadius: '6px' }}></div>
-                        </div>
-                      </div>
+                      <MetagameSkeleton />
                     ) : Object.keys(metagame.playstyles).length === 0 ? (
                       <div className="empty-state" style={{ padding: '1rem' }}>No metagame data available for this format.</div>
                     ) : (
@@ -536,6 +528,24 @@ const SkeletonRow = () => (
         <div className="tile-name skeleton-block" style={{ width: '120px' }}></div>
         <div className="tile-usage skeleton-block" style={{ width: '60px' }}></div>
       </div>
+    </div>
+  </div>
+);
+
+const MetagameSkeleton = () => (
+  <div className="metagame-analysis pulse-opacity" style={{ padding: '0.25rem 0' }}>
+    <div className="skeleton-block" style={{ width: '180px', height: '16px', borderRadius: '4px', marginBottom: '12px' }}></div>
+    <div className="stalliness-bar-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+      <div className="skeleton-block" style={{ width: '55px', height: '14px', borderRadius: '4px' }}></div>
+      <div className="skeleton-block" style={{ flex: 1, height: '8px', borderRadius: '4px' }}></div>
+      <div className="skeleton-block" style={{ width: '45px', height: '14px', borderRadius: '4px' }}></div>
+    </div>
+    <div className="playstyles-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+      <div className="skeleton-block" style={{ width: '110px', height: '28px', borderRadius: '6px' }}></div>
+      <div className="skeleton-block" style={{ width: '120px', height: '28px', borderRadius: '6px' }}></div>
+      <div className="skeleton-block" style={{ width: '95px', height: '28px', borderRadius: '6px' }}></div>
+      <div className="skeleton-block" style={{ width: '105px', height: '28px', borderRadius: '6px' }}></div>
+      <div className="skeleton-block" style={{ width: '115px', height: '28px', borderRadius: '6px' }}></div>
     </div>
   </div>
 );

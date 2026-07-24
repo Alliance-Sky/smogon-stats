@@ -330,6 +330,11 @@ select:focus {
   color: var(--primary);
 }
 
+.tool-tile {
+  content-visibility: visible !important;
+  contain: none !important;
+}
+
 
 .tile-details {
   padding: 0.25rem;

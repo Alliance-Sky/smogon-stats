@@ -263,7 +263,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
 
           <div className="control-group">
             <label>Sort By</label>
-            <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); resetExpansion(); }}>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
               <option value="usage">Usage</option>
               <option value="viability">Viability Ceiling</option>
               <option value="leads">Lead %</option>

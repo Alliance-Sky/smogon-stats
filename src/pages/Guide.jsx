@@ -6,7 +6,7 @@ function Guide() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 400); // 400ms artificial delay for visual consistency
+    }, 400); 
     return () => clearTimeout(timer);
   }, []);
 

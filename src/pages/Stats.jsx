@@ -131,7 +131,6 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   };
   const onRatingChange = (e) => {
     setRating(e.target.value);
-    resetExpansion();
   };
 
   const availableFormats = Object.keys(formats);

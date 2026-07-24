@@ -337,7 +337,20 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
       {isExpanded && (
         <div className="tile-details">
           {loadingDetails ? (
-            <div className="details-loader">Fetching Stats Data...</div>
+            <div className="skeleton-container fade-in">
+              <div className="skeleton-header">
+                <div className="skeleton-circle"></div>
+                <div className="skeleton-title"></div>
+              </div>
+              <div className="skeleton-line" style={{ width: '80%' }}></div>
+              <div className="skeleton-line" style={{ width: '60%' }}></div>
+              <div className="skeleton-line" style={{ width: '90%' }}></div>
+              <div className="skeleton-grid">
+                <div className="skeleton-card"></div>
+                <div className="skeleton-card"></div>
+                <div className="skeleton-card"></div>
+              </div>
+            </div>
           ) : detailsError ? (
             <div className="details-error">Stats data not available</div>
           ) : detailsData ? (

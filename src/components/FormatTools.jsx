@@ -19,30 +19,41 @@ export default function FormatTools({ theme, period, months, formats, formatName
     
     if (selectedMonth === period) {
       setLocalFormats(formats);
-      const available = Object.keys(formats);
-      if (available.length > 0 && !formats[selectedFormat]) {
-        setSelectedFormat(available[0]);
-        setSelectedRating(formats[available[0]][0] || '0');
-      }
+      setSelectedFormat(prev => {
+        if (formats[prev]) {
+          setSelectedRating(r => formats[prev].includes(r) ? r : formats[prev][0]);
+          return prev;
+        }
+        const available = Object.keys(formats);
+        if (available.length > 0) {
+          setSelectedRating(formats[available[0]][0] || '0');
+          return available[0];
+        }
+        return '';
+      });
     } else {
       setFetchingFormats(true);
       getFormats(selectedMonth).then(data => {
         if (isCancelled) return;
         setLocalFormats(data);
-        const available = Object.keys(data);
-        if (available.length > 0) {
-          setSelectedFormat(available[0]);
-          setSelectedRating(data[available[0]][0] || '0');
-        } else {
-          setSelectedFormat('');
-          setSelectedRating('');
-        }
+        setSelectedFormat(prev => {
+          if (data[prev]) {
+            setSelectedRating(r => data[prev].includes(r) ? r : data[prev][0]);
+            return prev;
+          }
+          const available = Object.keys(data);
+          if (available.length > 0) {
+            setSelectedRating(data[available[0]][0] || '0');
+            return available[0];
+          }
+          return '';
+        });
         setFetchingFormats(false);
       });
     }
     
     return () => { isCancelled = true; };
-  }, [selectedMonth, period, formats, selectedFormat]);
+  }, [selectedMonth, period, formats]);
 
   const onFormatChange = (e) => {
     const newFormat = e.target.value;

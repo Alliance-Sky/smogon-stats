@@ -412,6 +412,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
 const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded, onPokemonClick }) => {
   const spriteSlug = getSprite(row.pokemon);
   const spriteUrl = `https://play.pokemonshowdown.com/sprites/home-centered/${spriteSlug}.png`;
+  const deferredExpanded = React.useDeferredValue(isExpanded);
   
   return (
     <div id={`pokemon-row-${row.pokemon}`} className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
@@ -440,7 +441,7 @@ const PokemonRow = React.memo(({ row, sortBy, isExpanded, loadingDetails, detail
         </div>
       </div>
       
-      {isExpanded && (
+      {deferredExpanded && (
         <div className="tile-details">
           {loadingDetails ? (
             <div className="skeleton-container fade-in">

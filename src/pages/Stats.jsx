@@ -68,8 +68,21 @@ export default function Stats({ theme, period, format, rating, setPeriod, setFor
     window.history.replaceState(null, '', url);
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
-  const [showTools, setShowTools] = React.useState(false);
+  
+  const [showTools, setShowTools] = React.useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tools') === 'true';
+  });
 
+  React.useEffect(() => {
+    const url = new URL(window.location);
+    if (showTools) {
+      url.searchParams.set('tools', 'true');
+    } else {
+      url.searchParams.delete('tools');
+    }
+    window.history.replaceState(null, '', url);
+  }, [showTools]);
   const {
     months,
     formats,

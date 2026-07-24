@@ -71,6 +71,7 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
+        <div className="header-title-container">
           <h1>Smogon Stats</h1>
           <p className="header-desc" style={{ marginBottom: '8px' }}>
             Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.

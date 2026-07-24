@@ -67,20 +67,10 @@ function App() {
     }
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prev => {
-      const newTheme = prev === 'scarlet' ? 'violet' : 'scarlet';
-      document.cookie = `theme=${newTheme};path=/;max-age=31536000`;
-      return newTheme;
-    });
-  };
-
-  const nextTheme = theme === 'scarlet' ? 'violet' : 'scarlet';
 
   return (
     <div className="app-container">
       <header className="app-header">
-        <div className="header-title-container">
           <h1>Smogon Stats</h1>
           <p className="header-desc" style={{ marginBottom: '8px' }}>
             Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
@@ -104,18 +94,31 @@ function App() {
             >
               Guide
             </button>
+            <select 
+              value={theme}
+              onChange={(e) => {
+                const newTheme = e.target.value;
+                setTheme(newTheme);
+                document.cookie = `theme=${newTheme};path=/;max-age=31536000`;
+              }}
+              style={{ 
+                background: 'none', 
+                border: 'none', 
+                color: 'var(--text-muted)', 
+                cursor: 'pointer', 
+                fontWeight: 'bold', 
+                fontSize: '0.95rem', 
+                padding: '0 16px 4px 0', 
+                margin: 0,
+                outline: 'none',
+                boxShadow: 'none',
+                backgroundPosition: 'right 0px center'
+              }}
+            >
+              <option value="scarlet">Light Theme</option>
+              <option value="violet">Dark Theme</option>
+            </select>
           </nav>
-        </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button 
-            className="theme-toggle" 
-            onClick={toggleTheme} 
-            title={`Switch to Pokémon ${nextTheme.charAt(0).toUpperCase() + nextTheme.slice(1)} theme`}
-            aria-label="Toggle theme"
-            style={{ padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <PokeballIcon variant={nextTheme} size={32} />
-          </button>
         </div>
       </header>
     

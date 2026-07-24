@@ -220,7 +220,9 @@ export default function Stats({ currentView, theme, period, format, rating, setP
         {loading || !stats ? (
           <>
             <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
-              <div className="skeleton-block" style={{ width: '210px', height: '34px', borderRadius: '12px', marginRight: 'auto' }}></div>
+              <div style={{ marginRight: 'auto' }}>
+                <div className="skeleton-block" style={{ width: '80px', height: '34px', borderRadius: '12px' }}></div>
+              </div>
               <div className="skeleton-block" style={{ width: '100px', height: '34px', borderRadius: '12px' }}></div>
               <div className="skeleton-block" style={{ width: '110px', height: '34px', borderRadius: '12px' }}></div>
             </div>

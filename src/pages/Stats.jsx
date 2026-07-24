@@ -1,8 +1,9 @@
 import React from 'react';
 import { useStats } from '../hooks/useStats';
 import PokeballIcon from '../components/PokeballIcon';
-import FormatTools from '../components/FormatTools';
 import '../index.css';
+
+const FormatTools = React.lazy(() => import('../components/FormatTools'));
 
 function getSprite(name) {
   const hyphenatedBases = [
@@ -369,7 +370,9 @@ export default function Stats({ currentView, theme, period, format, rating, setP
             )}
             
             <div style={{ display: currentView === 'chart' ? 'block' : 'none', width: '100%' }}>
-              <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
+              <React.Suspense fallback={<div className="empty-state" style={{ padding: '2rem' }}>Loading Chart...</div>}>
+                <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
+              </React.Suspense>
             </div>
             <div style={{ display: currentView !== 'chart' ? 'block' : 'none', width: '100%' }}>
               <div className="pokedex-list fade-in-data">

@@ -266,10 +266,8 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                     window.history.replaceState(null, '', url);
                   }}>Expand All</button>
                   <button className="control-btn" onClick={() => { 
-                    React.startTransition(() => {
-                      setShowMeta(false); 
-                      collapseAll(); 
-                    });
+                    setShowMeta(false); 
+                    collapseAll(); 
                     const url = new URL(window.location);
                     url.searchParams.delete('expand');
                     window.history.replaceState(null, '', url);

@@ -158,6 +158,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
     months,
     formats,
     stats,
+    metagame,
     loading,
     error,
     details,

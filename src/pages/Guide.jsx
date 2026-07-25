@@ -98,6 +98,18 @@ function Guide() {
           </ul>
         </section>
 
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h3 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>5. Trend Tracker</h3>
+          <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
+            The Trend Tracker is an advanced historical analysis tool that lets you visualize meta shifts over time.
+          </p>
+          <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6' }}>
+            <li style={{ marginBottom: '0.5rem' }}><strong>Historical Tracking:</strong> See how a Pokémon's usage percentage has evolved over the past 6, 12, or 24 months.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong>Multi-Comparison:</strong> Type and add multiple Pokémon to the chart to compare their usage trends head-to-head.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong>Rating Baselines:</strong> The Trend Tracker strictly curates data from the top 2 highest rating brackets for each format to ensure you are analyzing true top-tier competitive trends.</li>
+          </ul>
+        </section>
+
       </div>
     </div>
   );

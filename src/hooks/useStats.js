@@ -1,150 +1,105 @@
-import { useState, useEffect, useRef } from 'react';
-
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getMonths, getFormats, getStats, getDetails, getViability, getLeads, getMetagame, getTotalBattles } from '../utils/api';
 
 export function useStats(period, format, rating, setFormat, setRating) {
+  const { data: months = [] } = useQuery({
+    queryKey: ['months'],
+    queryFn: getMonths
+  });
 
-  const [months, setMonths] = useState([]);
-  const [formats, setFormats] = useState({});
-  
+  const { data: formats = {} } = useQuery({
+    queryKey: ['formats', period],
+    queryFn: () => getFormats(period),
+    enabled: !!period
+  });
 
-  const [stats, setStats] = useState(null);
-  const [metagame, setMetagame] = useState(null);
-  const [totalBattles, setTotalBattles] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  
+  useEffect(() => {
+    if (period && formats && Object.keys(formats).length > 0) {
+      if (!formats[format]) {
+        const firstFormat = Object.keys(formats)[0];
+        const firstRating = formats[firstFormat][0];
+        setFormat(firstFormat);
+        setRating(firstRating);
+      } else if (!formats[format].includes(rating)) {
+        setRating(formats[format][0]);
+      }
+    }
+  }, [period, format, rating, formats, setFormat, setRating]);
 
-  const [details, setDetails] = useState(null);
+  const isValidCombo = !!(period && format && rating && formats[format]?.includes(rating));
+
+  const { data: statsData, isPending: isStatsPending, error: statsError } = useQuery({
+    queryKey: ['stats', period, format, rating],
+    queryFn: () => getStats(period, format, rating),
+    enabled: isValidCombo
+  });
+
+  const { data: viabilityData = {}, isPending: isViabilityPending, error: viabilityError } = useQuery({
+    queryKey: ['viability', period, format, rating],
+    queryFn: () => getViability(period, format, rating),
+    enabled: isValidCombo
+  });
+
+  const { data: leadsData = [], isPending: isLeadsPending, error: leadsError } = useQuery({
+    queryKey: ['leads', period, format, rating],
+    queryFn: () => getLeads(period, format, rating),
+    enabled: isValidCombo
+  });
+
+  const { data: metagame = null, isPending: isMetagamePending, error: metagameError } = useQuery({
+    queryKey: ['metagame', period, format, rating],
+    queryFn: () => getMetagame(period, format, rating),
+    enabled: isValidCombo
+  });
+
+  const { data: totalBattles = 0, isPending: isTotalBattlesPending, error: totalBattlesError } = useQuery({
+    queryKey: ['totalBattles', period, format, rating],
+    queryFn: () => getTotalBattles(period, format, rating),
+    enabled: isValidCombo
+  });
+
+  const isAnyPending = isStatsPending || isViabilityPending || isLeadsPending || isMetagamePending || isTotalBattlesPending;
+  const anyError = statsError || viabilityError || leadsError || metagameError || totalBattlesError;
+
+  const { data: details, isFetching: loadingDetails, isError: detailsError, refetch: fetchDetails } = useQuery({
+    queryKey: ['details', period, format, rating],
+    queryFn: () => getDetails(period, format, rating),
+    enabled: isValidCombo
+  });
+
+  const stats = useMemo(() => {
+    if (!statsData) return null;
+    const leadsMap = {};
+    leadsData.forEach(lead => {
+      leadsMap[lead.pokemon] = lead.leadPercent;
+    });
+
+    return statsData.map(stat => ({
+      ...stat,
+      viability: viabilityData[stat.pokemon] || null,
+      leadPercent: leadsMap[stat.pokemon] || '0.000%'
+    }));
+  }, [statsData, viabilityData, leadsData]);
+
   const [expanded, setExpanded] = useState(new Set());
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [detailsError, setDetailsError] = useState(false);
   const chunkingRef = useRef(0);
 
-
   useEffect(() => {
-    let isCancelled = false;
-    getMonths().then(data => {
-      if (!isCancelled) setMonths(data);
-    });
-    return () => { isCancelled = true; };
-  }, []);
-
-
-  useEffect(() => {
-    let isCancelled = false;
-    if (period) {
-      setFormats({});
-      getFormats(period).then(data => {
-        if (isCancelled) return;
-        setFormats(data);
-        
-
-        const availableFormats = Object.keys(data);
-        if (availableFormats.length > 0 && !data[format]) {
-          const firstFormat = availableFormats[0];
-          const firstRating = data[firstFormat][0];
-          setFormat(firstFormat);
-          setRating(firstRating);
-        }
-      });
-    }
-    return () => { isCancelled = true; };
-  }, [period, format, setFormat, setRating]);
-
-
-  useEffect(() => {
-    let isCancelled = false;
-
-
-    setDetails(null);
     setExpanded(new Set());
     chunkingRef.current += 1;
-    setDetailsError(false);
-    setMetagame(null);
-    
-    if (period && format && rating && formats[format] && formats[format].includes(rating)) {
-      setLoading(true);
-      setError(null);
-      const fetchStartTime = Date.now();
+  }, [period, format, rating]);
 
-      Promise.all([getStats(period, format, rating), getViability(period, format, rating), getLeads(period, format, rating), getMetagame(period, format, rating), getTotalBattles(period, format, rating)])
-        .then(([statsData, viabilityData, leadsData, metagameData, battlesCount]) => {
-          if (isCancelled) return;
-          
-          setMetagame(metagameData);
-          setTotalBattles(battlesCount || 0);
-          
-          const leadsMap = {};
-          leadsData.forEach(lead => {
-            leadsMap[lead.pokemon] = lead.leadPercent;
-          });
-
-          const mergedStats = statsData.map(stat => ({
-            ...stat,
-            viability: viabilityData[stat.pokemon] || null,
-            leadPercent: leadsMap[stat.pokemon] || '0.000%'
-          }));
-          
-          setStats(mergedStats);
-          
-          const params = new URLSearchParams(window.location.search);
-          if (params.get('expand') === 'all') {
-            setExpanded(new Set(mergedStats.map(s => s.pokemon)));
-          }
-          
-          const elapsed = Date.now() - fetchStartTime;
-          const minSkeletonTime = 300; // 300ms sweet spot to ensure silky smooth transitions on cache hits
-          const delay = Math.max(0, minSkeletonTime - elapsed);
-
-          setTimeout(() => {
-            if (!isCancelled) setLoading(false);
-          }, delay);
-          
-
-          setLoadingDetails(true);
-          getDetails(period, format, rating)
-            .then(detailsData => {
-              if (isCancelled) return;
-              setDetails(detailsData);
-              setLoadingDetails(false);
-            })
-            .catch(err => {
-              if (isCancelled) return;
-              console.error("Failed to prefetch details", err);
-              setDetailsError(true);
-              setLoadingDetails(false);
-            });
-        })
-        .catch(err => {
-          if (isCancelled) return;
-          setError(err.message);
-          setLoading(false);
-        });
-    } else if (formats[format] && !formats[format].includes(rating)) {
-
-      setRating(formats[format][0]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('expand') === 'all' && stats) {
+        setExpanded(new Set(stats.map(s => s.pokemon)));
     }
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [period, format, rating, formats, setRating]);
+  }, [stats]);
 
   const fetchDetailsIfNeeded = () => {
     if (!details && !loadingDetails) {
-      setLoadingDetails(true);
-      setDetailsError(false);
-      getDetails(period, format, rating)
-        .then(data => {
-          setDetails(data);
-          setLoadingDetails(false);
-        })
-        .catch(err => {
-          console.error("Failed to fetch detailed stats", err);
-          setDetailsError(true);
-          setLoadingDetails(false);
-        });
+      fetchDetails();
     }
   };
 
@@ -197,6 +152,22 @@ export function useStats(period, format, rating, setFormat, setRating) {
     chunkingRef.current += 1;
     setExpanded(new Set());
   };
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let timer;
+    if (isAnyPending) {
+      timer = setTimeout(() => {
+        setLoading(true);
+      }, 300);
+    } else {
+      setLoading(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isAnyPending]);
+
+  const error = anyError ? anyError.message : null;
 
   return {
     months,

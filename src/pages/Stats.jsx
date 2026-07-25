@@ -1,7 +1,9 @@
 import React from 'react';
 import { useStats } from '../hooks/useStats';
-import PokeballIcon from '../components/PokeballIcon';
+import { useReactTable, getCoreRowModel, getSortedRowModel } from '@tanstack/react-table';
 import '../index.css';
+import { useStore } from '../store';
+
 
 const FormatTools = React.lazy(() => import('../components/FormatTools'));
 
@@ -53,11 +55,14 @@ const formatPercent = (percentStr, showDecimals = false) => {
   return `${Math.round(num)}%`;
 };
 
-export default function Stats({ currentView, theme, period, format, rating, setPeriod, setFormat, setRating }) {
+export default function Stats({ currentView }) {
+  const { theme, period, format, rating, setPeriod, setFormat, setRating } = useStore();
   const [sortBy, setSortBy] = React.useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('sortBy') || 'usage';
   });
+
+  const [sorting, setSorting] = React.useState([{ id: sortBy, desc: true }]);
 
   React.useEffect(() => {
     const url = new URL(window.location);
@@ -66,6 +71,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
   const [visibleCount, setVisibleCount] = React.useState(200);
+
   
   const [showMeta, setShowMeta] = React.useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -172,23 +178,51 @@ export default function Stats({ currentView, theme, period, format, rating, setP
     setTimeout(() => setToast(null), 3000);
   };
 
-  const sortedStats = React.useMemo(() => {
-    if (!stats) return [];
-    if (sortBy === 'usage') return stats;
-    if (sortBy === 'leads') {
-      return [...stats].sort((a, b) => parseFloat(b.leadPercent) - parseFloat(a.leadPercent));
+  const columns = React.useMemo(() => [
+    {
+      accessorKey: 'pokemon',
+      id: 'pokemon',
+    },
+    {
+      accessorKey: 'usagePercent',
+      id: 'usage',
+      sortingFn: (rowA, rowB, columnId) => parseFloat(rowA.getValue(columnId) || 0) - parseFloat(rowB.getValue(columnId) || 0),
+    },
+    {
+      accessorKey: 'leadPercent',
+      id: 'leads',
+      sortingFn: (rowA, rowB, columnId) => parseFloat(rowA.getValue(columnId) || 0) - parseFloat(rowB.getValue(columnId) || 0),
+    },
+    {
+      accessorKey: 'viability',
+      id: 'viability',
+      sortingFn: (rowA, rowB, columnId) => {
+         const getV = (item, idx) => (item && item.length > idx ? item[idx] : -1);
+         const a = rowA.getValue(columnId);
+         const b = rowB.getValue(columnId);
+         const diff1 = getV(a, 1) - getV(b, 1);
+         if (diff1 !== 0) return diff1;
+         const diff2 = getV(a, 2) - getV(b, 2);
+         if (diff2 !== 0) return diff2;
+         const diff3 = getV(a, 3) - getV(b, 3);
+         if (diff3 !== 0) return diff3;
+         return getV(a, 0) - getV(b, 0);
+      }
     }
-    return [...stats].sort((a, b) => {
-      const getV = (item, idx) => (item.viability && item.viability.length > idx ? item.viability[idx] : -1);
-      const diff1 = getV(b, 1) - getV(a, 1);
-      if (diff1 !== 0) return diff1;
-      const diff2 = getV(b, 2) - getV(a, 2);
-      if (diff2 !== 0) return diff2;
-      const diff3 = getV(b, 3) - getV(a, 3);
-      if (diff3 !== 0) return diff3;
-      return getV(b, 0) - getV(a, 0);
-    });
-  }, [stats, sortBy]);
+  ], []);
+
+  const tableData = React.useMemo(() => stats || [], [stats]);
+
+  const table = useReactTable({
+    data: tableData,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
+  const sortedStats = table.getRowModel().rows;
 
   React.useEffect(() => {
     setVisibleCount(200);
@@ -201,7 +235,7 @@ export default function Stats({ currentView, theme, period, format, rating, setP
         next.add(pokemonName);
         return next;
       });
-      const targetIndex = sortedStats.findIndex(r => r.pokemon === pokemonName);
+      const targetIndex = sortedStats.findIndex(r => r.original.pokemon === pokemonName);
       if (targetIndex !== -1) {
         setVisibleCount(prev => Math.max(prev, targetIndex + 20));
       }
@@ -252,7 +286,10 @@ export default function Stats({ currentView, theme, period, format, rating, setP
 
               <div className="control-group">
                 <label>Sort By</label>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                <select value={sortBy} onChange={(e) => {
+                  setSortBy(e.target.value);
+                  setSorting([{ id: e.target.value, desc: true }]);
+                }}>
                   <option value="usage">Usage</option>
                   <option value="viability">Viability Ceiling</option>
                   <option value="leads">Lead %</option>
@@ -352,7 +389,9 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                   )}
                   
                   <div className="pokedex-list fade-in-data">
-                    {sortedStats.slice(0, visibleCount).map((row, index) => (
+                    {sortedStats.slice(0, visibleCount).map((tableRow, index) => {
+                      const row = tableRow.original;
+                      return (
                       <PokemonRow 
                         key={row.pokemon}
                         row={row}
@@ -366,10 +405,10 @@ export default function Stats({ currentView, theme, period, format, rating, setP
                         setExpanded={setExpanded}
                         onPokemonClick={scrollToPokemon}
                       />
-                    ))}
+                    )})}
                   </div>
                   {visibleCount < sortedStats.length && (
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', paddingBottom: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
                       <button 
                         className="load-more-btn"
                         onClick={() => {

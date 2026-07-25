@@ -1,8 +1,7 @@
 import React from 'react';
 
 export default function PokeballIcon({ variant = 'scarlet', size = 24, className = '' }) {
-
-  const src = variant === 'scarlet' ? '/favicon-scarlet.svg' : '/favicon-violet.svg';
+  const src = `/favicon-${variant}.svg`;
 
   return (
     <img 

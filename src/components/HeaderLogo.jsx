@@ -1,10 +1,12 @@
 import React from 'react';
 
-export default function HeaderLogo({ theme }) {
-  const isViolet = theme === 'violet';
-
+export default function HeaderLogo({ theme, onClick }) {
   return (
-    <div className={`brand-logo-container ${isViolet ? 'violet-theme' : 'scarlet-theme'}`}>
+    <div 
+      className={`brand-logo-container ${theme}-theme`}
+      onClick={onClick}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+    >
       <div className="brand-text-group">
         <div className="brand-title">
           <span className="brand-main">SMOGON</span>

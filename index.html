@@ -14,17 +14,23 @@
     <meta name="twitter:title" content="Pokemon Showdown Usage Stats" />
     <meta name="twitter:description" content="View historical Pokemon Showdown usage statistics from 2014 to present." />
     <link rel="icon" type="image/svg+xml" href="/favicon-scarlet.svg" id="favicon" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
     <script>
       (function() {
         try {
           var match = document.cookie.match(/(^| )theme=([^;]+)/);
-          var theme = match ? match[2] : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'violet' : 'scarlet');
+          var theme = match ? match[2] : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-red' : 'scarlet');
           document.documentElement.setAttribute('data-theme', theme);
-          document.documentElement.style.backgroundColor = theme === 'violet' ? '#09090b' : '#fdfaf6';
-          document.documentElement.style.color = theme === 'violet' ? '#f4f4f5' : '#2d3748';
+          
+          var bg = '#fdfaf6';
+          var color = '#2d3748';
+          if (theme === 'dark-red') { bg = '#0a0a0a'; color = '#f5f5f5'; }
+          else if (theme === 'violet') { bg = '#0d1117'; color = '#f0f6fc'; }
+          else if (theme === 'light-green') { bg = '#6ee7b7'; color = '#064e3b'; }
+          
+          document.documentElement.style.backgroundColor = bg;
+          document.documentElement.style.color = color;
+          
           var favicon = document.getElementById('favicon');
           if (favicon) favicon.href = '/favicon-' + theme + '.svg';
         } catch (e) {}

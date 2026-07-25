@@ -1,49 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import Stats from './pages/Stats';
 import Guide from './pages/Guide';
-import PokeballIcon from './components/PokeballIcon';
+import Changelog from './pages/Changelog';
+import TrendTracker from './components/TrendTracker';
 import HeaderLogo from './components/HeaderLogo';
+import PokeballIcon from './components/PokeballIcon';
 
-const getInitialTheme = () => {
-  const match = document.cookie.match(/(^| )theme=([^;]+)/);
-  if (match) return match[2];
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'violet';
-  }
-  return 'scarlet';
-};
+import { Route, Switch, useLocation } from "wouter";
+import { useStore } from './store';
 
 function App() {
-  const [theme, setTheme] = useState(getInitialTheme);
-  const [currentView, setCurrentView] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('view') || 'stats';
-  });
-  const [period, setPeriod] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('period') || '2026-06';
-  });
-  const [format, setFormat] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('format') || 'gen9ou';
-  });
-  const [rating, setRating] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('rating') || '1760';
-  });
+  const { theme, setTheme, period, format, rating } = useStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [location, setLocation] = useLocation();
 
   useEffect(() => {
     const url = new URL(window.location);
-    if (currentView === 'stats') {
-      url.searchParams.delete('view');
-    } else {
-      url.searchParams.set('view', currentView);
-    }
     url.searchParams.set('period', period);
     url.searchParams.set('format', format);
     url.searchParams.set('rating', rating);
     window.history.replaceState(null, '', url);
-  }, [currentView, period, format, rating]);
+  }, [period, format, rating, location]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -80,55 +57,64 @@ function App() {
   return (
     <div className="app-container">
       <header className="app-header">
-        <div className="header-title-container">
-          <HeaderLogo theme={theme} />
-          <p className="header-desc" style={{ marginBottom: '8px' }}>
-            Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.
-          </p>
-          <nav style={{ display: 'flex', gap: '15px', marginTop: '15px', alignItems: 'center' }}>
-            <button 
-              onClick={() => setCurrentView('stats')} 
-              className={`nav-btn ${currentView === 'stats' ? 'active' : ''}`}
-              style={{ color: currentView === 'stats' ? 'var(--primary)' : 'var(--text-muted)' }}
-            >
-              Stats
-            </button>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
-            <button 
-              onClick={() => setCurrentView('chart')} 
-              className={`nav-btn ${currentView === 'chart' ? 'active' : ''}`}
-              style={{ color: currentView === 'chart' ? 'var(--primary)' : 'var(--text-muted)' }}
-            >
-              Format Chart
-            </button>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
-            <button 
-              onClick={() => setCurrentView('guide')} 
-              className={`nav-btn ${currentView === 'guide' ? 'active' : ''}`}
-              style={{ color: currentView === 'guide' ? 'var(--primary)' : 'var(--text-muted)' }}
-            >
-              Guide
-            </button>
-          </nav>
+        <div className="header-top-row">
+          <HeaderLogo theme={theme} onClick={() => setLocation('/')} />
+          
+          <button 
+            className="mobile-menu-btn" 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle Mobile Menu"
+          >
+            {isMobileMenuOpen ? (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            ) : (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            )}
+          </button>
         </div>
+
+        <nav className="desktop-nav">
+          <button onClick={() => setLocation('/')} className={`nav-btn ${location === '/' ? 'active' : ''}`} style={{ color: location === '/' ? 'var(--primary)' : 'var(--text-muted)' }}>Stats</button>
+          <span className="nav-separator">|</span>
+          <button onClick={() => setLocation('/chart')} className={`nav-btn ${location === '/chart' ? 'active' : ''}`} style={{ color: location === '/chart' ? 'var(--primary)' : 'var(--text-muted)' }}>Format Chart</button>
+          <span className="nav-separator">|</span>
+          <button onClick={() => setLocation('/trend')} className={`nav-btn ${location === '/trend' ? 'active' : ''}`} style={{ color: location === '/trend' ? 'var(--primary)' : 'var(--text-muted)' }}>Trend Tracker</button>
+          <span className="nav-separator">|</span>
+          <button onClick={() => setLocation('/guide')} className={`nav-btn ${location === '/guide' ? 'active' : ''}`} style={{ color: location === '/guide' ? 'var(--primary)' : 'var(--text-muted)' }}>Guide</button>
+          <span className="nav-separator">|</span>
+          <button onClick={() => setLocation('/changelog')} className={`nav-btn ${location === '/changelog' ? 'active' : ''}`} style={{ color: location === '/changelog' ? 'var(--primary)' : 'var(--text-muted)' }}>Changelog</button>
+        </nav>
+
+        {isMobileMenuOpen && (
+          <nav className="mobile-nav">
+            <button onClick={() => { setLocation('/'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/' ? 'active' : ''}`}>Stats</button>
+            <button onClick={() => { setLocation('/chart'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/chart' ? 'active' : ''}`}>Format Chart</button>
+            <button onClick={() => { setLocation('/trend'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/trend' ? 'active' : ''}`}>Trend Tracker</button>
+            <button onClick={() => { setLocation('/guide'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/guide' ? 'active' : ''}`}>Guide</button>
+            <button onClick={() => { setLocation('/changelog'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/changelog' ? 'active' : ''}`}>Changelog</button>
+          </nav>
+        )}
       </header>
     
       <main className="app-main">
-        <div style={{ display: currentView === 'guide' ? 'block' : 'none', width: '100%' }}>
-          <Guide />
-        </div>
-        <div style={{ display: currentView !== 'guide' ? 'block' : 'none', width: '100%' }}>
-          <Stats 
-            currentView={currentView}
-            theme={theme}
-            period={period}
-            setPeriod={setPeriod}
-            format={format}
-            setFormat={setFormat}
-            rating={rating}
-            setRating={setRating}
-          />
-        </div>
+        <Switch>
+          <Route path="/guide" component={Guide} />
+          <Route path="/trend" component={TrendTracker} />
+          <Route path="/changelog" component={Changelog} />
+          <Route path="/chart">
+            <Stats currentView="chart" />
+          </Route>
+          <Route path="/">
+            <Stats currentView="stats" />
+          </Route>
+        </Switch>
       </main>
 
       <footer className="app-footer">

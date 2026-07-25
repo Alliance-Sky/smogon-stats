@@ -5,8 +5,12 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'esnext',
-    cssMinify: true,
+    cssMinify: 'lightningcss',
     minify: 'esbuild',
+    esbuildOptions: {
+      legalComments: 'none',
+      drop: ['console', 'debugger'],
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -23,3 +27,4 @@ export default defineConfig({
     allowedHosts: true
   }
 });
+

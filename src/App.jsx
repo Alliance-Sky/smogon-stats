@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Stats from './pages/Stats';
 import Guide from './pages/Guide';
 import Changelog from './pages/Changelog';
+import Charts from './pages/Charts';
 import TrendTracker from './components/TrendTracker';
 import HeaderLogo from './components/HeaderLogo';
 import PokeballIcon from './components/PokeballIcon';
@@ -15,6 +16,7 @@ function App() {
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const url = new URL(window.location);
     url.searchParams.set('period', period);
     url.searchParams.set('format', format);
@@ -47,6 +49,16 @@ function App() {
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    const bg = theme === 'violet' ? '#090d16' : '#fafaf9';
+    const color = theme === 'violet' ? '#f8fafc' : '#0f172a';
+    document.documentElement.style.backgroundColor = bg;
+    document.documentElement.style.color = color;
+
+    const initStyle = document.getElementById('theme-init-style');
+    if (initStyle) {
+      initStyle.remove();
+    }
+
     const favicon = document.getElementById('favicon');
     if (favicon) {
       favicon.href = `/favicon-${theme}.svg`;
@@ -81,22 +93,16 @@ function App() {
         </div>
 
         <nav className="desktop-nav">
-          <button onClick={() => setLocation('/')} className={`nav-btn ${location === '/' ? 'active' : ''}`} style={{ color: location === '/' ? 'var(--primary)' : 'var(--text-muted)' }}>Stats</button>
-          <span className="nav-separator">|</span>
-          <button onClick={() => setLocation('/chart')} className={`nav-btn ${location === '/chart' ? 'active' : ''}`} style={{ color: location === '/chart' ? 'var(--primary)' : 'var(--text-muted)' }}>Format Chart</button>
-          <span className="nav-separator">|</span>
-          <button onClick={() => setLocation('/trend')} className={`nav-btn ${location === '/trend' ? 'active' : ''}`} style={{ color: location === '/trend' ? 'var(--primary)' : 'var(--text-muted)' }}>Trend Tracker</button>
-          <span className="nav-separator">|</span>
-          <button onClick={() => setLocation('/guide')} className={`nav-btn ${location === '/guide' ? 'active' : ''}`} style={{ color: location === '/guide' ? 'var(--primary)' : 'var(--text-muted)' }}>Guide</button>
-          <span className="nav-separator">|</span>
-          <button onClick={() => setLocation('/changelog')} className={`nav-btn ${location === '/changelog' ? 'active' : ''}`} style={{ color: location === '/changelog' ? 'var(--primary)' : 'var(--text-muted)' }}>Changelog</button>
+          <button onClick={() => setLocation('/')} className={`nav-btn ${location === '/' ? 'active' : ''}`}>Stats</button>
+          <button onClick={() => setLocation('/charts')} className={`nav-btn ${(location === '/charts' || location === '/chart' || location === '/trend') ? 'active' : ''}`}>Charts</button>
+          <button onClick={() => setLocation('/guide')} className={`nav-btn ${location === '/guide' ? 'active' : ''}`}>Guide</button>
+          <button onClick={() => setLocation('/changelog')} className={`nav-btn ${location === '/changelog' ? 'active' : ''}`}>Changelog</button>
         </nav>
 
         {isMobileMenuOpen && (
           <nav className="mobile-nav">
             <button onClick={() => { setLocation('/'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/' ? 'active' : ''}`}>Stats</button>
-            <button onClick={() => { setLocation('/chart'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/chart' ? 'active' : ''}`}>Format Chart</button>
-            <button onClick={() => { setLocation('/trend'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/trend' ? 'active' : ''}`}>Trend Tracker</button>
+            <button onClick={() => { setLocation('/charts'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${(location === '/charts' || location === '/chart' || location === '/trend') ? 'active' : ''}`}>Charts</button>
             <button onClick={() => { setLocation('/guide'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/guide' ? 'active' : ''}`}>Guide</button>
             <button onClick={() => { setLocation('/changelog'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/changelog' ? 'active' : ''}`}>Changelog</button>
           </nav>
@@ -105,6 +111,7 @@ function App() {
     
       <main className="app-main">
         <Switch>
+          <Route path="/charts" component={Charts} />
           <Route path="/guide" component={Guide} />
           <Route path="/trend" component={TrendTracker} />
           <Route path="/changelog" component={Changelog} />
@@ -118,48 +125,29 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
           <div>
-            <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> & <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
+            <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> &amp; <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
             <p>Not affiliated with Smogon or Pokemon Showdown.</p>
-            <p style={{ marginBottom: 0 }}>&copy; 2026 Musaddik Temkar | Built with React & Vite.</p>
+            <p style={{ marginBottom: 0 }}>&copy; 2026 Musaddik Temkar | Built with React &amp; Vite.</p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: 'bold', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Theme:</span>
+          
+          <div className="theme-switch-pill">
             <button 
               onClick={() => {
                 setTheme('scarlet');
                 document.cookie = `theme=scarlet;path=/;max-age=31536000`;
               }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: theme === 'scarlet' ? 'var(--primary)' : 'var(--text-muted)',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: '0.9rem',
-                padding: '0',
-                outline: 'none',
-              }}
+              className={`theme-switch-btn ${theme === 'scarlet' ? 'active' : ''}`}
             >
               Light
             </button>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 'bold' }}>|</span>
             <button 
               onClick={() => {
                 setTheme('violet');
                 document.cookie = `theme=violet;path=/;max-age=31536000`;
               }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: theme === 'violet' ? 'var(--primary)' : 'var(--text-muted)',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: '0.9rem',
-                padding: '0',
-                outline: 'none',
-              }}
+              className={`theme-switch-btn ${theme === 'violet' ? 'active' : ''}`}
             >
               Dark
             </button>

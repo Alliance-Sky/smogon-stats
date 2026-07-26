@@ -3,6 +3,7 @@ import { useStats } from '../hooks/useStats';
 import { useReactTable, getCoreRowModel, getSortedRowModel } from '@tanstack/react-table';
 import '../index.css';
 import { useStore } from '../store';
+import ControlsContainer from '../components/ControlsContainer';
 
 
 const FormatTools = React.lazy(() => import('../components/FormatTools'));
@@ -116,15 +117,19 @@ export default function Stats({ currentView }) {
     collapseAll
   } = useStats(period, format, rating, setFormat, setRating);
 
-  const handleCollapseAll = React.useCallback(() => {
+  const handleToggleAll = React.useCallback(() => {
+    const isCurrentlyExpandingAll = new URLSearchParams(window.location.search).get('expand') === 'all' || (stats && stats.length > 0 && expanded.size === stats.length);
     const url = new URL(window.location);
-    url.searchParams.delete('expand');
-    window.history.replaceState(null, '', url);
-
-    React.startTransition(() => {
+    if (isCurrentlyExpandingAll) {
+      url.searchParams.delete('expand');
+      window.history.replaceState(null, '', url);
       collapseAll();
-    });
-  }, [collapseAll]);
+    } else {
+      url.searchParams.set('expand', 'all');
+      window.history.replaceState(null, '', url);
+      expandAll();
+    }
+  }, [expanded, stats, expandAll, collapseAll]);
 
   const resetExpansion = () => {
     const url = new URL(window.location);
@@ -138,6 +143,7 @@ export default function Stats({ currentView }) {
   const onPeriodChange = (e) => {
     setPeriod(e.target.value);
     resetExpansion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const onFormatChange = (e) => {
     const newFormat = e.target.value;
@@ -146,9 +152,11 @@ export default function Stats({ currentView }) {
     setFormat(newFormat);
     setRating(newRating);
     resetExpansion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const onRatingChange = (e) => {
     setRating(e.target.value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const availableFormats = Object.keys(formats);
@@ -168,9 +176,7 @@ export default function Stats({ currentView }) {
   };
 
   const onRowClick = (pokemon) => {
-    React.startTransition(() => {
-      toggleDetails(pokemon);
-    });
+    toggleDetails(pokemon);
   };
 
   const showToast = (msg) => {
@@ -259,7 +265,7 @@ export default function Stats({ currentView }) {
           </React.Suspense>
         ) : (
           <>
-            <div className="glass-panel controls-container">
+            <ControlsContainer label="Stats Filter &amp; Sorting Controls" defaultExpanded={false}>
               <div className="control-group">
                 <label>Stats Period</label>
                 <select value={period || ''} onChange={onPeriodChange} disabled={months.length === 0}>
@@ -289,30 +295,85 @@ export default function Stats({ currentView }) {
                 <select value={sortBy} onChange={(e) => {
                   setSortBy(e.target.value);
                   setSorting([{ id: e.target.value, desc: true }]);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}>
                   <option value="usage">Usage</option>
                   <option value="viability">Viability Ceiling</option>
                   <option value="leads">Lead %</option>
                 </select>
               </div>
-            </div>
+            </ControlsContainer>
 
-            <div className="glass-panel">
-              {loading || !stats ? (
-                <>
-                  <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
-                    <div style={{ marginRight: 'auto' }}>
-                      <div className="skeleton-block" style={{ width: '80px', height: '34px', borderRadius: '12px' }}></div>
+            <div className="glass-panel" style={{ minHeight: 'calc(100vh - 280px)', display: 'flex', flexDirection: 'column' }}>
+              <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '4px', marginBottom: '15px' }}>
+                <div style={{ display: 'flex', gap: '10px', marginRight: 'auto' }}>
+                  <button 
+                    className={`control-btn ${showMeta ? 'active' : ''}`} 
+                    onClick={() => setShowMeta(!showMeta)} 
+                  >
+                    Meta
+                  </button>
+                </div>
+                <button 
+                  className={`control-btn ${new URLSearchParams(window.location.search).get('expand') === 'all' || (stats && stats.length > 0 && expanded.size === stats.length) ? 'active' : ''}`} 
+                  onClick={handleToggleAll}
+                  disabled={loading || !stats}
+                  style={{ opacity: loading || !stats ? 0.6 : 1 }}
+                >
+                  {new URLSearchParams(window.location.search).get('expand') === 'all' || (stats && stats.length > 0 && expanded.size === stats.length) ? 'Collapse All' : 'Expand All'}
+                </button>
+              </div>
+
+              {showMeta && (
+                <div className="pokedex-tile tool-tile fade-in-data" style={{ marginBottom: '1rem', width: '100%' }}>
+                  <div className="tool-tile-content" style={{ width: '100%' }}>
+                    <div className="tool-tile-info" style={{ width: '100%' }}>
+                      {!metagame || loading || !stats ? (
+                        <MetagameSkeleton />
+                      ) : Object.keys(metagame.playstyles).length === 0 ? (
+                        <div className="empty-state" style={{ padding: '1rem' }}>No metagame data available for this format.</div>
+                      ) : (
+                        <div className="metagame-analysis">
+                          <h5 className="meta-overview-title">Metagame Overview</h5>
+                          
+                          <div className="stalliness-bar-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>OFFENSE</span>
+                            <div style={{ flex: 1, height: '8px', background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent) 50%, var(--text-muted) 100%)', borderRadius: '4px', position: 'relative' }}>
+                              <div style={{
+                                position: 'absolute',
+                                top: '-4px',
+                                left: `${Math.max(0, Math.min(100, ((metagame.stalliness + 1) / 2) * 100))}%`,
+                                width: '16px', height: '16px', backgroundColor: 'var(--panel-bg)', border: '2px solid var(--primary)', borderRadius: '50%',
+                                transform: 'translateX(-50%)'
+                              }}></div>
+                            </div>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>STALL</span>
+                          </div>
+
+                          <div className="playstyles-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {Object.entries(metagame.playstyles)
+                              .sort(([,a], [,b]) => b - a)
+                              .slice(0, 8)
+                              .map(([style, pct]) => (
+                                <span key={style} style={{ fontSize: '0.85rem', background: 'var(--badge-bg)', padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
+                                  {style.charAt(0).toUpperCase() + style.slice(1)}: <strong>{pct.toFixed(1)}%</strong>
+                                </span>
+                              ))
+                            }
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="skeleton-block" style={{ width: '100px', height: '34px', borderRadius: '12px' }}></div>
-                    <div className="skeleton-block" style={{ width: '110px', height: '34px', borderRadius: '12px' }}></div>
                   </div>
-                  <div className="pokedex-list fade-in-data">
-                    {Array.from({ length: 20 }).map((_, i) => (
-                      <SkeletonRow key={i} />
-                    ))}
-                  </div>
-                </>
+                </div>
+              )}
+
+              {loading || !stats ? (
+                <div className="pokedex-list fade-in-data">
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <SkeletonRow key={i} />
+                  ))}
+                </div>
               ) : error ? (
                 <div className="error-message">
                   <h3>Error Loading Data</h3>
@@ -324,70 +385,6 @@ export default function Stats({ currentView }) {
                 </div>
               ) : (
                 <>
-                  <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '15px' }}>
-                    <div style={{ display: 'flex', gap: '10px', marginRight: 'auto' }}>
-                      <button 
-                        className="control-btn" 
-                        onClick={() => setShowMeta(!showMeta)} 
-                      >
-                        Meta
-                      </button>
-                    </div>
-                    <button className="control-btn" onClick={() => { 
-                      React.startTransition(() => {
-                        expandAll(); 
-                      });
-                      const url = new URL(window.location);
-                      url.searchParams.set('expand', 'all');
-                      window.history.replaceState(null, '', url);
-                    }}>Expand All</button>
-                    <button className="control-btn" onClick={handleCollapseAll}>Collapse All</button>
-                  </div>
-
-                  {showMeta && (
-                    <div className="pokedex-tile tool-tile fade-in-data" style={{ marginBottom: '1rem', width: '100%' }}>
-                      <div className="tool-tile-content" style={{ width: '100%' }}>
-                        <div className="tool-tile-info" style={{ width: '100%' }}>
-                          {!metagame ? (
-                            <MetagameSkeleton />
-                          ) : Object.keys(metagame.playstyles).length === 0 ? (
-                            <div className="empty-state" style={{ padding: '1rem' }}>No metagame data available for this format.</div>
-                          ) : (
-                            <div className="metagame-analysis">
-                              <h5 className="meta-overview-title">Metagame Overview</h5>
-                              
-                              <div className="stalliness-bar-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>OFFENSE</span>
-                                <div style={{ flex: 1, height: '8px', background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent) 50%, var(--text-muted) 100%)', borderRadius: '4px', position: 'relative' }}>
-                                  <div style={{
-                                    position: 'absolute',
-                                    top: '-4px',
-                                    left: `${Math.max(0, Math.min(100, ((metagame.stalliness + 1) / 2) * 100))}%`,
-                                    width: '16px', height: '16px', backgroundColor: 'var(--panel-bg)', border: '2px solid var(--primary)', borderRadius: '50%',
-                                    transform: 'translateX(-50%)'
-                                  }}></div>
-                                </div>
-                                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>STALL</span>
-                              </div>
-
-                              <div className="playstyles-badges" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                {Object.entries(metagame.playstyles)
-                                  .sort(([,a], [,b]) => b - a)
-                                  .slice(0, 8)
-                                  .map(([style, pct]) => (
-                                    <span key={style} style={{ fontSize: '0.85rem', background: 'var(--badge-bg)', padding: '4px 10px', borderRadius: '6px', border: '1px solid var(--border)' }}>
-                                      {style.charAt(0).toUpperCase() + style.slice(1)}: <strong>{pct.toFixed(1)}%</strong>
-                                    </span>
-                                  ))
-                                }
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  
                   <div className="pokedex-list fade-in-data">
                     {sortedStats.slice(0, visibleCount).map((tableRow, index) => {
                       const row = tableRow.original;
@@ -408,7 +405,7 @@ export default function Stats({ currentView }) {
                     )})}
                   </div>
                   {visibleCount < sortedStats.length && (
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '0.75rem' }}>
                       <button 
                         className="load-more-btn"
                         onClick={() => {
@@ -455,9 +452,8 @@ export default function Stats({ currentView }) {
 const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded, onPokemonClick }) => {
   const spriteSlug = getSprite(row.pokemon);
   const spriteUrl = `https://play.pokemonshowdown.com/sprites/home-centered/${spriteSlug}.png`;
-  const deferredExpanded = React.useDeferredValue(isExpanded);
   const displayRank = sortBy === 'usage' ? row.rank : (index + 1);
-  const isTopRank = displayRank <= 3;
+  const isTopRank = displayRank <= 10;
   const isLeadSort = sortBy === 'leads' || sortBy === 'lead';
   const isViabilitySort = sortBy === 'viability';
   
@@ -497,7 +493,7 @@ const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails,
         </div>
       </div>
       
-      {deferredExpanded && (
+      {isExpanded && (
         <div className="tile-details">
           {loadingDetails ? (
             <div className="skeleton-container fade-in">

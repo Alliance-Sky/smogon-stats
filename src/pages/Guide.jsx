@@ -1,55 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 function Guide() {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 400); 
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="stats-page guide-page fade-in-data">
-        <div className="glass-panel" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-          <div className="pulse-opacity" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div className="skeleton-block" style={{ width: '50%', height: '32px', borderRadius: '8px' }}></div>
-            <div className="skeleton-block" style={{ width: '100%', height: '16px', borderRadius: '4px', marginTop: '10px' }}></div>
-            <div className="skeleton-block" style={{ width: '90%', height: '16px', borderRadius: '4px' }}></div>
-            
-            <div style={{ marginTop: '30px' }}>
-              <div className="skeleton-block" style={{ width: '30%', height: '24px', borderRadius: '6px', marginBottom: '15px' }}></div>
-              <div className="skeleton-block" style={{ width: '95%', height: '16px', borderRadius: '4px', marginBottom: '10px' }}></div>
-              <div className="skeleton-block" style={{ width: '85%', height: '16px', borderRadius: '4px', marginBottom: '10px' }}></div>
-              <div className="skeleton-block" style={{ width: '90%', height: '16px', borderRadius: '4px' }}></div>
-            </div>
-
-            <div style={{ marginTop: '30px' }}>
-              <div className="skeleton-block" style={{ width: '40%', height: '24px', borderRadius: '6px', marginBottom: '15px' }}></div>
-              <div className="skeleton-block" style={{ width: '100%', height: '16px', borderRadius: '4px', marginBottom: '10px' }}></div>
-              <div className="skeleton-block" style={{ width: '80%', height: '16px', borderRadius: '4px', marginBottom: '10px' }}></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="stats-page guide-page fade-in-data">
       <div className="glass-panel" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-        <h2 style={{ marginBottom: '1.5rem', color: 'var(--accent)', borderBottom: '2px solid var(--border)', paddingBottom: '0.5rem' }}>
-          How to Read Smogon Stats
-        </h2>
-        
-        <p style={{ marginBottom: '2rem', lineHeight: '1.6' }}>
-          This guide explains the metrics, terminology, and playstyles used in Smogon statistics, helping you better understand the competitive Pokémon metagame data.
-        </p>
-
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>1. Filtering & Formats</h3>
+          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>1. Filtering & Formats</h3>
           <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6' }}>
             <li style={{ marginBottom: '0.5rem' }}>
               <strong>Formats/Tiers:</strong> Competitive Pokémon is divided into tiers based on usage (e.g., OU, UU, RU, VGC). Generation (Gen 9, Gen 8) also dictates mechanics and available Pokémon.
@@ -61,7 +17,7 @@ function Guide() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>2. Primary Metrics</h3>
+          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>2. Primary Metrics</h3>
           <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6' }}>
             <li style={{ marginBottom: '0.5rem' }}>
               <strong>Usage (%):</strong> The percentage of teams in the selected format and rating that include a specific Pokémon.
@@ -76,7 +32,7 @@ function Guide() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>3. Metagame Playstyles</h3>
+          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>3. Metagame Playstyles</h3>
           <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
             The <strong>Stalliness Scale</strong> determines if a metagame leans towards Offense or Stall. Playstyles are categorized by pacing and mechanics:
           </p>
@@ -90,7 +46,7 @@ function Guide() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>4. Pokémon Details (Expanded View)</h3>
+          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>4. Pokémon Details (Expanded View)</h3>
           <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6' }}>
             <li style={{ marginBottom: '0.5rem' }}><strong>Top Spreads:</strong> Displays the Nature and Effort Values (EVs) commonly used. E.g., <code>Timid:252/0/0/0/4/252</code> means Timid nature, 252 HP, 0 Atk, 0 Def, 0 SpA, 4 SpD, 252 Spe.</li>
             <li style={{ marginBottom: '0.5rem' }}><strong>Common Counters:</strong> Pokémon that statistically perform the best against the selected Pokémon by consistently forcing switches or scoring knockouts.</li>
@@ -99,7 +55,7 @@ function Guide() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--accent)', marginBottom: '1rem' }}>5. Trend Tracker</h3>
+          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>5. Trend Tracker</h3>
           <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
             The Trend Tracker is an advanced historical analysis tool that lets you visualize meta shifts over time.
           </p>

@@ -194,7 +194,7 @@ export default function FormatTools({ theme, period, months, formats, formatName
 
   return (
     <div className="format-tools fade-in-data">
-      <div className="glass-panel controls-container" style={{ marginTop: 0, borderTop: 'none', marginBottom: '1.25rem' }}>
+      <div className="glass-panel controls-container">
         <div className="control-group">
           <label>Compare Period</label>
           <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
@@ -209,15 +209,6 @@ export default function FormatTools({ theme, period, months, formats, formatName
           <select value={selectedFormat} onChange={onFormatChange} disabled={fetchingFormats}>
             {fetchingFormats ? <option value={selectedFormat}>Loading...</option> : Object.keys(localFormats).map(f => (
               <option key={f} value={f}>{formatName(f)}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="control-group">
-          <label>Rating Baseline</label>
-          <select value={selectedRating} onChange={e => setSelectedRating(e.target.value)} disabled={fetchingFormats || !selectedFormat}>
-            {fetchingFormats ? <option value={selectedRating}>Loading...</option> : (localFormats[selectedFormat] || []).map(r => (
-              <option key={r} value={r}>{r}</option>
             ))}
           </select>
         </div>

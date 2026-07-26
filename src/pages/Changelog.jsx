@@ -5,16 +5,14 @@ export default function Changelog() {
     {
       version: 'v2.0.0',
       date: '26 July, 2026',
-      title: 'Architectural Overhaul & Performance Rewrite',
+      title: 'Architectural Overhaul & UI Enhancements',
       changes: [
-        'Migrated to TanStack React Query for intelligent client-side caching and API orchestration',
-        'Implemented TanStack React Table for ultra-fast, headless rendering of the main stats table',
-        'Adopted Zustand for zero-boilerplate global state management',
-        'Swapped traditional routing for Wouter to drastically reduce bundle size',
-        'Solved loading layout shifts with a highly optimized 300ms caching delay logic',
-        'Rebuilt the data visualization engine with custom Chart.js plugins to solve layout and formatting edge cases'
+        'Migrated to TanStack React Query, Zustand, Wouter, and TanStack Table for ultra-fast performance',
+        'Solved loading layout shifts and rebuilt data visualization with custom Chart.js plugins',
+        'Implemented collapsible filter HUD on Stats page (closed by default)',
+        'Added smooth scroll-to-top on filter/sorting changes and guaranteed full-height card layouts',
+        'Eliminated font layout shifts (FOUT) using CSS font-display block rules'
       ]
-
     },
     {
       version: 'v1.1.0',

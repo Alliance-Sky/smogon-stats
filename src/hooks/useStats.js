@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getMonths, getFormats, getStats, getDetails, getViability, getLeads, getMetagame, getTotalBattles } from '../utils/api';
+import { getMonths, getFormats, getStats, getDetails, getMetagame, getTotalBattles } from '../utils/api';
 
 export function useStats(period, format, rating, setFormat, setRating) {
   const { data: months = [] } = useQuery({
@@ -35,17 +35,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
     enabled: isValidCombo
   });
 
-  const { data: viabilityData = {}, isPending: isViabilityPending, error: viabilityError } = useQuery({
-    queryKey: ['viability', period, format, rating],
-    queryFn: () => getViability(period, format, rating),
-    enabled: isValidCombo
-  });
 
-  const { data: leadsData = [], isPending: isLeadsPending, error: leadsError } = useQuery({
-    queryKey: ['leads', period, format, rating],
-    queryFn: () => getLeads(period, format, rating),
-    enabled: isValidCombo
-  });
 
   const { data: metagame = null, isPending: isMetagamePending, error: metagameError } = useQuery({
     queryKey: ['metagame', period, format, rating],
@@ -59,28 +49,18 @@ export function useStats(period, format, rating, setFormat, setRating) {
     enabled: isValidCombo
   });
 
-  const isAnyPending = isStatsPending || isViabilityPending || isLeadsPending || isMetagamePending || isTotalBattlesPending;
-  const anyError = statsError || viabilityError || leadsError || metagameError || totalBattlesError;
+  const isAnyPending = isStatsPending || isMetagamePending || isTotalBattlesPending;
+  const anyError = statsError || metagameError || totalBattlesError;
 
   const { data: details, isFetching: loadingDetails, isError: detailsError, refetch: fetchDetails } = useQuery({
     queryKey: ['details', period, format, rating],
     queryFn: () => getDetails(period, format, rating),
-    enabled: isValidCombo
+    enabled: false
   });
 
   const stats = useMemo(() => {
-    if (!statsData) return null;
-    const leadsMap = {};
-    leadsData.forEach(lead => {
-      leadsMap[lead.pokemon] = lead.leadPercent;
-    });
-
-    return statsData.map(stat => ({
-      ...stat,
-      viability: viabilityData[stat.pokemon] || null,
-      leadPercent: leadsMap[stat.pokemon] || '0.000%'
-    }));
-  }, [statsData, viabilityData, leadsData]);
+    return statsData || null;
+  }, [statsData]);
 
   const [expanded, setExpanded] = useState(new Set());
   const chunkingRef = useRef(0);
@@ -94,7 +74,11 @@ export function useStats(period, format, rating, setFormat, setRating) {
     const params = new URLSearchParams(window.location.search);
     if (params.get('expand') === 'all' && stats) {
         setExpanded(new Set(stats.map(s => s.pokemon)));
+        if (!details && !loadingDetails) {
+          fetchDetails();
+        }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stats]);
 
   const fetchDetailsIfNeeded = () => {
@@ -149,8 +133,42 @@ export function useStats(period, format, rating, setFormat, setRating) {
   };
 
   const collapseAll = () => {
-    chunkingRef.current += 1;
-    setExpanded(new Set());
+    if (stats && expanded.size > 0) {
+      chunkingRef.current += 1;
+      const currentChunkId = chunkingRef.current;
+      
+      const expandedArray = Array.from(expanded);
+      let currentIndex = 0;
+      const chunkSize = 30;
+      
+      const processChunk = () => {
+        if (chunkingRef.current !== currentChunkId) return;
+        
+        const chunk = expandedArray.slice(currentIndex, currentIndex + chunkSize);
+        if (chunk.length === 0) {
+          setExpanded(new Set());
+          return;
+        }
+        
+        setExpanded(prev => {
+          const next = new Set(prev);
+          chunk.forEach(p => next.delete(p));
+          return next;
+        });
+        
+        currentIndex += chunkSize;
+        if (currentIndex < expandedArray.length) {
+          setTimeout(processChunk, 16);
+        } else {
+          setExpanded(new Set());
+        }
+      };
+      
+      processChunk();
+    } else {
+      chunkingRef.current += 1;
+      setExpanded(new Set());
+    }
   };
 
   const [loading, setLoading] = useState(false);

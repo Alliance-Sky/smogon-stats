@@ -19,17 +19,20 @@
       (function() {
         try {
           var match = document.cookie.match(/(^| )theme=([^;]+)/);
-          var theme = match ? match[2] : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-red' : 'scarlet');
+          var theme = match ? match[2] : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'violet' : 'scarlet');
+          if (theme !== 'violet' && theme !== 'scarlet') theme = 'scarlet';
           document.documentElement.setAttribute('data-theme', theme);
           
-          var bg = '#fdfaf6';
-          var color = '#2d3748';
-          if (theme === 'dark-red') { bg = '#0a0a0a'; color = '#f5f5f5'; }
-          else if (theme === 'violet') { bg = '#0d1117'; color = '#f0f6fc'; }
-          else if (theme === 'light-green') { bg = '#6ee7b7'; color = '#064e3b'; }
+          var bg = theme === 'violet' ? '#090d16' : '#fafaf9';
+          var color = theme === 'violet' ? '#f8fafc' : '#0f172a';
           
           document.documentElement.style.backgroundColor = bg;
           document.documentElement.style.color = color;
+          
+          var style = document.createElement('style');
+          style.id = 'theme-init-style';
+          style.innerHTML = 'html, body { background-color: ' + bg + '; color: ' + color + '; margin: 0; }';
+          document.head.appendChild(style);
           
           var favicon = document.getElementById('favicon');
           if (favicon) favicon.href = '/favicon-' + theme + '.svg';

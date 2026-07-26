@@ -1,13 +1,12 @@
 import SmogonWorker from './worker.js?worker';
 
 const BASE_URL = 'https://www.smogon.com/stats/';
-const CACHE_NAME = 'smogon-immutable-v4';
 
-// Cleanup old caches automatically
+// Cleanup old legacy caches to free up disk space for returning users
 if (typeof caches !== 'undefined') {
   caches.keys().then(keys => {
     for (const key of keys) {
-      if (key.startsWith('smogon-') && key !== CACHE_NAME) {
+      if (key.startsWith('smogon-')) {
         caches.delete(key).catch(console.error);
       }
     }
@@ -63,26 +62,7 @@ async function fetchApi(endpoint) {
   return null;
 }
 
-async function getText(targetUrl, isImmutable = false) {
-  if (isImmutable && 'caches' in window) {
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      const cachedResponse = await cache.match(targetUrl);
-      if (cachedResponse) {
-        let text;
-        if (cachedResponse.headers.get('Content-Type') === 'application/gzip') {
-          const decompressedStream = cachedResponse.body.pipeThrough(new DecompressionStream('gzip'));
-          text = await new Response(decompressedStream).text();
-        } else {
-          text = await cachedResponse.text();
-        }
-        return text;
-      }
-    } catch (e) {
-      console.warn('Cache API error:', e);
-    }
-  }
-
+async function getText(targetUrl) {
   let text = null;
 
   const runProxyFetch = async (proxy, timeoutMs) => {
@@ -112,7 +92,7 @@ async function getText(targetUrl, isImmutable = false) {
          } catch(e) {}
       }
       
-      if (targetUrl.endsWith('.txt')) {
+      if (new URL(targetUrl).pathname.endsWith('.txt')) {
         if (fetchedText.trim().startsWith('<')) {
           throw new Error("Proxy returned HTML instead of text data");
         }
@@ -142,32 +122,40 @@ async function getText(targetUrl, isImmutable = false) {
     throw new Error(`Failed to fetch data from Smogon using public proxies.`);
   }
   
-  if (isImmutable && 'caches' in window) {
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      let cacheResponse;
-      
-      if ('CompressionStream' in window) {
-        const compressedStream = new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'));
-        cacheResponse = new Response(compressedStream, {
-          headers: { 'Content-Type': 'application/gzip' }
-        });
-      } else {
-        cacheResponse = new Response(text, {
-          headers: { 'Content-Type': 'text/plain' }
-        });
-      }
-      
-      await cache.put(targetUrl, cacheResponse);
-    } catch (e) {
-      console.warn('Cache API put error:', e);
-    }
-  }
-  
   return text;
 }
 
+let initDataCache = null;
+let initDataPromise = null;
+
+export async function getInit() {
+  if (initDataCache) return initDataCache;
+  if (!initDataPromise) {
+    initDataPromise = fetchApi('/api/v3/init').then(json => {
+      if (json) {
+        if (json.stats && Array.isArray(json.stats)) {
+          json.stats = json.stats.map(tuple => ({
+            rank: tuple[0],
+            pokemon: tuple[1],
+            usagePercent: tuple[2],
+            leadPercent: tuple[3],
+            viability: tuple[4]
+          }));
+        }
+        initDataCache = json;
+        return json;
+      }
+      return null;
+    });
+  }
+  return await initDataPromise;
+}
+
 export async function getMonths() {
+  const init = await getInit();
+  if (init && init.months) {
+    return init.months;
+  }
   const json = await fetchApi('/api/months');
   if (json && Array.isArray(json)) {
     return json;
@@ -175,96 +163,40 @@ export async function getMonths() {
   return [];
 }
 
-const tierOrder = ['ou', 'ubers', 'uu', 'ru', 'nu', 'pu', 'lc', 'monotype', 'doublesou', 'randombattle'];
-
-function getTierRank(formatStr) {
-  const clean = formatStr.replace(/^gen\d+/i, '').toLowerCase();
-  const idx = tierOrder.indexOf(clean);
-  return idx !== -1 ? idx : 999;
-}
-
-function sortFormatsObject(formatsObj) {
-  const getGenNum = (str) => {
-    const match = str.match(/^gen(\d+)/i);
-    return match ? parseInt(match[1], 10) : 0;
-  };
-
-  const keys = Object.keys(formatsObj).sort((a, b) => {
-    const genA = getGenNum(a);
-    const genB = getGenNum(b);
-    if (genA !== genB) {
-      return genB - genA;
-    }
-    const rankA = getTierRank(a);
-    const rankB = getTierRank(b);
-    if (rankA !== rankB) {
-      return rankA - rankB;
-    }
-    return a.localeCompare(b);
-  });
-
-  const sortedObj = {};
-  for (const k of keys) {
-    sortedObj[k] = formatsObj[k];
-  }
-  return sortedObj;
-}
-
 export async function getFormats(month) {
-  const json = await fetchApi(`/api/formats?month=${month}`);
-  if (json && typeof json === 'object') {
-    const sorted = sortFormatsObject(json);
-    return sorted;
+  const init = await getInit();
+  if (init && init.defaultMonth === month && init.formats) {
+    const sortedObj = {};
+    for (const item of init.formats) {
+      sortedObj[item.format] = item.ratings;
+    }
+    return sortedObj;
+  }
+  const json = await fetchApi(`/api/v2/formats?month=${month}`);
+  if (json && Array.isArray(json)) {
+    const sortedObj = {};
+    for (const item of json) {
+      sortedObj[item.format] = item.ratings;
+    }
+    return sortedObj;
   }
   return {};
 }
 
 export async function getStats(month, format, rating) {
-  const cacheKey = `usage-${month}-${format}-${rating}`;
-  
-  if ('caches' in window) {
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      const cachedResponse = await cache.match(cacheKey);
-      if (cachedResponse) {
-        let jsonText;
-        if (cachedResponse.headers.get('Content-Type') === 'application/gzip') {
-          const decompressedStream = cachedResponse.body.pipeThrough(new DecompressionStream('gzip'));
-          jsonText = await new Response(decompressedStream).text();
-        } else {
-          jsonText = await cachedResponse.text();
-        }
-        return JSON.parse(jsonText);
-      }
-    } catch (e) {
-      console.warn('Cache API error:', e);
-    }
+  const init = await getInit();
+  if (init && init.defaultMonth === month && init.defaultFormat === format && init.defaultRating === rating && init.stats) {
+    return init.stats;
   }
-  
-  const json = await fetchApi(`/api/usage?month=${month}&format=${format}&rating=${rating}`);
-  if (json) {
-    if ('caches' in window) {
-      try {
-        const cache = await caches.open(CACHE_NAME);
-        const jsonString = JSON.stringify(json);
-        
-        try {
-          const compressedStream = new Blob([jsonString]).stream().pipeThrough(new CompressionStream('gzip'));
-          const cacheResponse = new Response(compressedStream, {
-            headers: { 'Content-Type': 'application/gzip' }
-          });
-          await cache.put(cacheKey, cacheResponse);
-        } catch (e) {
-          const uncompressedResponse = new Response(jsonString, {
-            headers: { 'Content-Type': 'application/json' }
-          });
-          await cache.put(cacheKey, uncompressedResponse);
-        }
-      } catch (e) {
-        console.warn('Cache API put error:', e);
-      }
-    }
-    return json;
+  const json = await fetchApi(`/api/v3/stats?month=${month}&format=${format}&rating=${rating}`);
+  if (json && Array.isArray(json)) {
+    return json.map(tuple => ({
+      rank: tuple[0],
+      pokemon: tuple[1],
+      usagePercent: tuple[2],
+      leadPercent: tuple[3],
+      viability: tuple[4]
+    }));
   }
   return [];
 }
@@ -273,7 +205,7 @@ export async function getDetails(month, format, rating) {
   const fileName = `${format}-${rating}.txt`;
   const targetUrl = `${BASE_URL}${month}/moveset/${fileName}?v=2`;
   
-  const text = await getText(targetUrl, true);
+  const text = await getText(targetUrl);
   if (typeof text === 'object' && text !== null) {
       return text;
   }

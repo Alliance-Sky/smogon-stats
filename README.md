@@ -1,19 +1,32 @@
 # smogonstats.eu.cc
 
-A Pokemon Showdown usage stats viewer built with React and Vite.
+A high-performance, esports-inspired Pokémon Showdown usage stats viewer and analytics dashboard built with React, Vite, and Cloudflare Workers.
 
 ## Features
 
-- **Interactive Data Browsing**: View and filter Pokémon Showdown usage stats across different months, competitive formats (e.g., Gen 9 OU, Random Battles), and rating baselines.
-- **Detailed Pokémon Stats**: Expand any Pokémon to see detailed breakdowns of their top Moves, Spreads, Items, and Abilities.
-- **Scarlet / Violet Theming**: Features a dynamic theme toggle between Scarlet (light) and Violet (dark) aesthetics, defaulting to your system's color scheme preference.
-- **Noise Reduction**: Automatically filters out Pokémon and detailed stats (moves, items, spreads, abilities) that have exactly `0.00000000%` usage to provide a cleaner viewing experience while still including Pokémon with `<0.01%` usage.
-- **Dynamic Sprites**: Automatically fetches and displays centered Pokémon HOME sprites directly from Pokémon Showdown.
-- **Performance & Caching**: Leverages the browser Cache API and Web Workers to efficiently fetch, parse, and cache Smogon's raw data files without blocking the main UI thread.
+- **Interactive Competitive Analytics**: Browse and filter historical Pokémon Showdown usage statistics across generations, competitive formats (e.g., Gen 9 OU, VGC, Random Battles), and Elo rating baselines (0, 1500, 1695, 1760+).
+- **Comprehensive Charts & Trend Tracking**: Dedicated Charts dashboard featuring cross-month Format Stats comparisons and a Trend Tracker to visualize metagame shifts over time.
+- **In-Depth Pokémon Breakdowns**: Expand any Pokémon card to inspect detailed competitive metrics, including Top Moves, Abilities, Items, EV Spreads, Common Teammates, and Counters/Checks.
+- **Viability Ceiling & Lead Metrics**: Sort and evaluate Pokémon by total Usage %, Viability Ceiling (Top, Middle, Bottom tiers), and Lead usage percentages.
+- **Esports Minimalist Design**: Clean typography (Outfit Variable font), high-end glassmorphism panels, and a responsive layout with custom Scarlet (light) and Violet (dark) color themes.
+- **Zero-Flicker & Shift-Free UX**: Optimized rendering engine with CSS font-display block rules, smooth scroll-to-top navigation, and stable layout dimensions to eliminate FOUT and layout shifts.
+- **URL State Persistence**: Deep-linking support that preserves active view, selected period, format, rating baseline, and expanded cards in URL search parameters.
+- **Dedicated Guide & Documentation**: Built-in reference guide explaining Smogon terminology, rating filters, primary metrics, and metagame playstyles (Stalliness scale, Offense, Balance, VoltTurn).
+
+## Architecture & Technology Stack
+
+- **Frontend Framework**: React 18 with Vite and Rolldown bundling.
+- **Data Management & Caching**: TanStack React Query for API caching, deduplication, and background synchronization.
+- **State Management**: Zustand for lightweight, zero-boilerplate global state orchestration.
+- **High-Speed Rendering**: TanStack React Table for headless, virtualized list processing.
+- **Client-Side Routing**: Wouter for minimal bundle footprint.
+- **Data Visualization**: Chart.js and react-chartjs-2 with custom plugins for advanced responsive charting.
+- **Backend Integration**: Connected to PostgreSQL database endpoints and Cloudflare Workers for ultra-fast data retrieval.
 
 ## Development
 
-To start the development server:
+To start the development server locally:
+
 ```bash
 npm install
 npm run dev
@@ -21,20 +34,25 @@ npm run dev
 
 ## Build
 
-To build the project for production:
+To create an optimized production build:
+
 ```bash
 npm run build
 ```
 
 ## Deployment
 
-This project is configured to deploy directly to Cloudflare using the modern Workers with Static Assets (via Wrangler).
+This project is configured for edge deployment on Cloudflare using Workers with Static Assets (via Wrangler):
+
+```bash
+npm run deploy
+```
 
 ## Credits
 
-- **[Smogon](https://www.smogon.com/stats/)**: For providing the raw competitive Pokémon usage statistics data.
-- **[Pokémon Showdown](https://play.pokemonshowdown.com/sprites/)**: For the Pokémon sprite assets used in the application.
-- **[React](https://react.dev/)** & **[Vite](https://vitejs.dev/)**: For the frontend framework and build tooling.
+- **[Smogon](https://www.smogon.com/stats/)**: For compiling and providing raw competitive Pokémon usage statistics.
+- **[Pokémon Showdown](https://play.pokemonshowdown.com/sprites/)**: For competitive battle platform data and sprite assets.
+- **[TanStack](https://tanstack.com/)** & **[Zustand](https://docs.pmnd.rs/zustand)**: For modern React query caching and state architecture.
 
 ## License
 

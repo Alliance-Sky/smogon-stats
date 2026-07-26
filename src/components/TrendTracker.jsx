@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useQuery, useQueries } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import '../utils/chartSetup';
 import { Line } from 'react-chartjs-2';
 import { getTrend, getFormats, getStats } from '../utils/api';
@@ -156,14 +156,14 @@ export default function TrendTracker() {
     return assignedColorsRef.current[pokemon];
   };
 
-  const trendQueries = useQueries({
-    queries: trackedPokemon.map(pokemon => ({
-      queryKey: ['trend', format, rating, pokemon, monthsLimit],
-      queryFn: () => getTrend(format, rating, [pokemon], monthsLimit),
-    }))
+  const trendQuery = useQuery({
+    queryKey: ['trend', format, rating, trackedPokemon.join(','), monthsLimit],
+    queryFn: () => getTrend(format, rating, trackedPokemon, monthsLimit),
+    enabled: trackedPokemon.length > 0,
+    placeholderData: keepPreviousData
   });
 
-  const isFetchingAny = trendQueries.some(q => q.isFetching);
+  const isFetchingAny = trendQuery.isFetching;
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -179,14 +179,8 @@ export default function TrendTracker() {
   }, [isFetchingAny]);
 
   const trendData = useMemo(() => {
-    const mergedData = {};
-    trendQueries.forEach(q => {
-      if (q.data) {
-        Object.assign(mergedData, q.data);
-      }
-    });
-    return mergedData;
-  }, [trendQueries]);
+    return trendQuery.data || {};
+  }, [trendQuery.data]);
 
   const handleAddPokemon = (e) => {
     e.preventDefault();
@@ -322,7 +316,7 @@ export default function TrendTracker() {
 
   return (
     <div className="trend-tracker fade-in-data">
-      <div className="glass-panel controls-container" style={{ marginTop: 0, borderTop: 'none', marginBottom: '1.25rem' }}>
+      <div className="glass-panel controls-container">
         <div className="control-group">
           <label>Format</label>
           <select value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>

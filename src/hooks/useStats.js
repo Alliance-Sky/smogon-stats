@@ -1,5 +1,5 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { getMonths, getFormats, getStats, getDetails, getMetagame, getTotalBattles } from '../utils/api';
 
 export function useStats(period, format, rating, setFormat, setRating) {
@@ -11,7 +11,8 @@ export function useStats(period, format, rating, setFormat, setRating) {
   const { data: formats = {} } = useQuery({
     queryKey: ['formats', period],
     queryFn: () => getFormats(period),
-    enabled: !!period
+    enabled: !!period,
+    placeholderData: keepPreviousData
   });
 
   useEffect(() => {
@@ -29,34 +30,69 @@ export function useStats(period, format, rating, setFormat, setRating) {
 
   const isValidCombo = !!(period && format && rating && formats[format]?.includes(rating));
 
-  const { data: statsData, isPending: isStatsPending, error: statsError } = useQuery({
+  const { data: statsData, isPending: isStatsPending, isFetching: isStatsFetching, error: statsError } = useQuery({
     queryKey: ['stats', period, format, rating],
     queryFn: () => getStats(period, format, rating),
-    enabled: isValidCombo
+    enabled: isValidCombo,
+    placeholderData: keepPreviousData
   });
 
-
-
-  const { data: metagame = null, isPending: isMetagamePending, error: metagameError } = useQuery({
+  const { data: metagame = null, isPending: isMetagamePending, isFetching: isMetagameFetching, error: metagameError } = useQuery({
     queryKey: ['metagame', period, format, rating],
     queryFn: () => getMetagame(period, format, rating),
-    enabled: isValidCombo
+    enabled: isValidCombo,
+    placeholderData: keepPreviousData
   });
 
-  const { data: totalBattles = 0, isPending: isTotalBattlesPending, error: totalBattlesError } = useQuery({
+  const { data: totalBattles = 0, isPending: isTotalBattlesPending, isFetching: isTotalBattlesFetching, error: totalBattlesError } = useQuery({
     queryKey: ['totalBattles', period, format, rating],
     queryFn: () => getTotalBattles(period, format, rating),
-    enabled: isValidCombo
+    enabled: isValidCombo,
+    placeholderData: keepPreviousData
   });
 
   const isAnyPending = isStatsPending || isMetagamePending || isTotalBattlesPending;
+  const isAnyFetching = isStatsFetching || isMetagameFetching || isTotalBattlesFetching;
   const anyError = statsError || metagameError || totalBattlesError;
 
-  const { data: details, isFetching: loadingDetails, isError: detailsError, refetch: fetchDetails } = useQuery({
-    queryKey: ['details', period, format, rating],
-    queryFn: () => getDetails(period, format, rating),
-    enabled: false
-  });
+  const [details, setDetails] = useState({});
+  const [loadingDetails, setLoadingDetails] = useState({});
+  const [detailsError, setDetailsError] = useState({});
+  const [loadingAllDetails, setLoadingAllDetails] = useState(false);
+
+  useEffect(() => {
+    setDetails({});
+    setLoadingDetails({});
+    setDetailsError({});
+    setLoadingAllDetails(false);
+  }, [period, format, rating]);
+
+  const fetchDetailsIfNeeded = (pokemon) => {
+    if (pokemon) {
+      if (!details[pokemon] && !loadingDetails[pokemon] && !loadingAllDetails) {
+        setLoadingDetails(prev => ({ ...prev, [pokemon]: true }));
+        getDetails(period, format, rating, pokemon)
+          .then(data => setDetails(prev => ({ ...prev, [pokemon]: data })))
+          .catch(() => setDetailsError(prev => ({ ...prev, [pokemon]: true })))
+          .finally(() => setLoadingDetails(prev => ({ ...prev, [pokemon]: false })));
+      }
+    } else {
+      if (!loadingAllDetails) {
+        setLoadingAllDetails(true);
+        console.log("Fetching bulk details...");
+        getDetails(period, format, rating)
+          .then(data => {
+            console.log("Bulk details fetched. Keys count:", data ? Object.keys(data).length : "null/undefined");
+            if (data) setDetails(prev => ({ ...prev, ...data }));
+          })
+          .catch(err => console.error("Bulk details fetch error:", err))
+          .finally(() => {
+            setLoadingAllDetails(false);
+            console.log("Bulk details fetch finished.");
+          });
+      }
+    }
+  };
 
   const stats = useMemo(() => {
     return statsData || null;
@@ -74,18 +110,12 @@ export function useStats(period, format, rating, setFormat, setRating) {
     const params = new URLSearchParams(window.location.search);
     if (params.get('expand') === 'all' && stats) {
         setExpanded(new Set(stats.map(s => s.pokemon)));
-        if (!details && !loadingDetails) {
-          fetchDetails();
+        if (Object.keys(details).length < stats.length) {
+          fetchDetailsIfNeeded();
         }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [stats]);
-
-  const fetchDetailsIfNeeded = () => {
-    if (!details && !loadingDetails) {
-      fetchDetails();
-    }
-  };
 
   const toggleDetails = (pokemon) => {
     setExpanded(prev => {
@@ -94,13 +124,13 @@ export function useStats(period, format, rating, setFormat, setRating) {
         newExpanded.delete(pokemon);
       } else {
         newExpanded.add(pokemon);
+        fetchDetailsIfNeeded(pokemon);
       }
       return newExpanded;
     });
-    fetchDetailsIfNeeded();
   };
 
-  const expandAll = () => {
+  const expandAll = useCallback(() => {
     if (stats) {
       chunkingRef.current += 1;
       const currentChunkId = chunkingRef.current;
@@ -128,11 +158,14 @@ export function useStats(period, format, rating, setFormat, setRating) {
       };
       
       processChunk();
-      fetchDetailsIfNeeded();
+      if (Object.keys(details).length < stats.length) {
+        // use fetchDetailsIfNeeded from scope
+        fetchDetailsIfNeeded();
+      }
     }
-  };
+  }, [stats, details]);
 
-  const collapseAll = () => {
+  const collapseAll = useCallback(() => {
     if (stats && expanded.size > 0) {
       chunkingRef.current += 1;
       const currentChunkId = chunkingRef.current;
@@ -169,21 +202,29 @@ export function useStats(period, format, rating, setFormat, setRating) {
       chunkingRef.current += 1;
       setExpanded(new Set());
     }
-  };
+  }, [stats, expanded]);
 
   const [loading, setLoading] = useState(false);
+  const isFirstMount = useRef(true);
 
   useEffect(() => {
-    let timer;
-    if (isAnyPending) {
-      timer = setTimeout(() => {
-        setLoading(true);
-      }, 300);
-    } else {
-      setLoading(false);
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      if (!isAnyFetching) {
+        return;
+      }
     }
-    return () => clearTimeout(timer);
-  }, [isAnyPending]);
+
+    if (isAnyFetching) {
+      setLoading(true);
+    } else {
+      
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [isAnyFetching]);
 
   const error = anyError ? anyError.message : null;
 
@@ -194,11 +235,13 @@ export function useStats(period, format, rating, setFormat, setRating) {
     metagame,
     totalBattles,
     loading,
+    isFetching: isAnyFetching,
     error,
     details,
     expanded,
     setExpanded,
     loadingDetails,
+    loadingAllDetails,
     detailsError,
     toggleDetails,
     expandAll,

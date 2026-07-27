@@ -1,29 +1,56 @@
 import { create } from 'zustand';
 
 const getInitialTheme = () => {
-  const match = document.cookie.match(/(^| )theme=([^;]+)/);
-  if (match) return match[2];
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'violet';
-  }
   return 'scarlet';
 };
 
-const params = new URLSearchParams(window.location.search);
+const getInitialStateFromQuery = () => {
+  if (typeof window !== 'undefined' && window.__REACT_QUERY_STATE__) {
+    try {
+      const queries = window.__REACT_QUERY_STATE__.queries;
+      const statsQuery = queries.find(q => q.queryKey && q.queryKey[0] === 'stats');
+      if (statsQuery && statsQuery.queryKey.length >= 4) {
+        return {
+          defaultMonth: statsQuery.queryKey[1],
+          defaultFormat: statsQuery.queryKey[2],
+          defaultRating: statsQuery.queryKey[3]
+        };
+      }
+    } catch(e) {}
+  }
+  return null;
+};
+
+const getParam = (key, defaultVal) => {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has(key)) return params.get(key);
+    
+    const initState = getInitialStateFromQuery();
+    if (initState) {
+      if (key === 'period' && initState.defaultMonth) return initState.defaultMonth;
+      if (key === 'format' && initState.defaultFormat) return initState.defaultFormat;
+      if (key === 'rating' && initState.defaultRating) return initState.defaultRating;
+    }
+  }
+  return defaultVal;
+};
 
 export const useStore = create((set) => ({
   theme: getInitialTheme(),
   setTheme: (theme) => {
-    document.cookie = `theme=${theme};path=/;max-age=31536000`;
+    if (typeof document !== 'undefined') {
+      document.cookie = `theme=${theme};path=/;max-age=31536000`;
+    }
     set({ theme });
   },
 
-  period: params.get('period') || '2026-06',
+  period: getParam('period', '2026-06'),
   setPeriod: (period) => set({ period }),
 
-  format: params.get('format') || 'gen9ou',
+  format: getParam('format', 'gen9ou'),
   setFormat: (format) => set({ format }),
 
-  rating: params.get('rating') || '1760',
+  rating: getParam('rating', '1760'),
   setRating: (rating) => set({ rating })
 }));

@@ -1,6 +1,6 @@
 # smogonstats.eu.cc
 
-A high-performance, esports-inspired Pokémon Showdown usage stats viewer and analytics dashboard built with React, Vite, and Cloudflare Workers.
+A Pokémon Showdown usage stats viewer and analytics dashboard built with React, Vite, and Cloudflare Workers.
 
 ## Features
 
@@ -8,7 +8,7 @@ A high-performance, esports-inspired Pokémon Showdown usage stats viewer and an
 - **Comprehensive Charts & Trend Tracking**: Dedicated Charts dashboard featuring cross-month Format Stats comparisons and a Trend Tracker to visualize metagame shifts over time.
 - **In-Depth Pokémon Breakdowns**: Expand any Pokémon card to inspect detailed competitive metrics, including Top Moves, Abilities, Items, EV Spreads, Common Teammates, and Counters/Checks.
 - **Viability Ceiling & Lead Metrics**: Sort and evaluate Pokémon by total Usage %, Viability Ceiling (Top, Middle, Bottom tiers), and Lead usage percentages.
-- **Esports Minimalist Design**: Clean typography (Outfit Variable font), high-end glassmorphism panels, and a responsive layout with custom Scarlet (light) and Violet (dark) color themes.
+- **Minimalist Design**: Clean typography (Outfit Variable font), high-end glassmorphism panels, and a responsive layout with custom Scarlet (light) and Violet (dark) color themes.
 - **Zero-Flicker & Shift-Free UX**: Optimized rendering engine with CSS font-display block rules, smooth scroll-to-top navigation, and stable layout dimensions to eliminate FOUT and layout shifts.
 - **URL State Persistence**: Deep-linking support that preserves active view, selected period, format, rating baseline, and expanded cards in URL search parameters.
 - **Dedicated Guide & Documentation**: Built-in reference guide explaining Smogon terminology, rating filters, primary metrics, and metagame playstyles (Stalliness scale, Offense, Balance, VoltTurn).
@@ -18,10 +18,10 @@ A high-performance, esports-inspired Pokémon Showdown usage stats viewer and an
 - **Frontend Framework**: React 18 with Vite and Rolldown bundling.
 - **Data Management & Caching**: TanStack React Query for API caching, deduplication, and background synchronization.
 - **State Management**: Zustand for lightweight, zero-boilerplate global state orchestration.
-- **High-Speed Rendering**: TanStack React Table for headless, virtualized list processing.
+- **High-Speed Rendering**: TanStack React Table for headless, virtualized list processing with native Float64 numeric sorting.
 - **Client-Side Routing**: Wouter for minimal bundle footprint.
 - **Data Visualization**: Chart.js and react-chartjs-2 with custom plugins for advanced responsive charting.
-- **Backend Integration**: Connected to PostgreSQL database endpoints and Cloudflare Workers for ultra-fast data retrieval.
+- **Backend Integration**: Connected to PostgreSQL database endpoints via the highly optimized proxy-api v3, utilizing targeted micro-payloads for detailed data lookups.
 
 ## Development
 

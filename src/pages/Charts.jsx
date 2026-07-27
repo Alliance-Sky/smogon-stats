@@ -7,7 +7,7 @@ function Charts() {
   return (
     <div className="stats-page fade-in-data" style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'stretch' }}>
-        {/* Card 1: Format Stats Chart */}
+        
         <div className="pokedex-tile" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyItems: 'stretch', justifyContent: 'space-between', height: '100%', contain: 'none', borderRadius: '12px' }}>
           <div>
             <div style={{ display: 'inline-flex', padding: '14px', borderRadius: '14px', background: 'var(--primary-glow)', color: 'var(--primary)', marginBottom: '1.5rem' }}>
@@ -45,7 +45,6 @@ function Charts() {
           </button>
         </div>
 
-        {/* Card 2: Trend Tracker Chart */}
         <div className="pokedex-tile" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyItems: 'stretch', justifyContent: 'space-between', height: '100%', contain: 'none', borderRadius: '12px' }}>
           <div>
             <div style={{ display: 'inline-flex', padding: '14px', borderRadius: '14px', background: 'var(--accent-glow)', color: 'var(--accent)', marginBottom: '1.5rem' }}>

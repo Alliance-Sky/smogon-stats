@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Stats from './pages/Stats';
-import Guide from './pages/Guide';
-import Changelog from './pages/Changelog';
-import Charts from './pages/Charts';
-import TrendTracker from './components/TrendTracker';
 import HeaderLogo from './components/HeaderLogo';
 import PokeballIcon from './components/PokeballIcon';
 
 import { Route, Switch, useLocation } from "wouter";
 import { useStore } from './store';
+
+const Guide = lazy(() => import('./pages/Guide'));
+const Changelog = lazy(() => import('./pages/Changelog'));
+const Charts = lazy(() => import('./pages/Charts'));
+const TrendTracker = lazy(() => import('./components/TrendTracker'));
 
 function App() {
   const { theme, setTheme, period, format, rating } = useStore();
@@ -26,6 +27,19 @@ function App() {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const match = document.cookie.match(/(^| )theme=([^;]+)/);
+    let actualTheme = 'scarlet';
+    if (match) {
+      actualTheme = match[2];
+    } else if (mediaQuery.matches) {
+      actualTheme = 'violet';
+    }
+    
+    if (theme !== actualTheme) {
+      useStore.setState({ theme: actualTheme });
+    }
+
     const handleChange = (e) => {
       if (!document.cookie.match(/(^| )theme=([^;]+)/)) {
         setTheme(e.matches ? 'violet' : 'scarlet');
@@ -65,12 +79,11 @@ function App() {
     }
   }, [theme]);
 
-
   return (
     <div className="app-container">
       <header className="app-header">
         <div className="header-top-row">
-          <HeaderLogo theme={theme} onClick={() => setLocation('/')} />
+          <HeaderLogo onClick={() => setLocation('/')} />
           
           <button 
             className="mobile-menu-btn" 
@@ -110,18 +123,20 @@ function App() {
       </header>
     
       <main className="app-main">
-        <Switch>
-          <Route path="/charts" component={Charts} />
-          <Route path="/guide" component={Guide} />
-          <Route path="/trend" component={TrendTracker} />
-          <Route path="/changelog" component={Changelog} />
-          <Route path="/chart">
-            <Stats currentView="chart" />
-          </Route>
-          <Route path="/">
-            <Stats currentView="stats" />
-          </Route>
-        </Switch>
+        <Suspense fallback={<div className="loading-fallback" style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}><div className="skeleton-circle" style={{ width: '40px', height: '40px' }}></div></div>}>
+          <Switch>
+            <Route path="/charts" component={Charts} />
+            <Route path="/guide" component={Guide} />
+            <Route path="/trend" component={TrendTracker} />
+            <Route path="/changelog" component={Changelog} />
+            <Route path="/chart">
+              <Stats currentView="chart" />
+            </Route>
+            <Route path="/">
+              <Stats currentView="stats" />
+            </Route>
+          </Switch>
+        </Suspense>
       </main>
 
       <footer className="app-footer">

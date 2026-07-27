@@ -5,7 +5,6 @@ import '../index.css';
 import { useStore } from '../store';
 import ControlsContainer from '../components/ControlsContainer';
 
-
 const FormatTools = React.lazy(() => import('../components/FormatTools'));
 
 function getSprite(name) {
@@ -46,24 +45,29 @@ function getSprite(name) {
   return lowerName.replace(/[^a-z0-9]/g, '');
 }
 
-const formatPercent = (percentStr, showDecimals = false) => {
-  if (!percentStr) return '';
-  const num = parseFloat(percentStr);
-  if (isNaN(num)) return percentStr;
+const formatPercent = (val, showDecimals = false) => {
+  if (val == null) return '';
+  const num = typeof val === 'number' ? val : parseFloat(val);
+  if (isNaN(num)) return val;
   if (showDecimals) {
-    return `${parseFloat(percentStr)}%`;
+    return `${Number(num.toFixed(5))}%`;
   }
   return `${Math.round(num)}%`;
 };
 
 export default function Stats({ currentView }) {
   const { theme, period, format, rating, setPeriod, setFormat, setRating } = useStore();
-  const [sortBy, setSortBy] = React.useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('sortBy') || 'usage';
-  });
+  const [sortBy, setSortBy] = React.useState('usage');
+  const [sorting, setSorting] = React.useState([{ id: 'usage', desc: true }]);
 
-  const [sorting, setSorting] = React.useState([{ id: sortBy, desc: true }]);
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('sortBy')) {
+      const sb = params.get('sortBy');
+      setSortBy(sb);
+      setSorting([{ id: sb, desc: true }]);
+    }
+  }, []);
 
   React.useEffect(() => {
     const url = new URL(window.location);
@@ -71,13 +75,16 @@ export default function Stats({ currentView }) {
     window.history.replaceState(null, '', url);
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
-  const [visibleCount, setVisibleCount] = React.useState(200);
+  const [visibleCount, setVisibleCount] = React.useState(100);
 
-  
-  const [showMeta, setShowMeta] = React.useState(() => {
+  const [showMeta, setShowMeta] = React.useState(false);
+
+  React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('meta') === 'true';
-  });
+    if (params.get('meta') === 'true') {
+      setShowMeta(true);
+    }
+  }, []);
 
   React.useEffect(() => {
     const url = new URL(window.location);
@@ -111,6 +118,7 @@ export default function Stats({ currentView }) {
     expanded,
     setExpanded,
     loadingDetails,
+    loadingAllDetails,
     detailsError,
     toggleDetails,
     expandAll,
@@ -118,7 +126,7 @@ export default function Stats({ currentView }) {
   } = useStats(period, format, rating, setFormat, setRating);
 
   const handleToggleAll = React.useCallback(() => {
-    const isCurrentlyExpandingAll = new URLSearchParams(window.location.search).get('expand') === 'all' || (stats && stats.length > 0 && expanded.size === stats.length);
+    const isCurrentlyExpandingAll = (stats && stats.length > 0 && expanded.size === stats.length);
     const url = new URL(window.location);
     if (isCurrentlyExpandingAll) {
       url.searchParams.delete('expand');
@@ -192,12 +200,12 @@ export default function Stats({ currentView }) {
     {
       accessorKey: 'usagePercent',
       id: 'usage',
-      sortingFn: (rowA, rowB, columnId) => parseFloat(rowA.getValue(columnId) || 0) - parseFloat(rowB.getValue(columnId) || 0),
+      sortingFn: (rowA, rowB, columnId) => (rowA.getValue(columnId) || 0) - (rowB.getValue(columnId) || 0),
     },
     {
       accessorKey: 'leadPercent',
       id: 'leads',
-      sortingFn: (rowA, rowB, columnId) => parseFloat(rowA.getValue(columnId) || 0) - parseFloat(rowB.getValue(columnId) || 0),
+      sortingFn: (rowA, rowB, columnId) => (rowA.getValue(columnId) || 0) - (rowB.getValue(columnId) || 0),
     },
     {
       accessorKey: 'viability',
@@ -231,7 +239,7 @@ export default function Stats({ currentView }) {
   const sortedStats = table.getRowModel().rows;
 
   React.useEffect(() => {
-    setVisibleCount(200);
+    setVisibleCount(100);
   }, [sortedStats]);
 
   const scrollToPokemon = React.useCallback((pokemonName) => {
@@ -255,6 +263,8 @@ export default function Stats({ currentView }) {
       }
     }, 50);
   }, [setExpanded, sortedStats]);
+
+  const isAllExpanded = stats && stats.length > 0 && expanded.size === stats.length;
 
   return (
     <>
@@ -315,12 +325,12 @@ export default function Stats({ currentView }) {
                   </button>
                 </div>
                 <button 
-                  className={`control-btn ${new URLSearchParams(window.location.search).get('expand') === 'all' || (stats && stats.length > 0 && expanded.size === stats.length) ? 'active' : ''}`} 
+                  className={`control-btn ${isAllExpanded ? 'active' : ''}`} 
                   onClick={handleToggleAll}
                   disabled={loading || !stats}
                   style={{ opacity: loading || !stats ? 0.6 : 1 }}
                 >
-                  {new URLSearchParams(window.location.search).get('expand') === 'all' || (stats && stats.length > 0 && expanded.size === stats.length) ? 'Collapse All' : 'Expand All'}
+                  {isAllExpanded ? 'Collapse All' : 'Expand All'}
                 </button>
               </div>
 
@@ -328,7 +338,7 @@ export default function Stats({ currentView }) {
                 <div className="pokedex-tile tool-tile fade-in-data" style={{ marginBottom: '1rem', width: '100%' }}>
                   <div className="tool-tile-content" style={{ width: '100%' }}>
                     <div className="tool-tile-info" style={{ width: '100%' }}>
-                      {!metagame || loading || !stats ? (
+                      {loading || !metagame ? (
                         <MetagameSkeleton />
                       ) : Object.keys(metagame.playstyles).length === 0 ? (
                         <div className="empty-state" style={{ padding: '1rem' }}>No metagame data available for this format.</div>
@@ -395,8 +405,8 @@ export default function Stats({ currentView }) {
                         index={index}
                         sortBy={sortBy}
                         isExpanded={expanded.has(row.pokemon)}
-                        loadingDetails={loadingDetails}
-                        detailsError={detailsError}
+                        loadingDetails={(loadingDetails && loadingDetails[row.pokemon]) || (loadingAllDetails && (!details || !details[row.pokemon]))}
+                        detailsError={detailsError && detailsError[row.pokemon]}
                         detailsData={details && details[row.pokemon]}
                         onRowClick={onRowClick}
                         setExpanded={setExpanded}
@@ -410,7 +420,7 @@ export default function Stats({ currentView }) {
                         className="load-more-btn"
                         onClick={() => {
                           React.startTransition(() => {
-                            setVisibleCount(prev => prev + 200);
+                            setVisibleCount(prev => prev + 100);
                           });
                         }}
                       >
@@ -465,6 +475,10 @@ const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails,
           src={spriteUrl} 
           alt={row.pokemon} 
           className="tile-sprite" 
+          width="32"
+          height="32"
+          loading="lazy"
+          decoding="async"
           onError={(e) => e.target.style.display='none'} 
         />
         <div className="tile-info">

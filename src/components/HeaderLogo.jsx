@@ -1,9 +1,9 @@
 import React from 'react';
 
-export default function HeaderLogo({ theme, onClick }) {
+export default function HeaderLogo({ onClick }) {
   return (
     <div 
-      className={`brand-logo-container ${theme}-theme`}
+      className="brand-logo-container"
       onClick={onClick}
       style={{ cursor: onClick ? 'pointer' : 'default' }}
     >

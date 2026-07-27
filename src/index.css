@@ -1,13 +1,9 @@
-/* ==========================================================================
-   SMOGON STATS — ESFORMS & COMPETITIVE ANALYTICS DESIGN SYSTEM
-   Anti-Slop, High-End Esports & Kinetic Minimalist Frontend Architecture
-   ========================================================================== */
 
-/* Outfit Variable with font-display: block to prevent FOUT flickering */
+
 @font-face {
   font-family: 'Outfit Variable';
   font-style: normal;
-  font-display: block;
+  font-display: swap;
   font-weight: 100 900;
   src: url('@fontsource-variable/outfit/files/outfit-latin-wght-normal.woff2') format('woff2-variations');
   unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
@@ -16,7 +12,7 @@
 @font-face {
   font-family: 'Outfit Variable';
   font-style: normal;
-  font-display: block;
+  font-display: swap;
   font-weight: 100 900;
   src: url('@fontsource-variable/outfit/files/outfit-latin-ext-wght-normal.woff2') format('woff2-variations');
   unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
@@ -26,33 +22,25 @@
   --zoom-desktop: 92%;
   --zoom-mobile: 85%;
   --header-h: 72px;
-  
-  /* Shape Consistency Lock (Rule 4.4) */
+
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
   --radius-pill: 9999px;
-  
-  /* Transitions */
+
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-/* ==========================================================================
-   THEME TOKENS (Page Theme Lock & Color Consistency Lock - Rule 4.2 & 4.11)
-   ========================================================================== */
 
 :root, [data-theme="scarlet"] {
   --bg-color: #fafaf9;
   --text-color: #0f172a;
   --text-muted: #64748b;
-  
-  /* Singular Crimson Accent for Scarlet (Light) Mode */
+
   --primary: #e11d48;
   --primary-hover: #be123c;
   --primary-glow: rgba(225, 29, 72, 0.15);
-  
-  /* Gold Trophy Accent */
+
   --accent: #d97706;
   --accent-glow: rgba(217, 119, 6, 0.15);
   
@@ -76,13 +64,11 @@
   --bg-color: #090d16;
   --text-color: #f8fafc;
   --text-muted: #94a3b8;
-  
-  /* Singular Electric Emerald Accent for Violet (Dark) Mode */
+
   --primary: #10b981;
   --primary-hover: #059669;
   --primary-glow: rgba(16, 185, 129, 0.15);
-  
-  /* Cyber Gold Accent */
+
   --accent: #f59e0b;
   --accent-glow: rgba(245, 158, 11, 0.15);
   
@@ -101,10 +87,6 @@
   --row-hover: rgba(30, 41, 59, 0.7);
   --highlight-color: #f59e0b;
 }
-
-/* ==========================================================================
-   BASE & RESET
-   ========================================================================== */
 
 * {
   box-sizing: border-box;
@@ -129,7 +111,6 @@ body {
   }
 }
 
-/* Selection */
 ::selection {
   background: var(--primary);
   color: #ffffff;
@@ -140,10 +121,6 @@ body {
   flex-direction: column;
   min-height: 100dvh;
 }
-
-/* ==========================================================================
-   HEADER & NAVIGATION (Rule 4.7 - Single Line Desktop Nav, Max 72px)
-   ========================================================================== */
 
 .app-header {
   height: var(--header-h);
@@ -166,7 +143,6 @@ body {
   gap: 1.5rem;
 }
 
-/* Brand Logo (HeaderLogo component) */
 .brand-logo-container {
   display: inline-flex;
   align-items: center;
@@ -196,10 +172,10 @@ body {
   line-height: 1;
 }
 
-.scarlet-theme .brand-main { color: #0f172a; }
-.scarlet-theme .brand-sub { color: #e11d48; }
-.violet-theme .brand-main { color: #f8fafc; }
-.violet-theme .brand-sub { color: #10b981; }
+[data-theme="scarlet"] .brand-main { color: #0f172a; }
+[data-theme="scarlet"] .brand-sub { color: #e11d48; }
+[data-theme="violet"] .brand-main { color: #f8fafc; }
+[data-theme="violet"] .brand-sub { color: #10b981; }
 
 .brand-mascot-tag {
   font-size: 0.68rem;
@@ -210,7 +186,6 @@ body {
   margin-top: 3px;
 }
 
-/* Desktop Navigation */
 .desktop-nav {
   display: flex;
   gap: 0.5rem;
@@ -247,10 +222,9 @@ body {
 }
 
 .nav-separator {
-  display: none; /* Removed noisy ASCII pipes in favor of pill container */
+  display: none; 
 }
 
-/* Mobile Menu Button & Nav */
 .mobile-menu-btn {
   display: none;
   background: var(--details-bg);
@@ -334,10 +308,6 @@ body {
   }
 }
 
-/* ==========================================================================
-   MAIN CONTENT AREA
-   ========================================================================== */
-
 .app-main {
   flex: 1;
   padding: 1.5rem 2rem 4rem 2rem;
@@ -352,7 +322,6 @@ body {
   }
 }
 
-/* Glass Panels & Cards */
 .glass-panel {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -361,10 +330,6 @@ body {
   box-shadow: var(--shadow);
   transition: all 0.3s var(--ease-smooth);
 }
-
-/* ==========================================================================
-   FILTER BAR / ESPORTS HUD CONTROLS
-   ========================================================================== */
 
 .collapsible-hud-container {
   display: flex;
@@ -424,7 +389,6 @@ body {
   align-items: center;
 }
 
-/* Desktop: Always open, keep original static stats period layout */
 @media (min-width: 769px) {
   .collapsible-hud-container .controls-header {
     display: none;
@@ -501,7 +465,6 @@ select:disabled {
   cursor: not-allowed;
 }
 
-/* Control Buttons & Actions */
 .list-actions {
   display: flex;
   flex-wrap: wrap;
@@ -538,10 +501,6 @@ select:disabled {
 .control-btn:active {
   transform: translateY(0);
 }
-
-/* ==========================================================================
-   METAGAME OVERVIEW HUD TILE
-   ========================================================================== */
 
 .metagame-analysis {
   padding: 0.5rem 0;
@@ -597,10 +556,6 @@ select:disabled {
   font-weight: 800;
   margin-left: 4px;
 }
-
-/* ==========================================================================
-   POKÉMON STATS GRID & TILES
-   ========================================================================== */
 
 .pokedex-list {
   display: grid;
@@ -692,7 +647,6 @@ select:disabled {
   line-height: 1.2;
 }
 
-/* Embedded Metric Pill Badges */
 .badge-pill {
   display: inline-flex;
   align-items: center;
@@ -766,10 +720,6 @@ select:disabled {
   transform: rotate(180deg);
   color: var(--primary);
 }
-
-/* ==========================================================================
-   EXPANDED STATS COMPACT GRID
-   ========================================================================== */
 
 .tile-details {
   padding: 0.25rem;
@@ -879,10 +829,6 @@ select:disabled {
 .clickable-pokemon:hover {
   background-color: var(--row-hover);
 }
-
-/* ==========================================================================
-   FORMAT TOOLS, TREND TRACKER & CHARTS
-   ========================================================================== */
 
 .format-tools {
   display: flex;
@@ -1049,10 +995,6 @@ select:disabled {
   transform: scale(1.1);
 }
 
-/* ==========================================================================
-   GUIDE & CHANGELOG (Editorial & Timeline Architecture)
-   ========================================================================== */
-
 .guide-page {
   animation: fadeInData 0.4s var(--ease-smooth) forwards;
 }
@@ -1147,7 +1089,6 @@ select:disabled {
   color: var(--primary);
 }
 
-/* Timeline Styles for Changelog */
 .timeline-container {
   position: relative;
   max-width: 850px;
@@ -1257,10 +1198,6 @@ select:disabled {
   font-weight: 900;
 }
 
-/* ==========================================================================
-   FOOTER (Rule 4.11 & Clean Contrast)
-   ========================================================================== */
-
 .app-footer {
   margin-top: auto;
   padding: 2.5rem 2rem;
@@ -1319,10 +1256,6 @@ select:disabled {
   color: #ffffff;
   box-shadow: 0 2px 8px var(--primary-glow);
 }
-
-/* ==========================================================================
-   LOADERS, SKELETONS & UTILITIES
-   ========================================================================== */
 
 .fade-in-data {
   animation: fadeInData 0.4s var(--ease-smooth) forwards;
@@ -1455,7 +1388,6 @@ select:disabled {
   margin-bottom: 0.5rem;
 }
 
-/* Floating Actions & Buttons */
 .load-more-btn {
   background: var(--panel-bg);
   color: var(--text-color);
@@ -1540,7 +1472,6 @@ select:disabled {
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* Splash Screen */
 .splash-screen {
   position: fixed;
   inset: 0;

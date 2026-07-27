@@ -9,9 +9,8 @@ const COLORS = [
   '#f43f5e', '#3b82f6', '#10b981', '#a855f7', '#f59e0b', '#ec4899', '#2dd4bf', '#f97316'
 ];
 
-// Always ensure these popular formats are available in the dropdown
 const POPULAR_FORMATS = Object.fromEntries(Object.entries({
-  // Gen 9
+  
   'gen9ou': ['0', '1500', '1695', '1825'], 'gen9ubers': ['0', '1500', '1630', '1760'], 'gen9uu': ['0', '1500', '1630', '1760'], 'gen9ru': ['0', '1500', '1630', '1760'], 'gen9nu': ['0', '1500', '1630', '1760'], 'gen9pu': ['0', '1500', '1630', '1760'], 'gen9lc': ['0', '1500', '1630', '1760'], 'gen9monotype': ['0', '1500', '1630', '1760'], 'gen9doublesou': ['0', '1500', '1630', '1760'], 'gen9doublesuu': ['0', '1500', '1630', '1760'], 'gen9doublesubers': ['0', '1500', '1630', '1760'], 'gen9randombattle': ['0', '1100', '1300', '1500'],
   'gen9battlestadiumsingles': ['0', '1500', '1630', '1760'], 'gen9battlestadiumdoubles': ['0', '1500', '1630', '1760'],
   'gen9bssregj': ['0', '1500', '1630', '1760'], 'gen9bssregi': ['0', '1500', '1630', '1760'], 'gen9bssregh': ['0', '1500', '1630', '1760'], 'gen9bssregg': ['0', '1500', '1630', '1760'], 'gen9bssregf': ['0', '1500', '1630', '1760'],
@@ -20,36 +19,28 @@ const POPULAR_FORMATS = Object.fromEntries(Object.entries({
   'gen9vgc2024regh': ['0', '1500', '1630', '1760'], 'gen9vgc2024reghbo3': ['0', '1500', '1630', '1760'], 'gen9vgc2024regg': ['0', '1500', '1630', '1760'], 'gen9vgc2024reggbo3': ['0', '1500', '1630', '1760'], 'gen9vgc2024regf': ['0', '1500', '1630', '1760'], 'gen9vgc2024regfbo3': ['0', '1500', '1630', '1760'],
   'gen9vgc2023regulatione': ['0', '1500', '1630', '1760'], 'gen9vgc2023regulationebo3': ['0', '1500', '1630', '1760'], 'gen9vgc2023regulationd': ['0', '1500', '1630', '1760'], 'gen9vgc2023regulationc': ['0', '1500', '1630', '1760'], 'gen9vgc2023series2': ['0', '1500', '1630', '1760'], 'gen9vgc2023series1': ['0', '1500', '1630', '1760'],
 
-  // Gen 8
   'gen8ou': ['0', '1500', '1630', '1760'], 'gen8ubers': ['0', '1500', '1630', '1760'], 'gen8uu': ['0', '1500', '1630', '1760'], 'gen8ru': ['0', '1500', '1630', '1760'], 'gen8nu': ['0', '1500', '1630', '1760'], 'gen8pu': ['0', '1500', '1630', '1760'], 'gen8lc': ['0', '1500', '1630', '1760'], 'gen8doublesou': ['0', '1500', '1630', '1760'], 'gen8doublesuu': ['0', '1500', '1630', '1760'], 'gen8randombattle': ['0', '1100', '1300', '1500'],
   'gen8battlestadiumsingles': ['0', '1500', '1630', '1760'], 'gen8battlestadiumdoubles': ['0', '1500', '1630', '1760'],
   'gen8vgc2022': ['0', '1500', '1630', '1760'], 'gen8vgc2021': ['0', '1500', '1630', '1760'], 'gen8vgc2021series11': ['0', '1500', '1630', '1760'], 'gen8vgc2021series10': ['0', '1500', '1630', '1760'], 'gen8vgc2021series9': ['0', '1500', '1630', '1760'], 'gen8vgc2020': ['0', '1500', '1630', '1760'],
 
-  // Gen 7
   'gen7ou': ['0', '1500', '1630', '1760'], 'gen7ubers': ['0', '1500', '1630', '1760'], 'gen7uu': ['0', '1500', '1630', '1760'], 'gen7ru': ['0', '1500', '1630', '1760'], 'gen7nu': ['0', '1500', '1630', '1760'], 'gen7pu': ['0', '1500', '1630', '1760'], 'gen7lc': ['0', '1500', '1630', '1760'], 'gen7doublesou': ['0', '1500', '1630', '1760'], 'gen7doublesuu': ['0', '1500', '1630', '1760'], 'gen7randombattle': ['0', '1100', '1300', '1500'],
   'gen7battlespotdoubles': ['0', '1500', '1630', '1760'],
   'gen7vgc2019': ['0', '1500', '1630', '1760'], 'gen7vgc2019ultraseries': ['0', '1500', '1630', '1760'], 'gen7vgc2019sunseries': ['0', '1500', '1630', '1760'], 'gen7vgc2019moonseries': ['0', '1500', '1630', '1760'], 'gen7vgc2018': ['0', '1500', '1630', '1760'], 'gen7vgc2017': ['0', '1500', '1630', '1760'],
 
-  // Gen 6
   'gen6ou': ['0', '1500', '1630', '1760'], 'gen6ubers': ['0', '1500', '1630', '1760'], 'gen6uu': ['0', '1500', '1630', '1760'], 'gen6ru': ['0', '1500', '1630', '1760'], 'gen6nu': ['0', '1500', '1630', '1760'], 'gen6doublesou': ['0', '1500', '1630', '1760'], 'gen6doublesuu': ['0', '1500', '1630', '1760'], 'gen6randombattle': ['0', '1100', '1300', '1500'],
   'gen6battlespotdoubles': ['0', '1500', '1630', '1760'],
   'gen6vgc2016': ['0', '1500', '1630', '1760'], 'vgc2016': ['0', '1500', '1630', '1760'], 'vgc2015': ['0', '1500', '1630', '1760'], 'gen6vgc2014': ['0', '1500', '1630', '1760'],
 
-  // Gen 5
   'gen5ou': ['0', '1500', '1630', '1760'], 'gen5ubers': ['0', '1500', '1630', '1760'], 'gen5uu': ['0', '1500', '1630', '1760'], 'gen5nu': ['0', '1500', '1630', '1760'], 'gen5doublesou': ['0', '1500', '1630', '1760'], 'gen5randombattle': ['0', '1100', '1300', '1500'],
   'gen5vgc2013': ['0', '1500', '1630', '1760'], 'gen5vgc2012': ['0', '1500', '1630', '1760'], 'gen5vgc2011': ['0', '1500', '1630', '1760'], 'gen5gbudoubles': ['0', '1500', '1630', '1760'],
 
-  // Gen 4
   'gen4ou': ['0', '1500', '1630', '1760'], 'gen4ubers': ['0', '1500', '1630', '1760'], 'gen4uu': ['0', '1500', '1630', '1760'], 'gen4nu': ['0', '1500', '1630', '1760'], 'gen4doublesou': ['0', '1500', '1630', '1760'], 'gen4randombattle': ['0', '1100', '1300', '1500'],
   'gen4vgc2010': ['0', '1500', '1630', '1760'], 'gen4vgc2009': ['0', '1500', '1630', '1760'],
 
-  // Gen 3
   'gen3ou': ['0', '1500', '1630', '1760'], 'gen3ubers': ['0', '1500', '1630', '1760'], 'gen3uu': ['0', '1500', '1630', '1760'], 'gen3nu': ['0', '1500', '1630', '1760'], 'gen3doublesou': ['0', '1500', '1630', '1760'], 'gen3randombattle': ['0', '1100', '1300', '1500'],
 
-  // Gen 2
   'gen2ou': ['0', '1500', '1630', '1760'], 'gen2ubers': ['0', '1500', '1630', '1760'], 'gen2uu': ['0', '1500', '1630', '1760'], 'gen2randombattle': ['0', '1100', '1300', '1500'],
 
-  // Gen 1
   'gen1ou': ['0', '1500', '1630', '1760'], 'gen1ubers': ['0', '1500', '1630', '1760'], 'gen1uu': ['0', '1500', '1630', '1760'], 'gen1randombattle': ['0', '1100', '1300', '1500']
 }).map(([k, v]) => [k, v.slice(-2)]));
 
@@ -144,13 +135,12 @@ export default function TrendTracker() {
     setPokemonInput('');
   }, [format]);
 
-  // Stable color assignment for tracked Pokemon
   const assignedColorsRef = React.useRef({});
   const getStableColor = (pokemon) => {
     if (!assignedColorsRef.current[pokemon]) {
       const usedColors = new Set(Object.values(assignedColorsRef.current));
       const availableColor = COLORS.find(c => !usedColors.has(c));
-      // If all colors are used, fallback to modulo assignment
+      
       assignedColorsRef.current[pokemon] = availableColor || COLORS[Object.keys(assignedColorsRef.current).length % COLORS.length];
     }
     return assignedColorsRef.current[pokemon];
@@ -197,7 +187,7 @@ export default function TrendTracker() {
         return;
       }
     } else {
-      // Fallback if list didn't load for some reason
+      
       matchedPokemon = pokemonName.split(' ').map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
     }
 
@@ -215,13 +205,11 @@ export default function TrendTracker() {
   const panelBg = theme === 'violet' ? '#18181b' : '#ffffff';
   const panelBorder = theme === 'violet' ? '#27272a' : '#f1f5f9';
 
-  // Process data for Chart.js
   const chartData = useMemo(() => {
     if (Object.keys(trendData).length === 0) {
       return { labels: [], datasets: [] };
     }
 
-    // Extract all unique months across all datasets and sort them chronologically
     const allMonths = new Set();
     Object.values(trendData).forEach((dataArray) => {
       dataArray.forEach((point) => allMonths.add(point.month));
@@ -231,8 +219,7 @@ export default function TrendTracker() {
 
     const datasets = trackedPokemon.map((pokemon) => {
       const dataForPokemon = trendData[pokemon] || [];
-      
-      // Map usage percentages to the corresponding month, or null if no data for that month
+
       const dataPoints = labels.map((month) => {
         const found = dataForPokemon.find((d) => d.month === month);
         return found ? parseFloat(found.usagePercent) : null;
@@ -245,7 +232,7 @@ export default function TrendTracker() {
         data: dataPoints,
         borderColor: color,
         backgroundColor: color,
-        tension: 0.3, // slight curve to the line
+        tension: 0.3, 
         pointRadius: 4,
         pointHoverRadius: 6,
         spanGaps: true,
@@ -386,7 +373,7 @@ export default function TrendTracker() {
                 gap: '6px',
                 padding: '4px 10px', 
                 borderRadius: '16px',
-                background: `${color}20`, // 20% opacity background
+                background: `${color}20`, 
                 border: `1px solid ${color}50`,
                 color: textColor,
                 fontSize: '0.85rem',

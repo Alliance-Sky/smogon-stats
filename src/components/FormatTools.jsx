@@ -184,7 +184,7 @@ export default function FormatTools({ theme, period, months, formats, formatName
       const meta = chart.getDatasetMeta(0);
       meta.data.forEach((bar, index) => {
         const label = data.labels[index];
-        // Ensure there is a gap above the bar so text doesn't overlap
+        
         const yPos = bar.y - (bar.height / 2) - 4; 
         ctx.fillText(label, chart.chartArea.left, yPos);
       });

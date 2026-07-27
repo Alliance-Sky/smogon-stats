@@ -3,6 +3,17 @@ import React from 'react';
 export default function Changelog() {
   const updates = [
     {
+      version: 'v2.1.0',
+      date: '27 July, 2026',
+      title: 'Backend V3 & Performance Optimizations',
+      changes: [
+        'Migrated to highly optimized v3 API endpoints with targeted JSON micro-payloads',
+        'Removed Web Worker for parsing movesets, reducing bundle size and CPU overhead',
+        'Updated data sorting and payload generation to use native floats instead of expensive string formatting',
+        'Implemented Schwartzian Transform in backend sorting logic for up to 34% faster payload delivery'
+      ]
+    },
+    {
       version: 'v2.0.0',
       date: '26 July, 2026',
       title: 'Architectural Overhaul & UI Enhancements',

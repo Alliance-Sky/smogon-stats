@@ -1,8 +1,5 @@
-import SmogonWorker from './worker.js?worker';
-
 const BASE_URL = 'https://www.smogon.com/stats/';
 
-// Cleanup old legacy caches to free up disk space for returning users
 if (typeof caches !== 'undefined') {
   caches.keys().then(keys => {
     for (const key of keys) {
@@ -11,28 +8,6 @@ if (typeof caches !== 'undefined') {
       }
     }
   }).catch(console.error);
-}
-
-const worker = new SmogonWorker();
-let nextId = 1;
-const workerCallbacks = new Map();
-
-worker.onmessage = (e) => {
-  const { id, result, error } = e.data;
-  const cb = workerCallbacks.get(id);
-  if (cb) {
-    if (error) cb.reject(new Error(error));
-    else cb.resolve(result);
-    workerCallbacks.delete(id);
-  }
-};
-
-function execWorker(type, payload) {
-  return new Promise((resolve, reject) => {
-    const id = nextId++;
-    workerCallbacks.set(id, { resolve, reject });
-    worker.postMessage({ id, type, payload });
-  });
 }
 
 const PRIMARY_API = 'https://api.smogonstats.eu.cc';
@@ -45,18 +20,24 @@ const PUBLIC_PROXIES = [
 ];
 
 async function fetchApi(endpoint) {
+  const bustedEndpoint = endpoint + (endpoint.includes('?') ? '&' : '?') + 'vx=3';
+
+  const activeApi = LOCAL_API;
+  const fallbackApi = LOCAL_API !== PRIMARY_API ? PRIMARY_API : null;
+
   try {
-    const res = await fetch(`${PRIMARY_API}${endpoint}`);
+    const res = await fetch(`${activeApi}${bustedEndpoint}`);
     if (res.ok) return await res.json();
   } catch (e) {
-    console.warn(`Primary API fetch failed for ${endpoint}, trying local fallback...`, e);
+    console.warn(`Active API fetch failed for ${bustedEndpoint}, trying fallback...`, e);
   }
-  if (LOCAL_API !== PRIMARY_API) {
+  
+  if (fallbackApi) {
     try {
-      const res = await fetch(`${LOCAL_API}${endpoint}`);
+      const res = await fetch(`${fallbackApi}${bustedEndpoint}`);
       if (res.ok) return await res.json();
     } catch (e) {
-      console.error(`Local API fallback fetch failed for ${endpoint}:`, e);
+      console.error(`Fallback API fetch failed for ${bustedEndpoint}:`, e);
     }
   }
   return null;
@@ -156,7 +137,7 @@ export async function getMonths() {
   if (init && init.months) {
     return init.months;
   }
-  const json = await fetchApi('/api/months');
+  const json = await fetchApi('/api/v3/months');
   if (json && Array.isArray(json)) {
     return json;
   }
@@ -172,7 +153,7 @@ export async function getFormats(month) {
     }
     return sortedObj;
   }
-  const json = await fetchApi(`/api/v2/formats?month=${month}`);
+  const json = await fetchApi(`/api/v3/formats?month=${month}`);
   if (json && Array.isArray(json)) {
     const sortedObj = {};
     for (const item of json) {
@@ -201,19 +182,13 @@ export async function getStats(month, format, rating) {
   return [];
 }
 
-export async function getDetails(month, format, rating) {
-  const fileName = `${format}-${rating}.txt`;
-  const targetUrl = `${BASE_URL}${month}/moveset/${fileName}?v=2`;
-  
-  const text = await getText(targetUrl);
-  if (typeof text === 'object' && text !== null) {
-      return text;
-  }
-  return await execWorker('parseMoveset', text);
+export async function getDetails(month, format, rating, pokemon = null) {
+  const json = await fetchApi(`/api/v3/details?month=${month}&format=${format}&rating=${rating}${pokemon ? `&pokemon=${pokemon}` : ''}`);
+  return json;
 }
 
 export async function getViability(month, format, rating) {
-  const json = await fetchApi(`/api/viability?month=${month}&format=${format}&rating=${rating}`);
+  const json = await fetchApi(`/api/v3/viability?month=${month}&format=${format}&rating=${rating}`);
   if (json) {
     return json;
   }
@@ -221,7 +196,7 @@ export async function getViability(month, format, rating) {
 }
 
 export async function getTotalBattles(month, format, rating) {
-  const json = await fetchApi(`/api/format-stats?month=${month}&format=${format}&rating=${rating}`);
+  const json = await fetchApi(`/api/v3/format-stats?month=${month}&format=${format}&rating=${rating}`);
   if (json) {
     return json.totalBattles || 0;
   }
@@ -229,7 +204,7 @@ export async function getTotalBattles(month, format, rating) {
 }
 
 export async function getLeads(month, format, rating) {
-  const json = await fetchApi(`/api/leads?month=${month}&format=${format}&rating=${rating}`);
+  const json = await fetchApi(`/api/v3/leads?month=${month}&format=${format}&rating=${rating}`);
   if (json && Array.isArray(json)) {
     return json;
   }
@@ -237,7 +212,7 @@ export async function getLeads(month, format, rating) {
 }
 
 export async function getMetagame(month, format, rating) {
-  const json = await fetchApi(`/api/metagame?month=${month}&format=${format}&rating=${rating}`);
+  const json = await fetchApi(`/api/v3/metagame?month=${month}&format=${format}&rating=${rating}`);
   if (json) {
     return json;
   }
@@ -246,7 +221,7 @@ export async function getMetagame(month, format, rating) {
 
 export async function getTrend(format, rating, pokemonList, months = 12) {
   const pokemonQuery = pokemonList.join(',');
-  const json = await fetchApi(`/api/trend?format=${format}&rating=${rating}&pokemon=${encodeURIComponent(pokemonQuery)}&months=${months}`);
+  const json = await fetchApi(`/api/v3/trend?format=${format}&rating=${rating}&pokemon=${encodeURIComponent(pokemonQuery)}&months=${months}`);
   if (json) {
     return json;
   }

@@ -20,24 +20,22 @@ const PUBLIC_PROXIES = [
 ];
 
 async function fetchApi(endpoint) {
-  const bustedEndpoint = endpoint + (endpoint.includes('?') ? '&' : '?') + 'vx=3';
-
   const activeApi = LOCAL_API;
   const fallbackApi = LOCAL_API !== PRIMARY_API ? PRIMARY_API : null;
 
   try {
-    const res = await fetch(`${activeApi}${bustedEndpoint}`);
+    const res = await fetch(`${activeApi}${endpoint}`);
     if (res.ok) return await res.json();
   } catch (e) {
-    console.warn(`Active API fetch failed for ${bustedEndpoint}, trying fallback...`, e);
+    console.warn(`Active API fetch failed for ${endpoint}, trying fallback...`, e);
   }
   
   if (fallbackApi) {
     try {
-      const res = await fetch(`${fallbackApi}${bustedEndpoint}`);
+      const res = await fetch(`${fallbackApi}${endpoint}`);
       if (res.ok) return await res.json();
     } catch (e) {
-      console.error(`Fallback API fetch failed for ${bustedEndpoint}:`, e);
+      console.error(`Fallback API fetch failed for ${endpoint}:`, e);
     }
   }
   return null;
@@ -196,6 +194,10 @@ export async function getViability(month, format, rating) {
 }
 
 export async function getTotalBattles(month, format, rating) {
+  const init = await getInit();
+  if (init && init.defaultMonth === month && init.defaultFormat === format && init.defaultRating === rating && init.totalBattles !== undefined) {
+    return init.totalBattles;
+  }
   const json = await fetchApi(`/api/v3/format-stats?month=${month}&format=${format}&rating=${rating}`);
   if (json) {
     return json.totalBattles || 0;
@@ -212,6 +214,10 @@ export async function getLeads(month, format, rating) {
 }
 
 export async function getMetagame(month, format, rating) {
+  const init = await getInit();
+  if (init && init.defaultMonth === month && init.defaultFormat === format && init.defaultRating === rating && init.metagame) {
+    return init.metagame;
+  }
   const json = await fetchApi(`/api/v3/metagame?month=${month}&format=${format}&rating=${rating}`);
   if (json) {
     return json;

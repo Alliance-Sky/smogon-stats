@@ -17,12 +17,13 @@ export async function prefetch() {
     const format = init.defaultFormat || 'gen9ou';
     const rating = init.defaultRating || '1760';
 
+    if (init.metagame) queryClient.setQueryData(['metagame', period, format, rating], init.metagame);
+    if (init.totalBattles !== undefined) queryClient.setQueryData(['totalBattles', period, format, rating], init.totalBattles);
+
     await Promise.all([
       queryClient.prefetchQuery({ queryKey: ['months'], queryFn: getMonths }),
       queryClient.prefetchQuery({ queryKey: ['formats', period], queryFn: () => getFormats(period) }),
-      queryClient.prefetchQuery({ queryKey: ['stats', period, format, rating], queryFn: () => getStats(period, format, rating) }),
-      queryClient.prefetchQuery({ queryKey: ['metagame', period, format, rating], queryFn: () => getMetagame(period, format, rating) }),
-      queryClient.prefetchQuery({ queryKey: ['totalBattles', period, format, rating], queryFn: () => getTotalBattles(period, format, rating) })
+      queryClient.prefetchQuery({ queryKey: ['stats', period, format, rating], queryFn: () => getStats(period, format, rating) })
     ]);
   }
   return dehydrate(queryClient);

@@ -3,7 +3,7 @@ import { useStats } from '../hooks/useStats';
 import { useReactTable, getCoreRowModel, getSortedRowModel } from '@tanstack/react-table';
 import '../index.css';
 import { useStore } from '../store';
-import ControlsContainer from '../components/ControlsContainer';
+
 
 const FormatTools = React.lazy(() => import('../components/FormatTools'));
 
@@ -55,8 +55,18 @@ const formatPercent = (val, showDecimals = false) => {
   return `${Math.round(num)}%`;
 };
 
+const getTier = (viability) => {
+  if (!viability || viability.length < 2) return { letter: 'N', color: 'tier-n' };
+  const top = viability[1];
+  if (top >= 93) return { letter: 'S', color: 'tier-s' };
+  if (top >= 91) return { letter: 'A', color: 'tier-a' };
+  if (top >= 88) return { letter: 'B', color: 'tier-b' };
+  if (top >= 84) return { letter: 'C', color: 'tier-c' };
+  return { letter: 'D', color: 'tier-d' };
+};
+
 export default function Stats({ currentView }) {
-  const { theme, period, format, rating, setPeriod, setFormat, setRating } = useStore();
+  const { theme, period, setPeriod, format, setFormat, rating, setRating, newAvailableMonth, setNewAvailableMonth } = useStore();
   const [sortBy, setSortBy] = React.useState('usage');
   const [sorting, setSorting] = React.useState([{ id: 'usage', desc: true }]);
 
@@ -122,7 +132,8 @@ export default function Stats({ currentView }) {
     detailsError,
     toggleDetails,
     expandAll,
-    collapseAll
+    collapseAll,
+    expansionState
   } = useStats(period, format, rating, setFormat, setRating);
 
   const handleToggleAll = React.useCallback(() => {
@@ -275,7 +286,7 @@ export default function Stats({ currentView }) {
           </React.Suspense>
         ) : (
           <>
-            <ControlsContainer label="Stats Filter &amp; Sorting Controls" defaultExpanded={false}>
+            <div className="glass-panel controls-container stats-controls">
               <div className="control-group">
                 <label>Stats Period</label>
                 <select value={period || ''} onChange={onPeriodChange} disabled={months.length === 0}>
@@ -303,18 +314,60 @@ export default function Stats({ currentView }) {
               <div className="control-group">
                 <label>Sort By</label>
                 <select value={sortBy} onChange={(e) => {
-                  setSortBy(e.target.value);
-                  setSorting([{ id: e.target.value, desc: true }]);
+                  const val = e.target.value;
+                  setSortBy(val);
+                  setSorting([{ id: val === 'tier' ? 'viability' : val === 'lead' ? 'leads' : val, desc: true }]);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}>
-                  <option value="usage">Usage</option>
+                  <option value="usage">Usage %</option>
+                  <option value="lead">Lead %</option>
                   <option value="viability">Viability Ceiling</option>
-                  <option value="leads">Lead %</option>
+                  <option value="tier">Tier</option>
                 </select>
               </div>
-            </ControlsContainer>
+            </div>
 
             <div className="glass-panel" style={{ minHeight: 'calc(100vh - 280px)', display: 'flex', flexDirection: 'column' }}>
+              {newAvailableMonth && (
+                <div className="new-month-banner" style={{ 
+                  position: 'fixed', 
+                  bottom: '24px', 
+                  right: '24px', 
+                  zIndex: 9999,
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  backgroundColor: 'var(--primary)', 
+                  color: 'white', 
+                  padding: '16px 20px', 
+                  borderRadius: '12px', 
+                  boxShadow: 'var(--shadow-lg)',
+                  gap: '16px',
+                  animation: 'fadeInData 0.4s var(--ease-spring)'
+                }}>
+                  <span style={{ fontWeight: 600 }}>New data for <strong>{newAvailableMonth}</strong> is now available!</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <button aria-label="Close" onClick={() => {
+                      localStorage.setItem('lastSeenMonth', newAvailableMonth);
+                      setNewAvailableMonth(null);
+                    }} style={{ 
+                      background: 'rgba(255,255,255,0.2)', 
+                      border: 'none', 
+                      color: 'white', 
+                      cursor: 'pointer', 
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1.2rem',
+                      lineHeight: '1',
+                      transition: 'background 0.2s'
+                    }}>&times;</button>
+                  </div>
+                </div>
+              )}
               <div className="list-actions" style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '4px', marginBottom: '15px' }}>
                 <div style={{ display: 'flex', gap: '10px', marginRight: 'auto' }}>
                   <button 
@@ -327,10 +380,12 @@ export default function Stats({ currentView }) {
                 <button 
                   className={`control-btn ${isAllExpanded ? 'active' : ''}`} 
                   onClick={handleToggleAll}
-                  disabled={loading || !stats}
-                  style={{ opacity: loading || !stats ? 0.6 : 1 }}
+                  disabled={loading || !stats || expansionState !== 'idle'}
+                  style={{ opacity: loading || !stats || expansionState !== 'idle' ? 0.6 : 1 }}
                 >
-                  {isAllExpanded ? 'Collapse All' : 'Expand All'}
+                  {expansionState === 'expanding' ? 'Expanding...' : 
+                   expansionState === 'collapsing' ? 'Collapsing...' : 
+                   isAllExpanded ? 'Collapse All' : 'Expand All'}
                 </button>
               </div>
 
@@ -379,7 +434,7 @@ export default function Stats({ currentView }) {
               )}
 
               {loading || !stats ? (
-                <div className="pokedex-list fade-in-data">
+                <div className="pokedex-list">
                   {Array.from({ length: 20 }).map((_, i) => (
                     <SkeletonRow key={i} />
                   ))}
@@ -395,7 +450,7 @@ export default function Stats({ currentView }) {
                 </div>
               ) : (
                 <>
-                  <div className="pokedex-list fade-in-data">
+                  <div className="pokedex-list">
                     {sortedStats.slice(0, visibleCount).map((tableRow, index) => {
                       const row = tableRow.original;
                       return (
@@ -411,6 +466,7 @@ export default function Stats({ currentView }) {
                         onRowClick={onRowClick}
                         setExpanded={setExpanded}
                         onPokemonClick={scrollToPokemon}
+                        showToast={showToast}
                       />
                     )})}
                   </div>
@@ -459,16 +515,36 @@ export default function Stats({ currentView }) {
   );
 }
 
-const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded, onPokemonClick }) => {
+const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails, detailsError, detailsData, onRowClick, setExpanded, onPokemonClick, showToast }) => {
+  const ref = React.useRef(null);
+  const [inView, setInView] = React.useState(index < 30);
+
+  React.useEffect(() => {
+    if (!ref.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      React.startTransition(() => {
+        if (entry.isIntersecting) {
+          setInView(true);
+        } else {
+          setInView(false);
+        }
+      });
+    }, { rootMargin: '1000px' });
+    
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
   const spriteSlug = getSprite(row.pokemon);
   const spriteUrl = `https://play.pokemonshowdown.com/sprites/home-centered/${spriteSlug}.png`;
   const displayRank = sortBy === 'usage' ? row.rank : (index + 1);
   const isTopRank = displayRank <= 10;
   const isLeadSort = sortBy === 'leads' || sortBy === 'lead';
+  const isTierSort = sortBy === 'tier';
   const isViabilitySort = sortBy === 'viability';
   
   return (
-    <div id={`pokemon-row-${row.pokemon}`} className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
+    <div id={`pokemon-row-${row.pokemon}`} ref={ref} className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
       <div className="tile-header" onClick={() => onRowClick(row.pokemon)}>
         <div className={`tile-rank ${isTopRank ? 'top-rank-gold' : ''}`}>#{displayRank}</div>
         <img 
@@ -477,13 +553,26 @@ const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails,
           className="tile-sprite" 
           width="32"
           height="32"
-          loading="lazy"
+          loading={index < 20 ? "eager" : "lazy"}
           decoding="async"
           onError={(e) => e.target.style.display='none'} 
         />
         <div className="tile-info">
           <div className="tile-name">{row.pokemon}</div>
-          {isViabilitySort && row.viability ? (
+          {isTierSort ? (
+            <div 
+              className="tile-usage badge-pill tier-tooltip-container" 
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <span className="badge-type">Tier</span>
+              <span className={`badge-value ${getTier(row.viability).color}`}>
+                {getTier(row.viability).letter}
+              </span>
+              <div className="tier-tooltip">Viability: {row.viability ? `[${row.viability.join(', ')}]` : 'N/A'}</div>
+            </div>
+          ) : isViabilitySort && row.viability ? (
             <div className="tile-usage badge-pill">
               <span className="badge-type">Viability</span>
               <span className="badge-value gold-value">[{row.viability.join(', ')}]</span>
@@ -509,7 +598,9 @@ const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails,
       
       {isExpanded && (
         <div className="tile-details">
-          {loadingDetails ? (
+          {!inView ? (
+            <div style={{ height: '462px' }} />
+          ) : loadingDetails ? (
             <div className="skeleton-container fade-in">
               <div className="skeleton-header">
                 <div className="skeleton-circle"></div>

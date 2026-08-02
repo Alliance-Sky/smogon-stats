@@ -5,6 +5,7 @@ import PokeballIcon from './components/PokeballIcon';
 
 import { Route, Switch, useLocation } from "wouter";
 import { useStore } from './store';
+import { fetchApi } from './utils/api';
 
 const Guide = lazy(() => import('./pages/Guide'));
 const Changelog = lazy(() => import('./pages/Changelog'));
@@ -12,7 +13,7 @@ const Charts = lazy(() => import('./pages/Charts'));
 const TrendTracker = lazy(() => import('./components/TrendTracker'));
 
 function App() {
-  const { theme, setTheme, period, format, rating } = useStore();
+  const { theme, setTheme, period, format, rating, setNewAvailableMonth } = useStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location, setLocation] = useLocation();
 
@@ -60,6 +61,24 @@ function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const checkNewMonth = async () => {
+      try {
+        const data = await fetchApi('/api/v3/init');
+        if (data && data.defaultMonth) {
+          const lastSeen = localStorage.getItem('lastSeenMonth') || '2026-06';
+          if (data.defaultMonth > lastSeen) {
+            setNewAvailableMonth(data.defaultMonth);
+          }
+        }
+      } catch (e) {}
+    };
+
+    checkNewMonth(); // Check immediately on load
+    const interval = setInterval(checkNewMonth, 60000);
+    return () => clearInterval(interval);
+  }, [period, setNewAvailableMonth]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -144,7 +163,7 @@ function App() {
           <div>
             <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> &amp; <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
             <p>Not affiliated with Smogon or Pokemon Showdown.</p>
-            <p style={{ marginBottom: 0 }}>&copy; 2026 Musaddik Temkar | Built with React &amp; Vite.</p>
+            <p style={{ marginBottom: 0 }}>&copy; 2026 Musaddik Temkar | Built with Preact &amp; Vite.</p>
           </div>
           
           <div className="theme-switch-pill">

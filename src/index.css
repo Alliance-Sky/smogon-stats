@@ -58,6 +58,13 @@
   --details-bg: #f8fafc;
   --row-hover: #fff1f2;
   --highlight-color: #e11d48;
+  
+  --tier-s-color: #dc2626;
+  --tier-a-color: #ea580c;
+  --tier-b-color: #d97706;
+  --tier-c-color: #16a34a;
+  --tier-d-color: #475569;
+  --tier-n-color: #94a3b8;
 }
 
 [data-theme="violet"] {
@@ -86,6 +93,13 @@
   --details-bg: #0b101b;
   --row-hover: rgba(30, 41, 59, 0.7);
   --highlight-color: #f59e0b;
+  
+  --tier-s-color: #f87171;
+  --tier-a-color: #fb923c;
+  --tier-b-color: #facc15;
+  --tier-c-color: #4ade80;
+  --tier-d-color: #94a3b8;
+  --tier-n-color: #64748b;
 }
 
 * {
@@ -433,6 +447,10 @@ body {
 
 select {
   appearance: none;
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
   background-color: var(--details-bg);
   color: var(--text-color);
   border: 1px solid var(--panel-border);
@@ -574,11 +592,11 @@ select:disabled {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: 8px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: border-color 0.2s, box-shadow 0.2s;
-  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-height: 48px;
 }
 
 .pokedex-tile:hover {
@@ -589,6 +607,7 @@ select:disabled {
 .pokedex-tile.expanded {
   border-color: var(--primary);
   box-shadow: var(--shadow);
+  contain-intrinsic-height: 510px;
 }
 
 .tile-header {
@@ -597,6 +616,7 @@ select:disabled {
   padding: 0.4rem 1rem;
   cursor: pointer;
   user-select: none;
+  border-radius: 8px;
 }
 
 .tile-header:hover {
@@ -606,6 +626,8 @@ select:disabled {
 .pokedex-tile.expanded .tile-header {
   background-color: var(--row-hover);
   border-bottom: 1px solid var(--panel-border);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 .tile-rank {
@@ -728,6 +750,8 @@ select:disabled {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--panel-border-hover) transparent;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .tile-details::-webkit-scrollbar {
@@ -1018,6 +1042,11 @@ select:disabled {
   .controls-container {
     grid-template-columns: 1fr;
     gap: 0.85rem;
+  }
+  .controls-container.stats-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1rem 0.75rem;
+    align-items: flex-end;
   }
   .controls-grid {
     grid-template-columns: 1fr;
@@ -1536,3 +1565,61 @@ select:disabled {
   border-color: var(--primary);
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
+
+/* Tier Badges */
+.tier-badge {
+  padding: 1px 8px;
+  border-radius: 4px;
+  font-weight: 900;
+  color: white !important;
+}
+
+.tier-tooltip-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.tier-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  width: max-content;
+  background-color: var(--panel-border-hover);
+  color: var(--text-color);
+  text-align: center;
+  border-radius: 6px;
+  padding: 4px 8px;
+  position: absolute;
+  z-index: 50;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.2s, visibility 0.2s;
+  font-size: 0.75rem;
+  font-weight: 700;
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.tier-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--panel-border-hover) transparent transparent transparent;
+}
+
+.tier-tooltip-container:hover .tier-tooltip,
+.tier-tooltip-container:active .tier-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tier-s { color: var(--tier-s-color) !important; font-weight: 900; }
+.tier-a { color: var(--tier-a-color) !important; font-weight: 900; }
+.tier-b { color: var(--tier-b-color) !important; font-weight: 900; }
+.tier-c { color: var(--tier-c-color) !important; font-weight: 900; }
+.tier-d { color: var(--tier-d-color) !important; font-weight: 900; }
+.tier-n { color: var(--tier-n-color) !important; font-weight: 900; }

@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import preact from '@preact/preset-vite';
 
 export default defineConfig({
-  plugins: [react()],
+  ssr: { noExternal: true },
+  plugins: [preact()],
   build: {
     target: 'esnext',
     cssMinify: 'lightningcss',
@@ -14,7 +15,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+          if (id.includes('node_modules/preact/')) {
             return 'vendor';
           }
         }

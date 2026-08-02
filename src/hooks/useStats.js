@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, startTransition } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { getMonths, getFormats, getStats, getDetails, getMetagame, getTotalBattles } from '../utils/api';
 
@@ -98,23 +98,42 @@ export function useStats(period, format, rating, setFormat, setRating) {
     return statsData || null;
   }, [statsData]);
 
-  const [expanded, setExpanded] = useState(new Set());
+  const [expanded, setExpanded] = useState(() => {
+    if (typeof window !== 'undefined' && statsData) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('expand') === 'all') {
+        return new Set(statsData.map(s => s.pokemon));
+      }
+    }
+    return new Set();
+  });
+  const [expansionState, setExpansionState] = useState('idle');
   const chunkingRef = useRef(0);
+  const isFirstMountForExpanded = useRef(true);
+  const autoExpandHandledForStats = useRef(false);
 
   useEffect(() => {
+    if (isFirstMountForExpanded.current) {
+      isFirstMountForExpanded.current = false;
+      return;
+    }
     setExpanded(new Set());
+    autoExpandHandledForStats.current = false;
     chunkingRef.current += 1;
   }, [period, format, rating]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('expand') === 'all' && stats) {
-        setExpanded(new Set(stats.map(s => s.pokemon)));
+    if (params.get('expand') === 'all' && stats && !autoExpandHandledForStats.current) {
+        autoExpandHandledForStats.current = true;
+        setExpanded(prev => {
+          if (prev.size === stats.length && prev.size > 0) return prev;
+          return new Set(stats.map(s => s.pokemon));
+        });
         if (Object.keys(details).length < stats.length) {
           fetchDetailsIfNeeded();
         }
     }
-  
   }, [stats]);
 
   const toggleDetails = (pokemon) => {
@@ -133,33 +152,14 @@ export function useStats(period, format, rating, setFormat, setRating) {
   const expandAll = useCallback(() => {
     if (stats) {
       chunkingRef.current += 1;
-      const currentChunkId = chunkingRef.current;
+      setExpansionState('expanding');
       
-      const allPokemons = stats.map(s => s.pokemon);
-      let currentIndex = 0;
-      const chunkSize = 30;
+      startTransition(() => {
+        setExpanded(new Set(stats.map(s => s.pokemon)));
+        setExpansionState('idle');
+      });
       
-      const processChunk = () => {
-        if (chunkingRef.current !== currentChunkId) return;
-        
-        const chunk = allPokemons.slice(currentIndex, currentIndex + chunkSize);
-        if (chunk.length === 0) return;
-        
-        setExpanded(prev => {
-          const next = new Set(prev);
-          chunk.forEach(p => next.add(p));
-          return next;
-        });
-        
-        currentIndex += chunkSize;
-        if (currentIndex < allPokemons.length) {
-          setTimeout(processChunk, 16);
-        }
-      };
-      
-      processChunk();
       if (Object.keys(details).length < stats.length) {
-        // use fetchDetailsIfNeeded from scope
         fetchDetailsIfNeeded();
       }
     }
@@ -168,63 +168,40 @@ export function useStats(period, format, rating, setFormat, setRating) {
   const collapseAll = useCallback(() => {
     if (stats && expanded.size > 0) {
       chunkingRef.current += 1;
-      const currentChunkId = chunkingRef.current;
+      setExpansionState('collapsing');
       
-      const expandedArray = Array.from(expanded);
-      let currentIndex = 0;
-      const chunkSize = 30;
-      
-      const processChunk = () => {
-        if (chunkingRef.current !== currentChunkId) return;
-        
-        const chunk = expandedArray.slice(currentIndex, currentIndex + chunkSize);
-        if (chunk.length === 0) {
-          setExpanded(new Set());
-          return;
-        }
-        
-        setExpanded(prev => {
-          const next = new Set(prev);
-          chunk.forEach(p => next.delete(p));
-          return next;
-        });
-        
-        currentIndex += chunkSize;
-        if (currentIndex < expandedArray.length) {
-          setTimeout(processChunk, 16);
-        } else {
-          setExpanded(new Set());
-        }
-      };
-      
-      processChunk();
+      startTransition(() => {
+        setExpanded(new Set());
+        setExpansionState('idle');
+      });
     } else {
       chunkingRef.current += 1;
-      setExpanded(new Set());
+      startTransition(() => setExpanded(new Set()));
+      setExpansionState('idle');
     }
   }, [stats, expanded]);
 
-  const [loading, setLoading] = useState(false);
-  const isFirstMount = useRef(true);
+  const [loading, setLoading] = useState(isAnyFetching);
+  const loadingStartTime = useRef(isAnyFetching ? Date.now() : 0);
 
   useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      if (!isAnyFetching) {
-        return;
+    let timer;
+    if (isAnyFetching) {
+      if (!loading) {
+        setLoading(true);
+        loadingStartTime.current = Date.now();
+      }
+    } else {
+      if (loading) {
+        const elapsed = Date.now() - loadingStartTime.current;
+        const remaining = Math.max(0, 300 - elapsed);
+        timer = setTimeout(() => {
+          setLoading(false);
+        }, remaining);
       }
     }
-
-    if (isAnyFetching) {
-      setLoading(true);
-    } else {
-      
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 250);
-      return () => clearTimeout(timer);
-    }
-  }, [isAnyFetching]);
+    return () => clearTimeout(timer);
+  }, [isAnyFetching, loading]);
 
   const error = anyError ? anyError.message : null;
 
@@ -245,6 +222,7 @@ export function useStats(period, format, rating, setFormat, setRating) {
     detailsError,
     toggleDetails,
     expandAll,
-    collapseAll
+    collapseAll,
+    expansionState
   };
 }

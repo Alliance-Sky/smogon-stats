@@ -215,14 +215,30 @@ export default function TrendTracker() {
       dataArray.forEach((point) => allMonths.add(point.month));
     });
     
-    const labels = Array.from(allMonths).sort();
+    let labels = Array.from(allMonths).sort();
+    
+    if (labels.length > 0) {
+      const latestMonth = labels[labels.length - 1];
+      const generatedLabels = [];
+      let [year, month] = latestMonth.split('-').map(Number);
+      for (let i = 0; i < monthsLimit; i++) {
+        const mm = month.toString().padStart(2, '0');
+        generatedLabels.unshift(`${year}-${mm}`);
+        month -= 1;
+        if (month === 0) {
+          month = 12;
+          year -= 1;
+        }
+      }
+      labels = generatedLabels;
+    }
 
     const datasets = trackedPokemon.map((pokemon) => {
       const dataForPokemon = trendData[pokemon] || [];
 
       const dataPoints = labels.map((month) => {
         const found = dataForPokemon.find((d) => d.month === month);
-        return found ? parseFloat(found.usagePercent) : null;
+        return found ? parseFloat(found.usagePercent) : 0;
       });
 
       const color = getStableColor(pokemon);
@@ -240,12 +256,14 @@ export default function TrendTracker() {
     });
 
     return { labels, datasets };
-  }, [trendData, trackedPokemon]);
+  }, [trendData, trackedPokemon, monthsLimit]);
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     color: textColor,
+    animation: { duration: 300 },
+    normalized: true,
     plugins: {
       legend: {
         position: 'top',

@@ -3,6 +3,18 @@ import React from 'react';
 export default function Changelog() {
   const updates = [
     {
+      version: 'v2.2.0',
+      date: '03 August, 2026',
+      title: 'Performance Engine & Viability Updates',
+      changes: [
+        'Migrated rendering engine to Preact and implemented IntersectionObserver virtualization, drastically reducing bundle size and eliminating DOM lag on massive lists',
+        'Re-engineered bulk Expand/Collapse actions with React startTransition for buttery smooth background state updates',
+        'Optimized Chart.js engine with data normalization, hardware-accelerated 300ms micro-animations, and fixed Trend Tracker plotting for 0% usage months',
+        'Introduced perfectly distributed Viability Tiers based on strict high-ladder percentiles, complete with new filter options and Guide documentation',
+        'Redesigned the controls into a responsive 2x2 grid layout merged directly into the navigation bar, and added an inline data availability banner'
+      ]
+    },
+    {
       version: 'v2.1.0',
       date: '27 July, 2026',
       title: 'Backend V3 & Performance Optimizations',

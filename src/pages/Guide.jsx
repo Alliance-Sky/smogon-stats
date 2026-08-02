@@ -26,7 +26,15 @@ function Guide() {
               <strong>Lead (%):</strong> How frequently a Pokémon is sent out as the very first Pokémon in a battle. High lead usage often indicates dedicated entry hazard setters.
             </li>
             <li style={{ marginBottom: '0.5rem' }}>
-              <strong>Viability Ceiling:</strong> An estimation of a Pokémon's maximum potential in high-level play `[Top, Middle, Bottom]`, independent of its overall usage rate. It predicts performance based on win rates at high Elo.
+              <strong>Viability Tiers (S, A, B, C, D, N):</strong> An estimation of a Pokémon's maximum potential in high-level play, independent of its overall usage rate. While Smogon's official Viability Rankings are manually curated by the community on forums, we calculate these tiers programmatically using the "Top 1%" ceiling metric from ladder statistics.
+              <ul style={{ paddingLeft: '1.5rem', marginTop: '0.5rem' }}>
+                <li><strong>S Tier (≥ 93):</strong> The absolute elite meta-definers (Top ~5%).</li>
+                <li><strong>A Tier (91 - 92):</strong> Excellent and highly viable choices (Next ~20%).</li>
+                <li><strong>B Tier (88 - 90):</strong> Solid performers forming the core of the metagame (Next ~20%).</li>
+                <li><strong>C Tier (84 - 87):</strong> Niche or situational picks (Next ~35%).</li>
+                <li><strong>D Tier (&lt; 84):</strong> Fringe choices that are generally outclassed (Bottom ~20%).</li>
+                <li><strong>N Tier:</strong> Unranked. Pokémon with insufficient high-level ladder data to calculate a reliable ceiling.</li>
+              </ul>
             </li>
           </ul>
         </section>

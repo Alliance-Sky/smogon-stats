@@ -135,6 +135,8 @@ export default function FormatTools({ theme, period, months, formats, formatName
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: { duration: 300 },
+    normalized: true,
     indexAxis: 'y',
     plugins: {
       legend: { display: false },

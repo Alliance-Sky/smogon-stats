@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOMServer from 'react-dom/server'
+import { renderToStringAsync } from 'preact-render-to-string'
 import App from './App.jsx'
 import { QueryClient, QueryClientProvider, HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import { Router } from 'wouter';
@@ -31,7 +31,7 @@ export async function prefetch() {
 
 import { useStore } from './store.js';
 
-export function render(url, dehydratedState) {
+export async function render(url, dehydratedState) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -56,7 +56,7 @@ export function render(url, dehydratedState) {
 
   const staticLocationHook = () => [url, () => {}];
 
-  const html = ReactDOMServer.renderToString(
+  const html = await renderToStringAsync(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <HydrationBoundary state={dehydratedState}>

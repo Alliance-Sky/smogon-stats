@@ -46,7 +46,7 @@ async function prerender() {
       dehydratedState = await prefetch();
     }
     
-    const { html } = render(url, dehydratedState)
+    const { html } = await render(url, dehydratedState)
 
     let appHtml = template.replace(`<!--app-html-->`, html)
     if (dehydratedState) {

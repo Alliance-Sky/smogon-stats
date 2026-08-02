@@ -19,7 +19,7 @@ const PUBLIC_PROXIES = [
   `${PRIMARY_API}/?url=`
 ];
 
-async function fetchApi(endpoint) {
+export async function fetchApi(endpoint) {
   const activeApi = LOCAL_API;
   const fallbackApi = LOCAL_API !== PRIMARY_API ? PRIMARY_API : null;
 
@@ -185,13 +185,6 @@ export async function getDetails(month, format, rating, pokemon = null) {
   return json;
 }
 
-export async function getViability(month, format, rating) {
-  const json = await fetchApi(`/api/v3/viability?month=${month}&format=${format}&rating=${rating}`);
-  if (json) {
-    return json;
-  }
-  return {};
-}
 
 export async function getTotalBattles(month, format, rating) {
   const init = await getInit();
@@ -205,13 +198,6 @@ export async function getTotalBattles(month, format, rating) {
   return 0;
 }
 
-export async function getLeads(month, format, rating) {
-  const json = await fetchApi(`/api/v3/leads?month=${month}&format=${format}&rating=${rating}`);
-  if (json && Array.isArray(json)) {
-    return json;
-  }
-  return [];
-}
 
 export async function getMetagame(month, format, rating) {
   const init = await getInit();

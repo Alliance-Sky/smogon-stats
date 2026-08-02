@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 
 const getInitialTheme = () => {
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/(^| )theme=([^;]+)/);
+    if (match && (match[2] === 'violet' || match[2] === 'scarlet')) return match[2];
+    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'violet';
+  }
   return 'scarlet';
 };
 
@@ -52,5 +57,8 @@ export const useStore = create((set) => ({
   setFormat: (format) => set({ format }),
 
   rating: getParam('rating', '1760'),
-  setRating: (rating) => set({ rating })
+  setRating: (rating) => set({ rating }),
+
+  newAvailableMonth: null,
+  setNewAvailableMonth: (month) => set({ newAvailableMonth: month })
 }));

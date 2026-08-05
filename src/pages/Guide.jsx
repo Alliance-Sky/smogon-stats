@@ -1,11 +1,42 @@
 import React from 'react';
+import SEO from '../components/SEO';
 
 function Guide() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Stalliness in Pokemon competitive stats?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Stalliness represents how 'stall-oriented' a team is. A positive number indicates a bulkier, more defensive stall team. A negative number indicates a faster, hyper-offensive team."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is the Usage percentage calculated?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Usage is calculated based on the appearance rate of a Pokemon in battles, but it is heavily weighted by the rating filter you select. Higher ratings weigh battles from highly skilled players much more heavily."
+        }
+      }
+    ]
+  };
+
   return (
     <div className="stats-page guide-page fade-in-data">
+      <SEO 
+        title="Usage Guide & Definitions" 
+        description="Learn how to read Pokemon Showdown usage stats, understand metagame playstyles like Stalliness, and track historical trends." 
+        url="/guide" 
+        schema={faqSchema}
+      />
       <div className="glass-panel" style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center', color: 'var(--text-color)' }}>Smogon Stats Guide</h1>
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>1. Filtering & Formats</h3>
+          <h2 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>1. Filtering & Formats</h2>
           <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6' }}>
             <li style={{ marginBottom: '0.5rem' }}>
               <strong>Formats/Tiers:</strong> Competitive Pokémon is divided into tiers based on usage (e.g., OU, UU, RU, VGC). Generation (Gen 9, Gen 8) also dictates mechanics and available Pokémon.
@@ -17,7 +48,7 @@ function Guide() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>2. Primary Metrics</h3>
+          <h2 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>2. Primary Metrics</h2>
           <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6' }}>
             <li style={{ marginBottom: '0.5rem' }}>
               <strong>Usage (%):</strong> The percentage of teams in the selected format and rating that include a specific Pokémon.
@@ -40,7 +71,7 @@ function Guide() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>3. Metagame Playstyles</h3>
+          <h2 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>3. Metagame Playstyles</h2>
           <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
             The <strong>Stalliness Scale</strong> determines if a metagame leans towards Offense or Stall. Playstyles are categorized by pacing and mechanics:
           </p>
@@ -54,7 +85,7 @@ function Guide() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>4. Pokémon Details (Expanded View)</h3>
+          <h2 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>4. Pokémon Details (Expanded View)</h2>
           <ul style={{ paddingLeft: '1.5rem', lineHeight: '1.6' }}>
             <li style={{ marginBottom: '0.5rem' }}><strong>Top Spreads:</strong> Displays the Nature and Effort Values (EVs) commonly used. E.g., <code>Timid:252/0/0/0/4/252</code> means Timid nature, 252 HP, 0 Atk, 0 Def, 0 SpA, 4 SpD, 252 Spe.</li>
             <li style={{ marginBottom: '0.5rem' }}><strong>Common Counters:</strong> Pokémon that statistically perform the best against the selected Pokémon by consistently forcing switches or scoring knockouts.</li>
@@ -63,7 +94,7 @@ function Guide() {
         </section>
 
         <section style={{ marginBottom: '2.5rem' }}>
-          <h3 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>5. Trend Tracker</h3>
+          <h2 style={{ color: 'var(--text-color)', marginBottom: '1rem' }}>5. Trend Tracker</h2>
           <p style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
             The Trend Tracker is an advanced historical analysis tool that lets you visualize meta shifts over time.
           </p>

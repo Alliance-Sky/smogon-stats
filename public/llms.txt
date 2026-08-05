@@ -1,0 +1,14 @@
+# Smogon Stats
+
+Smogon Stats is a modern, fast web application for exploring Pokémon competitive usage statistics.
+
+## Links
+- [GitHub Repository](https://github.com/Alliance-Sky/smogon-stats)
+- [Official Smogon Stats](https://www.smogon.com/stats/)
+
+## Data Model
+- **Usage Percentages**: How often a Pokémon appears on competitive teams in a given format.
+- **Lead Rates**: How frequently a Pokémon is sent out first.
+- **Viability Rankings**: Estimated performance ceiling based on ladder data.
+- **Stalliness**: Scale from negative (Hyper-offensive) to positive (Stall), determining metagame pace.
+- **Movesets and EVs**: Top moves, abilities, items, and EV spreads configured for each Pokémon.

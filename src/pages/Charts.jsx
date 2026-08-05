@@ -1,11 +1,18 @@
 import React from 'react';
 import { useLocation } from 'wouter';
+import SEO from '../components/SEO';
 
 function Charts() {
   const [, setLocation] = useLocation();
 
   return (
     <div className="stats-page fade-in-data" style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
+      <SEO 
+        title="Charts & Visualizations" 
+        description="Visualize Pokemon Showdown usage stats with interactive format charts and historical trend trackers." 
+        url="/charts" 
+      />
+      <h1 style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>Smogon Stats Charts</h1>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', alignItems: 'stretch' }}>
         
         <div className="pokedex-tile" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyItems: 'stretch', justifyContent: 'space-between', height: '100%', contain: 'none', borderRadius: '12px' }}>
@@ -35,14 +42,15 @@ function Charts() {
               </li>
             </ul>
           </div>
-          <button
-            onClick={() => setLocation('/chart')}
+          <a
+            href="/chart"
+            onClick={(e) => { e.preventDefault(); setLocation('/chart'); }}
             className="load-more-btn"
-            style={{ width: '100%', padding: '0.9rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', margin: 0 }}
+            style={{ width: '100%', padding: '0.9rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', margin: 0, textDecoration: 'none' }}
           >
             <span>Open Format Chart</span>
             <span style={{ fontSize: '1.2rem', lineHeight: 0.5 }}>→</span>
-          </button>
+          </a>
         </div>
 
         <div className="pokedex-tile" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', justifyItems: 'stretch', justifyContent: 'space-between', height: '100%', contain: 'none', borderRadius: '12px' }}>
@@ -70,14 +78,15 @@ function Charts() {
               </li>
             </ul>
           </div>
-          <button
-            onClick={() => setLocation('/trend')}
+          <a
+            href="/trend"
+            onClick={(e) => { e.preventDefault(); setLocation('/trend'); }}
             className="load-more-btn"
-            style={{ width: '100%', padding: '0.9rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', margin: 0 }}
+            style={{ width: '100%', padding: '0.9rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', margin: 0, textDecoration: 'none' }}
           >
             <span>Open Trend Tracker</span>
             <span style={{ fontSize: '1.2rem', lineHeight: 0.5 }}>→</span>
-          </button>
+          </a>
         </div>
       </div>
     </div>

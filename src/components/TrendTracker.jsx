@@ -4,6 +4,7 @@ import '../utils/chartSetup';
 import { Line } from 'react-chartjs-2';
 import { getTrend, getFormats, getStats } from '../utils/api';
 import { useStore } from '../store';
+import SEO from './SEO';
 
 const COLORS = [
   '#f43f5e', '#3b82f6', '#10b981', '#a855f7', '#f59e0b', '#ec4899', '#2dd4bf', '#f97316'
@@ -321,10 +322,18 @@ export default function TrendTracker() {
 
   return (
     <div className="trend-tracker fade-in-data">
+      <SEO 
+        title={`Trend Tracker - ${formatName(format)}`} 
+        description={`Track historical Pokemon Showdown usage trends for ${formatName(format)} over the past ${monthsLimit} months.`} 
+        url={`/trend?format=${format}&rating=${rating}&months=${monthsLimit}`} 
+      />
+      <h1 style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+        Smogon Trend Tracker for {formatName(format)}
+      </h1>
       <div className="glass-panel controls-container">
         <div className="control-group">
           <label>Format</label>
-          <select value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>
+          <select aria-label="Format" value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>
             {availableFormats.length === 0 && <option>Loading...</option>}
             {availableFormats.map(f => <option key={f} value={f}>{formatName(f)}</option>)}
           </select>
@@ -332,7 +341,7 @@ export default function TrendTracker() {
 
         <div className="control-group">
           <label>Rating Baseline</label>
-          <select value={rating || ''} onChange={onRatingChange} disabled={availableRatings.length === 0}>
+          <select aria-label="Rating Baseline" value={rating || ''} onChange={onRatingChange} disabled={availableRatings.length === 0}>
             {availableRatings.length === 0 && <option>Loading...</option>}
             {availableRatings.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
@@ -340,7 +349,7 @@ export default function TrendTracker() {
 
         <div className="control-group">
           <label>Timeframe</label>
-          <select value={monthsLimit} onChange={(e) => setMonthsLimit(Number(e.target.value))}>
+          <select aria-label="Timeframe" value={monthsLimit} onChange={(e) => setMonthsLimit(Number(e.target.value))}>
             <option value={6}>Last 6 Months</option>
             <option value={12}>Last 12 Months</option>
             <option value={24}>Last 24 Months</option>

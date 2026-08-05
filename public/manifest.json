@@ -1,0 +1,16 @@
+{
+  "name": "Smogon Stats",
+  "short_name": "SmogonStats",
+  "description": "Visualize Pokemon Showdown competitive usage statistics and metagame trends.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafaf9",
+  "theme_color": "#fafaf9",
+  "icons": [
+    {
+      "src": "/favicon-scarlet.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

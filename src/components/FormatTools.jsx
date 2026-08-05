@@ -199,7 +199,7 @@ export default function FormatTools({ theme, period, months, formats, formatName
       <div className="glass-panel controls-container">
         <div className="control-group">
           <label>Compare Period</label>
-          <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
+          <select aria-label="Compare Period" value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}>
             {months.map(m => (
               <option key={m} value={m}>{m}</option>
             ))}
@@ -208,7 +208,7 @@ export default function FormatTools({ theme, period, months, formats, formatName
 
         <div className="control-group">
           <label>Compare Format</label>
-          <select value={selectedFormat} onChange={onFormatChange} disabled={fetchingFormats}>
+          <select aria-label="Compare Format" value={selectedFormat} onChange={onFormatChange} disabled={fetchingFormats}>
             {fetchingFormats ? <option value={selectedFormat}>Loading...</option> : Object.keys(localFormats).map(f => (
               <option key={f} value={f}>{formatName(f)}</option>
             ))}

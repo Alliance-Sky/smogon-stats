@@ -3,6 +3,7 @@ import { useStats } from '../hooks/useStats';
 import { useReactTable, getCoreRowModel, getSortedRowModel } from '@tanstack/react-table';
 import '../index.css';
 import { useStore } from '../store';
+import SEO from '../components/SEO';
 
 
 const FormatTools = React.lazy(() => import('../components/FormatTools'));
@@ -85,7 +86,9 @@ export default function Stats({ currentView }) {
     window.history.replaceState(null, '', url);
   }, [sortBy]);
   const [toast, setToast] = React.useState(null);
-  const [visibleCount, setVisibleCount] = React.useState(100);
+  const pageParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const initialPage = parseInt(pageParams.get('page') || '1', 10);
+  const [visibleCount, setVisibleCount] = React.useState(initialPage * 100);
 
   const [showMeta, setShowMeta] = React.useState(false);
 
@@ -250,7 +253,9 @@ export default function Stats({ currentView }) {
   const sortedStats = table.getRowModel().rows;
 
   React.useEffect(() => {
-    setVisibleCount(100);
+    const pageParams = new URLSearchParams(window.location.search);
+    const page = parseInt(pageParams.get('page') || '1', 10);
+    setVisibleCount(page * 100);
   }, [sortedStats]);
 
   const scrollToPokemon = React.useCallback((pokemonName) => {
@@ -277,9 +282,72 @@ export default function Stats({ currentView }) {
 
   const isAllExpanded = stats && stats.length > 0 && expanded.size === stats.length;
 
+  const datasetSchema = {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": `Pokemon Showdown ${formatName(format)} Usage Stats - ${period}`,
+    "description": `Usage statistics, team distributions, and performance metrics for the Pokemon Showdown ${formatName(format)} format in ${period}.`,
+    "url": `https://smogonstats.eu.cc/?period=${period}&format=${format}&rating=${rating}`,
+    "creator": {
+      "@type": "Organization",
+      "name": "Smogon & Pokemon Showdown"
+    },
+    "keywords": [
+      "Pokemon", "Smogon", "Usage Stats", formatName(format), period, "Pokemon Showdown"
+    ],
+    "isAccessibleForFree": true,
+    "license": "https://opensource.org/licenses/MIT"
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://smogonstats.eu.cc/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": formatName(format),
+        "item": `https://smogonstats.eu.cc/?format=${format}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": period,
+        "item": `https://smogonstats.eu.cc/?period=${period}&format=${format}`
+      }
+    ]
+  };
+
+  const currentUrl = typeof window !== 'undefined' ? new URL(window.location.href) : new URL(`https://smogonstats.eu.cc/?period=${period}&format=${format}`);
+  currentUrl.searchParams.set('page', (Math.ceil(visibleCount / 100) + 1).toString());
+  const nextPageHref = currentUrl.pathname + currentUrl.search;
+
   return (
     <>
+      <SEO 
+        title={currentView === 'chart' ? `Format Chart - ${formatName(format)} (${period})` : `Usage Stats - ${formatName(format)} (${period})`} 
+        description={`View Pokemon Showdown ${currentView === 'chart' ? 'format distribution chart' : 'usage statistics'} for ${formatName(format)} in ${period}.`} 
+        url={currentView === 'chart' ? `/chart?period=${period}&format=${format}&rating=${rating}` : `/?period=${period}&format=${format}&rating=${rating}`} 
+        schema={[datasetSchema, breadcrumbSchema]}
+      />
       <div className="stats-page">
+        <h1 style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+          {currentView === 'chart' ? `Smogon Stats Chart for ${formatName(format)}` : `Smogon Usage Stats for ${formatName(format)}`}
+        </h1>
+        
+        <div style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+          <h2>{currentView === 'chart' ? 'Metagame Distribution' : 'Competitive Usage Analytics'}</h2>
+          <p>
+            Explore comprehensive battle analytics and team compositions for this format. These metrics illustrate the frequency at which various creatures are selected, their most effective held items, preferred move combinations, and stat distributions. By analyzing these competitive trends, you can better understand the current metagame and optimize your own strategies.
+          </p>
+        </div>
+
         {currentView === 'chart' ? (
           <React.Suspense fallback={<div className="empty-state" style={{ padding: '2rem' }}>Loading Chart...</div>}>
             <FormatTools theme={theme} period={period} months={months} formats={formats} formatName={formatName} />
@@ -289,7 +357,7 @@ export default function Stats({ currentView }) {
             <div className="glass-panel controls-container stats-controls">
               <div className="control-group">
                 <label>Stats Period</label>
-                <select value={period || ''} onChange={onPeriodChange} disabled={months.length === 0}>
+                <select aria-label="Stats Period" value={period || ''} onChange={onPeriodChange} disabled={months.length === 0}>
                   {months.length === 0 && <option>Loading...</option>}
                   {months.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
@@ -297,7 +365,7 @@ export default function Stats({ currentView }) {
 
               <div className="control-group">
                 <label>Format</label>
-                <select value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>
+                <select aria-label="Format" value={format || ''} onChange={onFormatChange} disabled={availableFormats.length === 0}>
                   {availableFormats.length === 0 && <option>Loading...</option>}
                   {availableFormats.map(f => <option key={f} value={f}>{formatName(f)}</option>)}
                 </select>
@@ -305,7 +373,7 @@ export default function Stats({ currentView }) {
 
               <div className="control-group">
                 <label>Rating Baseline</label>
-                <select value={rating || ''} onChange={onRatingChange} disabled={availableRatings.length === 0}>
+                <select aria-label="Rating Baseline" value={rating || ''} onChange={onRatingChange} disabled={availableRatings.length === 0}>
                   {availableRatings.length === 0 && <option>Loading...</option>}
                   {availableRatings.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
@@ -313,7 +381,7 @@ export default function Stats({ currentView }) {
 
               <div className="control-group">
                 <label>Sort By</label>
-                <select value={sortBy} onChange={(e) => {
+                <select aria-label="Sort By" value={sortBy} onChange={(e) => {
                   const val = e.target.value;
                   setSortBy(val);
                   setSorting([{ id: val === 'tier' ? 'viability' : val === 'lead' ? 'leads' : val, desc: true }]);
@@ -450,7 +518,7 @@ export default function Stats({ currentView }) {
                 </div>
               ) : (
                 <>
-                  <div className="pokedex-list">
+                  <div className="pokedex-list" role="table" aria-label={`Usage Statistics for ${formatName(format)}`}>
                     {sortedStats.slice(0, visibleCount).map((tableRow, index) => {
                       const row = tableRow.original;
                       return (
@@ -472,16 +540,24 @@ export default function Stats({ currentView }) {
                   </div>
                   {visibleCount < sortedStats.length && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '2rem', marginBottom: '0.75rem' }}>
-                      <button 
+                      <a 
+                        href={nextPageHref}
                         className="load-more-btn"
-                        onClick={() => {
+                        style={{ textDecoration: 'none' }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const newCount = visibleCount + 100;
+                          const newPage = Math.ceil(newCount / 100);
+                          const url = new URL(window.location);
+                          url.searchParams.set('page', newPage.toString());
+                          window.history.pushState(null, '', url);
                           React.startTransition(() => {
-                            setVisibleCount(prev => prev + 100);
+                            setVisibleCount(newCount);
                           });
                         }}
                       >
                         Load More Pokémon
-                      </button>
+                      </a>
                     </div>
                   )}
                 </>
@@ -544,7 +620,7 @@ const PokemonRow = React.memo(({ row, index, sortBy, isExpanded, loadingDetails,
   const isViabilitySort = sortBy === 'viability';
   
   return (
-    <div id={`pokemon-row-${row.pokemon}`} ref={ref} className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`}>
+    <div id={`pokemon-row-${row.pokemon}`} ref={ref} className={`pokedex-tile ${isExpanded ? 'expanded' : ''}`} role="row">
       <div className="tile-header" onClick={() => onRowClick(row.pokemon)}>
         <div className={`tile-rank ${isTopRank ? 'top-rank-gold' : ''}`}>#{displayRank}</div>
         <img 

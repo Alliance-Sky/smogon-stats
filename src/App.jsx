@@ -11,6 +11,8 @@ const Guide = lazy(() => import('./pages/Guide'));
 const Changelog = lazy(() => import('./pages/Changelog'));
 const Charts = lazy(() => import('./pages/Charts'));
 const TrendTracker = lazy(() => import('./components/TrendTracker'));
+const Directory = lazy(() => import('./pages/Directory'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 function App() {
   const { theme, setTheme, period, format, rating, setNewAvailableMonth } = useStore();
@@ -125,18 +127,18 @@ function App() {
         </div>
 
         <nav className="desktop-nav">
-          <button onClick={() => setLocation('/')} className={`nav-btn ${location === '/' ? 'active' : ''}`}>Stats</button>
-          <button onClick={() => setLocation('/charts')} className={`nav-btn ${(location === '/charts' || location === '/chart' || location === '/trend') ? 'active' : ''}`}>Charts</button>
-          <button onClick={() => setLocation('/guide')} className={`nav-btn ${location === '/guide' ? 'active' : ''}`}>Guide</button>
-          <button onClick={() => setLocation('/changelog')} className={`nav-btn ${location === '/changelog' ? 'active' : ''}`}>Changelog</button>
+          <a href="/" onClick={(e) => { e.preventDefault(); setLocation('/'); }} className={`nav-btn ${location === '/' ? 'active' : ''}`}>Stats</a>
+          <a href="/charts" onClick={(e) => { e.preventDefault(); setLocation('/charts'); }} className={`nav-btn ${(location === '/charts' || location === '/chart' || location === '/trend') ? 'active' : ''}`}>Charts</a>
+          <a href="/guide" onClick={(e) => { e.preventDefault(); setLocation('/guide'); }} className={`nav-btn ${location === '/guide' ? 'active' : ''}`}>Guide</a>
+          <a href="/changelog" onClick={(e) => { e.preventDefault(); setLocation('/changelog'); }} className={`nav-btn ${location === '/changelog' ? 'active' : ''}`}>Changelog</a>
         </nav>
 
         {isMobileMenuOpen && (
           <nav className="mobile-nav">
-            <button onClick={() => { setLocation('/'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/' ? 'active' : ''}`}>Stats</button>
-            <button onClick={() => { setLocation('/charts'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${(location === '/charts' || location === '/chart' || location === '/trend') ? 'active' : ''}`}>Charts</button>
-            <button onClick={() => { setLocation('/guide'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/guide' ? 'active' : ''}`}>Guide</button>
-            <button onClick={() => { setLocation('/changelog'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/changelog' ? 'active' : ''}`}>Changelog</button>
+            <a href="/" onClick={(e) => { e.preventDefault(); setLocation('/'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/' ? 'active' : ''}`}>Stats</a>
+            <a href="/charts" onClick={(e) => { e.preventDefault(); setLocation('/charts'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${(location === '/charts' || location === '/chart' || location === '/trend') ? 'active' : ''}`}>Charts</a>
+            <a href="/guide" onClick={(e) => { e.preventDefault(); setLocation('/guide'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/guide' ? 'active' : ''}`}>Guide</a>
+            <a href="/changelog" onClick={(e) => { e.preventDefault(); setLocation('/changelog'); setIsMobileMenuOpen(false); }} className={`mobile-nav-btn ${location === '/changelog' ? 'active' : ''}`}>Changelog</a>
           </nav>
         )}
       </header>
@@ -148,11 +150,15 @@ function App() {
             <Route path="/guide" component={Guide} />
             <Route path="/trend" component={TrendTracker} />
             <Route path="/changelog" component={Changelog} />
+            <Route path="/directory" component={Directory} />
             <Route path="/chart">
               <Stats currentView="chart" />
             </Route>
             <Route path="/">
               <Stats currentView="stats" />
+            </Route>
+            <Route>
+              <NotFound />
             </Route>
           </Switch>
         </Suspense>
@@ -161,9 +167,20 @@ function App() {
       <footer className="app-footer">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' }}>
           <div>
-            <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noreferrer">Smogon</a> &amp; <a href="https://pokemonshowdown.com" target="_blank" rel="noreferrer">Pokemon Showdown</a>.</p>
+            <p>
+              <a href="https://github.com/Alliance-Sky/smogon-stats" target="_blank" rel="noopener noreferrer">GitHub</a>
+              <span style={{ margin: '0 12px', color: 'var(--border-color)' }}>|</span> 
+              <a href="mailto:allianceskygit@gmail.com">Contact</a>
+              <span style={{ margin: '0 12px', color: 'var(--border-color)' }}>|</span> 
+              <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer">Sitemap</a>
+              <span style={{ margin: '0 12px', color: 'var(--border-color)' }}>|</span> 
+              <a href="/directory" onClick={(e) => { e.preventDefault(); setLocation('/directory'); }}>Stats Directory</a> 
+            </p>
+            <p>Data provided by <a href="https://smogon.com" target="_blank" rel="noopener noreferrer">Smogon</a> &amp; <a href="https://pokemonshowdown.com" target="_blank" rel="noopener noreferrer">Pokemon Showdown</a>.</p>
             <p>Not affiliated with Smogon or Pokemon Showdown.</p>
-            <p style={{ marginBottom: 0 }}>&copy; 2026 Musaddik Temkar | Built with Preact &amp; Vite.</p>
+            <p style={{ marginBottom: 0 }}>
+              &copy; 2026 Musaddik Temkar | Built with Preact &amp; Vite.
+            </p>
           </div>
           
           <div className="theme-switch-pill">

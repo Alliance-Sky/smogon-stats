@@ -1,58 +1,119 @@
-# smogonstats.eu.cc
+# [smogonstats.eu.cc](https://smogonstats.eu.cc)
 
-A Pokémon Showdown usage stats viewer and analytics dashboard built with React, Vite, and Cloudflare Workers.
+A Pokémon Showdown usage stats viewer, analytics dashboard, and trend tracker.
 
-## Features
+---
 
-- **Interactive Competitive Analytics**: Browse and filter historical Pokémon Showdown usage statistics across generations, competitive formats (e.g., Gen 9 OU, VGC, Random Battles), and Elo rating baselines (0, 1500, 1695, 1760+).
-- **Comprehensive Charts & Trend Tracking**: Dedicated Charts dashboard featuring cross-month Format Stats comparisons and a Trend Tracker to visualize metagame shifts over time.
-- **In-Depth Pokémon Breakdowns**: Expand any Pokémon card to inspect detailed competitive metrics, including Top Moves, Abilities, Items, EV Spreads, Common Teammates, and Counters/Checks.
-- **Viability Ceiling & Lead Metrics**: Sort and evaluate Pokémon by total Usage %, Viability Ceiling (Top, Middle, Bottom tiers), and Lead usage percentages.
-- **Minimalist Design**: Clean typography (Outfit Variable font), high-end glassmorphism panels, and a responsive layout with custom Scarlet (light) and Violet (dark) color themes.
-- **Zero-Flicker & Shift-Free UX**: Optimized rendering engine with CSS font-display block rules, smooth scroll-to-top navigation, and stable layout dimensions to eliminate FOUT and layout shifts.
-- **URL State Persistence**: Deep-linking support that preserves active view, selected period, format, rating baseline, and expanded cards in URL search parameters.
-- **Dedicated Guide & Documentation**: Built-in reference guide explaining Smogon terminology, rating filters, primary metrics, and metagame playstyles (Stalliness scale, Offense, Balance, VoltTurn).
+## User Guide
 
-## Architecture & Technology Stack
+### Overview
 
-- **Frontend Framework**: React 18 with Vite and Rolldown bundling.
-- **Data Management & Caching**: TanStack React Query for API caching, deduplication, and background synchronization.
-- **State Management**: Zustand for lightweight, zero-boilerplate global state orchestration.
-- **High-Speed Rendering**: TanStack React Table for headless, virtualized list processing with native Float64 numeric sorting.
-- **Client-Side Routing**: Wouter for minimal bundle footprint.
-- **Data Visualization**: Chart.js and react-chartjs-2 with custom plugins for advanced responsive charting.
-- **Backend Integration**: Connected to PostgreSQL database endpoints via the highly optimized proxy-api v3, utilizing targeted micro-payloads for detailed data lookups.
+[smogonstats.eu.cc](https://smogonstats.eu.cc) lets competitive Pokémon players browse historical Pokémon Showdown usage stats, moveset details, viability tiers, battle volume data, and metagame trends across generations and formats.
 
-## Development
+### Features
 
-To start the development server locally:
+- Usage Stats and Ratings: Filter ladder data by generation, format (Gen 9 OU, VGC, Random Battles, etc.), and rating baselines (such as 0, 1500, 1695, 1825 for Gen 9 OU; 0, 1100, 1300, 1500 for Random Battles).
+- Trend Tracker: Graph usage trajectories over 6, 12, or 24 months for single or multiple Pokémon. For each format, Trend Tracker uses only the top 2 highest rating baselines (such as 1695 and 1825 for Gen 9 OU) to focus on top-tier play.
+- Format Stats: Compare total battle count, battles per minute or hour, and estimated queue wait times across formats and months.
+- Moveset Details: Expand any Pokémon card to inspect top moves, abilities, items, EV spreads, common teammates, and counters.
+- Viability Tiers: Categorizes Pokémon into S (93+), A (91-92), B (88-90), C (84-87), D (<84), and N (unranked) tiers using top 1% ladder ceiling statistics.
+- Metagame and Lead Metrics: Sort by Lead usage % and check metagame playstyles on the Stalliness Scale (Offense, Balance, Stall, VoltTurn, Weatherless).
+- Guide and Changelog: In-app documentation explaining metrics and playstyles, plus a full project changelog.
+- Themes and URL State: Switch between Light and Dark themes. Active period, format, rating, and expanded cards save in the URL.
+
+---
+
+## Technical and Self-Hosting Guide
+
+### Tech Stack
+
+- Frontend: Preact 10 (with preact/compat aliasing) and Vite 8.
+- Static Site Generation (SSG): prerender.js runs after the build to generate pre-rendered HTML files for static routes (/ , /guide, /changelog, /charts, /trend, /chart), inline critical CSS, and preload fonts.
+- Data and State: TanStack React Query v5 (caching and sync), Zustand v5 (global state), Wouter v3 (routing), and TanStack React Table v8.
+- Charts: Chart.js v4 and react-chartjs-2.
+- Backend: Fetches data from PostgreSQL endpoints via the v3 API (`api.smogonstats.eu.cc`).
+
+### Directory Layout
+
+```text
+smogon-stats/
+├── public/              Static assets and favicons
+├── src/
+│   ├── components/      UI components (FormatTools, TrendTracker, HeaderLogo, etc.)
+│   ├── hooks/           React Query hooks (useStats)
+│   ├── pages/           Route views (Stats, Charts, Guide, Changelog)
+│   ├── utils/           API client (api.js) and Chart setup
+│   ├── App.jsx          Main layout and router
+│   ├── store.js         Zustand store
+│   ├── entry-client.jsx Client hydration entrypoint
+│   └── entry-server.jsx SSR entrypoint
+├── index.html           HTML template
+├── prerender.js         SSG script
+├── vite.config.js       Vite config
+└── wrangler.jsonc       Cloudflare Workers config
+```
+
+### Self-Hosting
+
+#### Backend Requirement (proxy-api)
+
+The frontend requires a separate backend service, [proxy-api](https://github.com/Alliance-Sky/proxy-api) (located outside this repository), to serve usage stats and process Smogon data into PostgreSQL.
+
+To set up the backend:
+1. Clone and build `proxy-api` (requires Go 1.20+ and PostgreSQL).
+2. Set up your PostgreSQL database (`DATABASE_URL`) and run `make populate` to parse and import Smogon statistics.
+3. Start the API server with `make run` or systemd (`proxy-api.service`). By default, it listens on port `9000`.
+
+#### Required Configuration Changes
+
+When self-hosting, update the API endpoints in both frontend and backend repositories:
+
+1. Frontend (`smogon-stats`):
+   - Edit `src/utils/api.js` and update `PRIMARY_API` and `LOCAL_API` to point to your backend API URL (e.g. `http://localhost:9000` or `https://api.yourdomain.com`).
+   - If deploying to Cloudflare Workers, update the custom domain route in `wrangler.jsonc`.
+
+2. Backend (`proxy-api`):
+   - Ensure CORS headers in `proxy-api` allow requests from your frontend domain.
+   - Set the `PORT` and `DATABASE_URL` environment variables to match your server environment.
+
+#### Prerequisites
+
+- Node.js 18+
+- npm 9+
+
+#### Setup and Development
 
 ```bash
+git clone https://github.com/Alliance-Sky/smogon-stats.git
+cd smogon-stats
 npm install
 npm run dev
 ```
 
-## Build
+The dev server runs on `http://localhost:10000`.
 
-To create an optimized production build:
+#### Build and Preview
 
 ```bash
 npm run build
+npm run preview
 ```
 
-## Deployment
+#### Deploy
 
-This project is configured for edge deployment on Cloudflare using Workers with Static Assets (via Wrangler):
+Deploy to Cloudflare Workers with Static Assets using Wrangler:
 
 ```bash
 npm run deploy
 ```
 
+---
+
 ## Credits
 
-- **[Smogon](https://www.smogon.com/stats/)**: For compiling and providing raw competitive Pokémon usage statistics.
-- **[Pokémon Showdown](https://play.pokemonshowdown.com/sprites/)**: For competitive battle platform data and sprite assets.
-- **[TanStack](https://tanstack.com/)** & **[Zustand](https://docs.pmnd.rs/zustand)**: For modern React query caching and state architecture.
+- Smogon: For compiling raw Pokémon Showdown usage data.
+- Pokémon Showdown: For battle platform data and sprite assets.
+- Preact, TanStack, and Zustand: Open-source libraries used in the project.
 
 ## License
 

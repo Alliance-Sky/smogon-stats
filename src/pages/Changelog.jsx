@@ -1,4 +1,5 @@
 import React from 'react';
+import SEO from '../components/SEO';
 
 export default function Changelog() {
   const updates = [
@@ -77,6 +78,12 @@ export default function Changelog() {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+      <SEO 
+        title="Changelog" 
+        description="See what's new in the Smogon Stats viewer. Updates, features, and performance improvements." 
+        url="/changelog" 
+      />
+      <h1 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center', color: 'var(--text-color)' }}>Changelog</h1>
       <div className="timeline-container">
         {updates.map((update, index) => (
           <div className="timeline-item" key={update.title + index}>

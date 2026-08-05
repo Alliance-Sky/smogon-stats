@@ -26,3 +26,7 @@ dist-server
 
 # Wrangler / Cloudflare
 .wrangler
+
+# SEO Audit Temp Files
+.seomator/
+full_audit_report.md

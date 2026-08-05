@@ -1,13 +1,4 @@
 User-agent: *
-Disallow:
-
-# Explicitly allow AI Crawlers for GEO
-User-agent: GPTBot
-User-agent: Google-Extended
-User-agent: CCBot
-User-agent: Bytespider
-User-agent: Amazonbot
-User-agent: ClaudeBot
-Disallow:
+Allow: /
 
 Sitemap: https://smogonstats.eu.cc/sitemap.xml
